@@ -255,7 +255,7 @@ const Channels = ({
 	}, [navigation]);
 
 	const handleExportLogs = useCallback(async (): Promise<void> => {
-		const result = await zipLogs();
+		const result = await zipLogs({ includeJson: enableDevOptions });
 		if (result.isErr()) {
 			showErrorNotification({
 				title: t('error_logs'),
@@ -270,7 +270,7 @@ const Channels = ({
 			url: `file://${result.value}`,
 			title: t('export_logs'),
 		});
-	}, [t]);
+	}, [t, enableDevOptions]);
 
 	const onChannelPress = useCallback(
 		(channel: TChannel) => {
