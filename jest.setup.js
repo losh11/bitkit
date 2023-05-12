@@ -2,6 +2,9 @@ import mockRNDeviceInfo from 'react-native-device-info/jest/react-native-device-
 import mockRNCNetInfo from '@react-native-community/netinfo/jest/netinfo-mock';
 import mockRNLocalize from 'react-native-localize/mock';
 
+jest.mock('react-native-reanimated', () =>
+	require('react-native-reanimated/mock'),
+);
 jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter');
 jest.mock('react-native-device-info', () => mockRNDeviceInfo);
 jest.mock('react-native-permissions', () =>
