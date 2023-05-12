@@ -1,6 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { LayoutAnimation, StyleProp, View, ViewStyle } from 'react-native';
+import { StyleProp, View, ViewStyle } from 'react-native';
 
 import { Pressable } from '../styles/components';
 import Money from '../components/Money';
@@ -62,8 +62,6 @@ const AmountToggle = ({
 
 		return reverse ? arr.reverse() : arr;
 	}, [primaryUnit, sats, reverse, space, decimalLength, secondaryFont]);
-
-	LayoutAnimation.easeInEaseOut();
 
 	const _onPress = useCallback((): void => {
 		if (!disable && onPress) {

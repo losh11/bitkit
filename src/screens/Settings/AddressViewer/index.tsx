@@ -7,7 +7,7 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import { FlatList, LayoutAnimation, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'react-native-qrcode-svg';
@@ -916,8 +916,6 @@ const AddressViewer = ({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [sendNavigationHasOpened, sendNavigationIsOpen]);
-
-	LayoutAnimation.easeInEaseOut();
 
 	return (
 		<ThemedView style={styles.root}>

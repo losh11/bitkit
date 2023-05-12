@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useMemo } from 'react';
-import { LayoutAnimation, StyleSheet, Image, View } from 'react-native';
+import { StyleSheet, Image, View } from 'react-native';
 import { Canvas, RadialGradient, Rect, vec } from '@shopify/react-native-skia';
 
 import { Pressable } from '../styles/components';
@@ -42,8 +42,6 @@ const SuggestionCard = ({
 	onPress,
 	onClose,
 }: CardProps): ReactElement => {
-	LayoutAnimation.easeInEaseOut();
-
 	const colors = useColors();
 
 	const containerStyle = useMemo(

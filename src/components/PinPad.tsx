@@ -5,7 +5,7 @@ import React, {
 	useEffect,
 	useCallback,
 } from 'react';
-import { StyleSheet, View, LayoutAnimation, Pressable } from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
 import { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
@@ -62,8 +62,6 @@ const PinPad = ({
 		});
 		setAttemptsRemaining(_attemptsRemaining);
 	}, [attemptsRemaining]);
-
-	useEffect(() => LayoutAnimation.easeInEaseOut());
 
 	// init view
 	useEffect(() => {

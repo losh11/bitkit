@@ -7,7 +7,6 @@ import React, {
 	useState,
 } from 'react';
 import {
-	LayoutAnimation,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	Platform,
@@ -124,7 +123,6 @@ const WalletsDetail = ({
 			//HIDE
 			if (y > 150 && showDetails) {
 				//Shrink the detail view
-				LayoutAnimation.easeInEaseOut();
 				setShowDetails(false);
 				updateHeight({ height, toValue: 30 });
 			}
@@ -132,7 +130,6 @@ const WalletsDetail = ({
 			//SHOW
 			if (y < 100 && !showDetails) {
 				//They scrolled up so show more details now
-				LayoutAnimation.easeInEaseOut();
 				setShowDetails(true);
 				updateHeight({ height, toValue: headerHeight });
 			}
