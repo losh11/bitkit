@@ -2,8 +2,10 @@ import net from 'net';
 import BitcoinJsonRpc from 'bitcoin-json-rpc';
 import ElectrumClient from 'electrum-client';
 
-const sleep = (ms = 1000): Promise<void> => {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms): Promise<void> => {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 };
 
 // tracks blocks count in electrum and when it maches bitcoin core resolves the promise

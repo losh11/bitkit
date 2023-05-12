@@ -1,7 +1,7 @@
 import '../src/utils/i18n';
 import { getWalletStore } from '../src/store/helpers';
 import { updateExchangeRates } from '../src/store/actions/wallet';
-import { getDisplayValues } from '../src/utils/exchange-rate';
+import { getDisplayValues } from '../src/utils/displayValues';
 import { resetExchangeRates } from '../src/store/actions/wallet';
 import { EBitcoinUnit } from '../src/store/types/wallet';
 

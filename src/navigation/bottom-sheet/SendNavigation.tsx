@@ -29,7 +29,7 @@ import {
 	setupOnChainTransaction,
 	setupFeeForOnChainTransaction,
 } from '../../store/actions/wallet';
-import { __DISABLE_ANIMATION__ } from '../../constants/env';
+import { __E2E__ } from '../../constants/env';
 
 export type SendNavigationProp = NativeStackNavigationProp<SendStackParamList>;
 
@@ -56,7 +56,7 @@ export type SendStackParamList = {
 const Stack = createNativeStackNavigator<SendStackParamList>();
 const screenOptions: NativeStackNavigationOptions = {
 	headerShown: false,
-	...(__DISABLE_ANIMATION__ ? { animationDuration: 0 } : {}),
+	...(__E2E__ ? { animationDuration: 0 } : {}),
 };
 
 /**

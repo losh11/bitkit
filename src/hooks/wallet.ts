@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import Store from '../store/types';
-import { IDisplayValues } from '../utils/exchange-rate/types';
+import { IDisplayValues } from '../utils/displayValues/types';
 import useDisplayValues from './displayValues';
 import {
 	selectedNetworkSelector,

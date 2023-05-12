@@ -27,7 +27,11 @@ export const markComplete = (name) => {
 	fs.writeFileSync(path.join(LOCK_PATH, 'lock-' + name), '1');
 };
 
-export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms) => {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+};
 
 export const isButtonEnabled = async (element) => {
 	try {

@@ -73,7 +73,7 @@ const ActivityFiltered = ({
 	const [radiusContainerHeight, setRadiusContainerHeight] = useState(0);
 	const [currentTab, setCurrentTab] = useState(0);
 	const [search, setSearch] = useState('');
-	const [timerange, setTimerange] = useState([]);
+	const [timerange, setTimerange] = useState<number[]>([]);
 	const [tags, setTags] = useState<string[]>([]);
 
 	const filter = useMemo(() => {

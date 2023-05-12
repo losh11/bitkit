@@ -105,7 +105,8 @@ const About = ({
 						title: t('about.support'),
 						type: EItemType.button,
 						onPress: async (): Promise<void> => {
-							await openURL(await createSupportLink());
+							const link = await createSupportLink();
+							await openURL(link);
 						},
 					},
 					{

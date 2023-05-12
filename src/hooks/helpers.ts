@@ -11,14 +11,12 @@ export const usePrevious = <T>(value: T): T | undefined => {
 
 // https://stackoverflow.com/a/61127960/1231070
 export const useDebouncedEffect = (
-	effect: Function,
+	effect: () => void,
 	deps: Array<any>,
 	delay: number,
 ): void => {
 	useEffect(() => {
-		const handler = setTimeout(() => {
-			effect();
-		}, delay);
+		const handler = setTimeout(effect, delay);
 
 		return (): void => {
 			clearTimeout(handler);

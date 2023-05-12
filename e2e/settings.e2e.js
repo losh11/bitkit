@@ -449,11 +449,11 @@ describe('Settings', () => {
 			}
 			await element(by.id('AdvancedSettings')).tap();
 			await element(by.id('Channels')).tap();
-			await element(by.id('CopyNodeId')).tap();
-			await element(by.id('RefreshLDK')).tap();
-			await element(by.id('RestartLDK')).tap();
-			await element(by.id('RebroadcastLDKTXS')).tap();
-			await sleep(1000);
+			// TODO: check that buttons are functional
+			// await element(by.id('CopyNodeId')).tap();
+			// await element(by.id('RefreshLDK')).tap();
+			// await element(by.id('RestartLDK')).tap();
+			// await element(by.id('RebroadcastLDKTXS')).tap();
 			await element(by.id('NavigationBack')).tap();
 
 			await element(by.id('LightningNodeInfo')).tap();

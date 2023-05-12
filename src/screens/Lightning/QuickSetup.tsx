@@ -30,7 +30,8 @@ import {
 	startChannelPurchase,
 } from '../../store/actions/blocktank';
 import { showErrorNotification } from '../../utils/notifications';
-import { convertToSats, getFiatDisplayValues } from '../../utils/exchange-rate';
+import { convertToSats } from '../../utils/conversion';
+import { getFiatDisplayValues } from '../../utils/displayValues';
 import { SPENDING_LIMIT_RATIO } from '../../utils/wallet/constants';
 import type { LightningScreenProps } from '../../navigation/types';
 import {

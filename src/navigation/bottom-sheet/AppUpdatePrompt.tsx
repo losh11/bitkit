@@ -2,7 +2,7 @@ import React, { memo, ReactElement, useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { __DISABLE_PERIODIC_REMINDERS__ } from '../../constants/env';
+import { __E2E__ } from '../../constants/env';
 import { Text01S } from '../../styles/text';
 import BottomSheetWrapper from '../../components/BottomSheetWrapper';
 import BottomSheetNavigationHeader from '../../components/BottomSheetNavigationHeader';
@@ -53,7 +53,7 @@ const AppUpdatePrompt = ({ enabled }: { enabled: boolean }): ReactElement => {
 		const isTimeoutOver = Number(new Date()) - ignoreTimestamp > ASK_INTERVAL;
 		return (
 			enabled &&
-			!__DISABLE_PERIODIC_REMINDERS__ &&
+			!__E2E__ &&
 			updateInfo !== null &&
 			!updateInfo.critical &&
 			isTimeoutOver &&

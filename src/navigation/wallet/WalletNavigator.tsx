@@ -16,7 +16,7 @@ import HighBalanceWarning from '../bottom-sheet/HighBalanceWarning';
 import AuthCheck from '../../components/AuthCheck';
 import TabBar from '../../components/TabBar';
 import type { RootStackScreenProps } from '../types';
-import { __DISABLE_ANIMATION__ } from '../../constants/env';
+import { __E2E__ } from '../../constants/env';
 
 export type WalletStackParamList = {
 	AuthCheck: { onSuccess: () => void };
@@ -33,7 +33,7 @@ const modalOptions = navOptions;
 const screenOptions: StackNavigationOptions = {
 	...navOptions,
 	...TransitionPresets.SlideFromRightIOS,
-	animationEnabled: !__DISABLE_ANIMATION__,
+	animationEnabled: !__E2E__,
 };
 
 const WalletsStack = ({

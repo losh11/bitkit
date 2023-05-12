@@ -556,7 +556,7 @@ export const clearUtxos = async ({
 }: {
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
-}): Promise<string> => {
+} = {}): Promise<string> => {
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
 	}

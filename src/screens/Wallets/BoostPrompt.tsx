@@ -24,7 +24,7 @@ import {
 	showErrorNotification,
 	showSuccessNotification,
 } from '../../utils/notifications';
-import { btcToSats } from '../../utils/helpers';
+import { btcToSats } from '../../utils/conversion';
 import { TOnchainActivityItem } from '../../store/types/activity';
 import {
 	useBottomSheetBackPress,

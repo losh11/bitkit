@@ -12,7 +12,7 @@ import {
 } from '../../screens/Widgets/WidgetsOnboarding';
 import WidgetsSuggestions from '../../screens/Widgets/WidgetsSuggestions';
 import { onboardedWidgetsSelector } from '../../store/reselect/widgets';
-import { __DISABLE_ANIMATION__ } from '../../constants/env';
+import { __E2E__ } from '../../constants/env';
 
 export type WidgetsNavigationProp =
 	NativeStackNavigationProp<WidgetsStackParamList>;
@@ -27,7 +27,7 @@ const Stack = createNativeStackNavigator<WidgetsStackParamList>();
 
 const screenOptions: NativeStackNavigationOptions = {
 	headerShown: false,
-	...(__DISABLE_ANIMATION__ ? { animationDuration: 0 } : {}),
+	...(__E2E__ ? { animationDuration: 0 } : {}),
 };
 
 const WidgetsNavigator = (): ReactElement => {

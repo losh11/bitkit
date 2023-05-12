@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { EItemType, IListData } from '../../../components/List';
 import SettingsView from '../SettingsView';
-import { mostUsedExchangeTickers } from '../../../utils/exchange-rate/types';
+import { mostUsedExchangeTickers } from '../../../utils/exchange-rate';
 import { updateSettings } from '../../../store/actions/settings';
 import { exchangeRatesSelector } from '../../../store/reselect/wallet';
 import { selectedCurrencySelector } from '../../../store/reselect/settings';

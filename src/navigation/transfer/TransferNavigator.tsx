@@ -10,7 +10,7 @@ import Confirm from '../../screens/Transfer/Confirm';
 import Availability from '../../screens/Transfer/Availability';
 import Success from '../../screens/Transfer/Success';
 import Interrupted from '../../screens/Transfer/Interrupted';
-import { __DISABLE_ANIMATION__ } from '../../constants/env';
+import { __E2E__ } from '../../constants/env';
 
 export type LightningNavigationProp =
 	NativeStackNavigationProp<TransferStackParamList>;
@@ -29,7 +29,7 @@ export type TransferStackParamList = {
 const Stack = createNativeStackNavigator<TransferStackParamList>();
 const screenOptions: NativeStackNavigationOptions = {
 	headerShown: false,
-	...(__DISABLE_ANIMATION__ ? { animationDuration: 0 } : {}),
+	...(__E2E__ ? { animationDuration: 0 } : {}),
 };
 
 const TransferStack = (): ReactElement => {

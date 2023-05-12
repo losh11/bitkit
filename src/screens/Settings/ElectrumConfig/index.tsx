@@ -59,7 +59,7 @@ const isValidURL = (data: string): boolean => {
 
 const validateInput = (
 	{ host, port }: { host: string; port: string },
-	t: Function,
+	t: (error: string) => void,
 ): Result<string> => {
 	//Ensure the user passed in a host & port to test.
 	let error;

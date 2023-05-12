@@ -405,9 +405,9 @@ export const unsubscribeFromLightningSubscriptions = (): void => {
 
 export const resetLdk = async (): Promise<Result<string>> => {
 	// wait for interactions/animations to be completed
-	await new Promise((resolve) =>
-		InteractionManager.runAfterInteractions(() => resolve(null)),
-	);
+	await new Promise((resolve) => {
+		InteractionManager.runAfterInteractions(() => resolve(null));
+	});
 
 	return await ldk.reset();
 };
@@ -427,9 +427,9 @@ export const refreshLdk = async ({
 } = {}): Promise<Result<string>> => {
 	try {
 		// wait for interactions/animations to be completed
-		await new Promise((resolve) =>
-			InteractionManager.runAfterInteractions(() => resolve(null)),
-		);
+		await new Promise((resolve) => {
+			InteractionManager.runAfterInteractions(() => resolve(null));
+		});
 		if (!selectedWallet) {
 			selectedWallet = getSelectedWallet();
 		}

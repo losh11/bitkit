@@ -20,8 +20,7 @@ import {
 	ELECTRUM_REGTEST_TCP_PORT,
 	ELECTRUM_REGTEST_PROTO,
 	WALLET_DEFAULT_SELECTED_NETWORK,
-	DISABLE_PERIODIC_REMINDERS,
-	DISABLE_ANIMATION,
+	E2E,
 } from '@env';
 import { isProtocol } from '../store/types/settings';
 import { isBitcoinNetwork } from '../utils/networks';
@@ -78,6 +77,4 @@ export const __ELECTRUM_REGTEST_PROTO__ = ELECTRUM_REGTEST_PROTO;
 export const __WALLET_DEFAULT_SELECTED_NETWORK__ =
 	WALLET_DEFAULT_SELECTED_NETWORK;
 
-export const __DISABLE_PERIODIC_REMINDERS__ =
-	DISABLE_PERIODIC_REMINDERS === 'true';
-export const __DISABLE_ANIMATION__ = DISABLE_ANIMATION === 'true';
+export const __E2E__ = E2E === 'true';

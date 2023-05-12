@@ -5,7 +5,7 @@ import { Platform, BackHandler } from 'react-native';
 import actions from './actions';
 import { getDispatch } from '../helpers';
 import { getSelectedNetwork, getSelectedWallet } from '../../utils/wallet';
-import { getAllKeychainKeys, resetKeychainValue } from '../../utils/helpers';
+import { getAllKeychainKeys, resetKeychainValue } from '../../utils/keychain';
 import { wipeLdkStorage } from '../../utils/lightning';
 import { removePin } from '../../utils/settings';
 import { TAvailableNetworks } from '../../utils/networks';

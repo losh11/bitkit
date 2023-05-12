@@ -15,7 +15,7 @@ import {
 } from '../types/wallet';
 import { defaultBitcoinTransactionData } from '../shapes/wallet';
 import { TAvailableNetworks } from '../../utils/networks';
-import { IExchangeRates } from '../../utils/exchange-rate/types';
+import { IExchangeRates } from '../../utils/exchange-rate';
 import { EFeeId } from '../types/fees';
 
 export const walletState = (state: Store): IWalletStore => state.wallet;

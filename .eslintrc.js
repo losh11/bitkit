@@ -2,9 +2,9 @@ module.exports = {
 	root: true,
 	extends: '@react-native-community',
 	parser: '@typescript-eslint/parser',
-	// parserOptions: {
-	// 	project: ['./tsconfig.json'], // Specify it only for TypeScript files
-	// },
+	parserOptions: {
+		project: ['./tsconfig.json'],
+	},
 	plugins: ['@typescript-eslint'],
 	globals: {
 		localStorage: false,
@@ -22,6 +22,7 @@ module.exports = {
 		'no-case-declarations': 0,
 		'no-console': 0,
 		'no-empty': [2, { allowEmptyCatch: true }],
+		'no-promise-executor-return': 2,
 		'no-shadow': 0,
 		'no-undef': 0,
 		'no-useless-escape': 0,
@@ -39,7 +40,17 @@ module.exports = {
 		// The following rules are made available via `@typescript-eslint/eslint-plugin`.
 		'@typescript-eslint/explicit-function-return-type': 2,
 		'@typescript-eslint/semi': 2,
-		// '@typescript-eslint/no-misused-promises': 2,
+		// '@typescript-eslint/no-floating-promises': 2,
+		'@typescript-eslint/no-misused-promises': [
+			2,
+			{
+				checksVoidReturn: {
+					arguments: false,
+					attributes: false,
+					properties: false,
+				},
+			},
+		],
 		'@typescript-eslint/no-shadow': 2,
 		'@typescript-eslint/no-unused-vars': 2,
 		'@typescript-eslint/prefer-optional-chain': 2,
@@ -90,4 +101,13 @@ module.exports = {
 			},
 		],
 	},
+	overrides: [
+		// Disable type-aware linting for .js files
+		{
+			files: ['*.js', '*.jsx'],
+			rules: {
+				'@typescript-eslint/no-misused-promises': 0,
+			},
+		},
+	],
 };

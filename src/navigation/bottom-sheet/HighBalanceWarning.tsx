@@ -2,7 +2,7 @@ import React, { memo, ReactElement, useEffect, useMemo } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { __DISABLE_PERIODIC_REMINDERS__ } from '../../constants/env';
+import { __E2E__ } from '../../constants/env';
 import { Caption13Up, Display, Text02S } from '../../styles/text';
 import BottomSheetWrapper from '../../components/BottomSheetWrapper';
 import BottomSheetNavigationHeader from '../../components/BottomSheetNavigationHeader';
@@ -14,7 +14,7 @@ import { closeBottomSheet, showBottomSheet } from '../../store/actions/ui';
 import { viewControllersSelector } from '../../store/reselect/ui';
 import { useBalance } from '../../hooks/wallet';
 import { useAppSelector } from '../../hooks/redux';
-import { getFiatDisplayValues } from '../../utils/exchange-rate';
+import { getFiatDisplayValues } from '../../utils/displayValues';
 import { openURL } from '../../utils/helpers';
 import { objectKeys } from '../../utils/objectKeys';
 import { bitcoinUnitSelector } from '../../store/reselect/settings';
@@ -107,7 +107,7 @@ const HighBalanceWarning = ({
 		const isTimeoutOver = Number(new Date()) - ignoreTimestamp > ASK_INTERVAL;
 		return (
 			enabled &&
-			!__DISABLE_PERIODIC_REMINDERS__ &&
+			!__E2E__ &&
 			thresholdReached &&
 			belowMaxWarnings &&
 			isTimeoutOver &&

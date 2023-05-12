@@ -13,11 +13,11 @@ import Money from './Money';
 import MoneySymbol from './MoneySymbol';
 import { EBalanceUnit, EBitcoinUnit } from '../store/types/wallet';
 import { balanceUnitSelector } from '../store/reselect/settings';
+import { convertToSats } from '../utils/conversion';
 import {
-	convertToSats,
 	getDisplayValues,
 	getFiatDisplayValuesForFiat,
-} from '../utils/exchange-rate';
+} from '../utils/displayValues';
 
 const NumberPadTextField = ({
 	value,

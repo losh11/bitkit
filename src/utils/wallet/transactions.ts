@@ -8,16 +8,12 @@ import { err, ok, Result } from '@synonymdev/result';
 import * as electrum from 'rn-electrum-client/helpers';
 import validate, { getAddressInfo } from 'bitcoin-address-validation';
 
-import { __JEST__ } from '../../constants/env';
+import { __E2E__, __JEST__ } from '../../constants/env';
 import { validateAddress } from '../scanner';
 import { EAvailableNetworks, networks, TAvailableNetworks } from '../networks';
-import {
-	btcToSats,
-	satsToBtc,
-	reduceValue,
-	getKeychainValue,
-	shuffleArray,
-} from '../helpers';
+import { reduceValue, shuffleArray } from '../helpers';
+import { btcToSats, satsToBtc } from '../conversion';
+import { getKeychainValue } from '../keychain';
 import {
 	EBoostType,
 	EPaymentType,
@@ -617,56 +613,46 @@ export const createFundedPsbtTransaction = async ({
 	});
 };
 
-export const signPsbt = ({
+/**
+ * Loops through inputs and signs them
+ * @param {Psbt} psbt
+ * @param {BIP32Interface} bip32Interface
+ * @param {TWalletName} selectedWallet
+ * @param {TAvailableNetworks} selectedNetwork
+ * @returns {Promise<Result<Psbt>>}
+ */
+export const signPsbt = async ({
+	psbt,
+	bip32Interface,
 	selectedWallet,
 	selectedNetwork,
-	bip32Interface,
-	psbt,
 }: {
+	psbt: Psbt;
+	bip32Interface: BIP32Interface;
 	selectedWallet: TWalletName;
 	selectedNetwork: TAvailableNetworks;
-	bip32Interface?: BIP32Interface;
-	psbt: Psbt;
 }): Promise<Result<Psbt>> => {
-	return new Promise(async (resolve) => {
-		//Loop through and sign our inputs
-		if (!bip32Interface) {
-			const bip32InterfaceRes = await getBip32Interface(
-				selectedWallet,
-				selectedNetwork,
-			);
-			if (bip32InterfaceRes.isErr()) {
-				return resolve(err(bip32InterfaceRes.error.message));
-			}
-			bip32Interface = bip32InterfaceRes.value;
-		}
-
-		const root = bip32Interface;
-
-		const transactionDataRes = getOnchainTransactionData({
-			selectedWallet,
-			selectedNetwork,
-		});
-
-		if (transactionDataRes.isErr()) {
-			return err(transactionDataRes.error.message);
-		}
-
-		const { inputs = [] } = transactionDataRes.value;
-		await Promise.all(
-			inputs.map((input, i) => {
-				try {
-					const path = input.path;
-					const keyPair = root.derivePath(path);
-					psbt.signInput(i, keyPair);
-				} catch (e) {
-					return resolve(err(e));
-				}
-			}),
-		);
-		psbt.finalizeAllInputs();
-		return resolve(ok(psbt));
+	const transactionDataRes = getOnchainTransactionData({
+		selectedWallet,
+		selectedNetwork,
 	});
+	if (transactionDataRes.isErr()) {
+		return err(transactionDataRes.error.message);
+	}
+
+	const { inputs } = transactionDataRes.value;
+	for (const [index, input] of inputs.entries()) {
+		try {
+			const keyPair = bip32Interface.derivePath(input.path);
+			psbt.signInput(index, keyPair);
+		} catch (e) {
+			return err(e);
+		}
+	}
+
+	psbt.finalizeAllInputs();
+
+	return ok(psbt);
 };
 
 /**
@@ -756,10 +742,10 @@ export const createTransaction = async ({
 		const psbt = psbtRes.value;
 
 		const signedPsbtRes = await signPsbt({
-			selectedWallet,
-			selectedNetwork,
 			psbt,
 			bip32Interface: bip32InterfaceRes.value,
+			selectedWallet,
+			selectedNetwork,
 		});
 
 		if (signedPsbtRes.isErr()) {
@@ -2338,6 +2324,10 @@ export const getFeeEstimates = async (
 	try {
 		if (!selectedNetwork) {
 			selectedNetwork = getSelectedNetwork();
+		}
+
+		if (__E2E__) {
+			return defaultFeesShape.onchain;
 		}
 
 		if (__DEV__ && selectedNetwork === EAvailableNetworks.bitcoinRegtest) {

@@ -2,7 +2,7 @@ import React, { memo, ReactElement, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import NumberPad from '../../../components/NumberPad';
-import { convertToSats } from '../../../utils/exchange-rate';
+import { convertToSats } from '../../../utils/conversion';
 import { handleNumberPadPress } from '../../../utils/numberpad';
 import { EBalanceUnit } from '../../../store/types/wallet';
 import { balanceUnitSelector } from '../../../store/reselect/settings';

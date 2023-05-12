@@ -28,7 +28,8 @@ import {
 } from '../../store/actions/blocktank';
 import { useSelector } from 'react-redux';
 import { SPENDING_LIMIT_RATIO } from '../../utils/wallet/constants';
-import { convertToSats, getFiatDisplayValues } from '../../utils/exchange-rate';
+import { convertToSats } from '../../utils/conversion';
+import { getFiatDisplayValues } from '../../utils/displayValues';
 import {
 	resetOnChainTransaction,
 	setupOnChainTransaction,

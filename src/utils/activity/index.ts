@@ -1,6 +1,6 @@
 import { IGetOrderResponse } from '@synonymdev/blocktank-client';
 
-import { btcToSats } from '../helpers';
+import { btcToSats } from '../conversion';
 import i18n from '../../utils/i18n';
 import { TPaidBlocktankOrders } from '../../store/types/blocktank';
 import { EPaymentType, IFormattedTransaction } from '../../store/types/wallet';

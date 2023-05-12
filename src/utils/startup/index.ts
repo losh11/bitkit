@@ -99,9 +99,9 @@ export const startWalletServices = async ({
 }): Promise<Result<string>> => {
 	try {
 		// wait for interactions/animations to be completed
-		await new Promise((resolve) =>
-			InteractionManager.runAfterInteractions(() => resolve(null)),
-		);
+		await new Promise((resolve) => {
+			InteractionManager.runAfterInteractions(() => resolve(null));
+		});
 		if (!selectedWallet) {
 			selectedWallet = getSelectedWallet();
 		}

@@ -13,7 +13,7 @@ import QuickConfirm from '../../screens/Lightning/QuickConfirm';
 import SettingUp from '../../screens/Lightning/SettingUp';
 import Success from '../../screens/Lightning/Success';
 import Timeout from '../../screens/Lightning/Timeout';
-import { __DISABLE_ANIMATION__ } from '../../constants/env';
+import { __E2E__ } from '../../constants/env';
 
 export type LightningNavigationProp =
 	NativeStackNavigationProp<LightningStackParamList>;
@@ -42,7 +42,7 @@ export type LightningStackParamList = {
 const Stack = createNativeStackNavigator<LightningStackParamList>();
 const screenOptions: NativeStackNavigationOptions = {
 	headerShown: false,
-	...(__DISABLE_ANIMATION__ ? { animationDuration: 0 } : {}),
+	...(__E2E__ ? { animationDuration: 0 } : {}),
 };
 
 const LightningStack = (): ReactElement => {

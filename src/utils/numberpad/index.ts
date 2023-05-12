@@ -1,5 +1,5 @@
 import { EBalanceUnit, EBitcoinUnit } from '../../store/types/wallet';
-import { getDisplayValues } from '../exchange-rate';
+import { getDisplayValues } from '../displayValues';
 
 /**
  * Handles the logic for NumberPads that deal with currency amounts

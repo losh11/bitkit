@@ -164,7 +164,7 @@ export const electrumConnection = ((): ElectrumConnectionPubSub => {
 		}
 	}, POLLING_INTERVAL);
 
-	function publish(isConnected: boolean): void {
+	const publish = (isConnected: boolean): void => {
 		// Skip if no subscribers
 		if (subscribers.size === 0) {
 			return;
@@ -177,11 +177,11 @@ export const electrumConnection = ((): ElectrumConnectionPubSub => {
 
 		latestState = isConnected;
 		subscribers.forEach((callback) => callback(isConnected));
-	}
+	};
 
-	function subscribe(
+	const subscribe = (
 		callback: (isConnected: boolean) => void,
-	): ElectrumConnectionSubscription {
+	): ElectrumConnectionSubscription => {
 		subscribers.add(callback);
 
 		return {
@@ -189,7 +189,7 @@ export const electrumConnection = ((): ElectrumConnectionPubSub => {
 				subscribers.delete(callback);
 			},
 		};
-	}
+	};
 
 	return { publish, subscribe };
 })();

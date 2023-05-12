@@ -12,15 +12,6 @@ export interface IResponse<T> {
 	data: T;
 }
 
-export interface ISetKeychainValue {
-	key: string;
-	value: string;
-}
-
-export interface IGetKeychainValue {
-	key: string;
-}
-
 export interface IGetAddress {
 	path: string;
 	type: EAddressType;

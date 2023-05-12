@@ -1,11 +1,8 @@
 import { Linking, Vibration } from 'react-native';
-import Keychain from 'react-native-keychain';
 import NetInfo from '@react-native-community/netinfo';
-import { default as bitcoinUnits } from 'bitcoin-units';
 import { err, ok, Result } from '@synonymdev/result';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
-import { IGetKeychainValue, IResponse, ISetKeychainValue } from './types';
 import { TAvailableNetworks } from './networks';
 import {
 	TBitcoinAbbreviation,
@@ -31,70 +28,12 @@ export const promiseTimeout = <T>(
 	});
 };
 
-export const setKeychainValue = async ({
-	key = '',
-	value = '',
-}: ISetKeychainValue): Promise<IResponse<string>> => {
-	return new Promise(async (resolve) => {
-		try {
-			await Keychain.setGenericPassword(key, value, { service: key });
-			resolve({ error: false, data: '' });
-		} catch (e) {
-			resolve({ error: true, data: e });
-		}
-	});
-};
-
 export const isOnline = async (): Promise<boolean> => {
 	try {
 		const connectionInfo = await NetInfo.fetch();
 		return connectionInfo.isConnected === true;
 	} catch {
 		return false;
-	}
-};
-
-export const getKeychainValue = async ({
-	key = '',
-}: IGetKeychainValue): Promise<{ error: boolean; data: string }> => {
-	return new Promise(async (resolve) => {
-		try {
-			let result = await Keychain.getGenericPassword({ service: key });
-			let data: string | undefined;
-			if (!result) {
-				return resolve({ error: true, data: '' });
-			}
-			if (!result.password) {
-				return resolve({ error: true, data: '' });
-			}
-			data = result.password;
-			resolve({ error: false, data });
-		} catch (e) {
-			resolve({ error: true, data: e });
-		}
-	});
-};
-
-/**
- * Returns an array of all known Keychain keys.
- * @returns {Promise<string[]>}
- */
-export const getAllKeychainKeys = async (): Promise<string[]> => {
-	return await Keychain.getAllGenericPasswordServices();
-};
-
-//WARNING: This will wipe the specified key's value from storage
-export const resetKeychainValue = async ({
-	key = '',
-}: {
-	key: string;
-}): Promise<Result<boolean>> => {
-	try {
-		const result = await Keychain.resetGenericPassword({ service: key });
-		return ok(result);
-	} catch (e) {
-		console.log(e);
-		return err(e);
 	}
 };
 
@@ -132,20 +71,6 @@ export const getNetworkData = ({
 	} catch {
 		return { abbreviation, label: 'Bitcoin Mainnet', ticker: 'BTC' };
 	}
-};
-
-export const btcToSats = (balance: number): number => {
-	try {
-		return Number(
-			bitcoinUnits(balance, 'BTC').to('satoshi').value().toFixed(0),
-		);
-	} catch (e) {
-		return 0;
-	}
-};
-
-export const satsToBtc = (balance: number): number => {
-	return bitcoinUnits(balance, 'sats').to('BTC').value();
 };
 
 export const getLastWordInString = (phrase = ''): string => {
@@ -535,7 +460,9 @@ export const applyAlpha = (hexColor: string, alpha: number): string => {
  * @returns {Promise<void>}
  */
 export const sleep = (ms = 1000): Promise<void> => {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 };
 
 /**
@@ -545,7 +472,7 @@ export const sleep = (ms = 1000): Promise<void> => {
  * @param {number} [interval] The interval of time between each attempt in milliseconds.
  * @returns {Promise<T>} The resolution of the Promise.
  */
-export async function tryNTimes<T>({
+export const tryNTimes = async <T>({
 	toTry,
 	times = 5,
 	interval = 50,
@@ -553,7 +480,7 @@ export async function tryNTimes<T>({
 	toTry: () => Promise<Result<T>>;
 	times?: number;
 	interval?: number;
-}): Promise<T> {
+}): Promise<T> => {
 	if (times < 1) {
 		throw new Error(
 			`Bad argument: 'times' must be greater than 0, but ${times} was received.`,
@@ -577,7 +504,7 @@ export async function tryNTimes<T>({
 		}
 		await sleep(interval);
 	}
-}
+};
 
 export const generateCalendar = (
 	date: Date,
