@@ -14,7 +14,14 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 } from 'react-native';
-import Animated, { EasingNode, FadeIn, FadeOut } from 'react-native-reanimated';
+
+import {
+	Easing,
+	FadeIn,
+	FadeOut,
+	useSharedValue,
+	withTiming,
+} from 'react-native-reanimated';
 import {
 	Canvas,
 	RadialGradient,
@@ -46,17 +53,12 @@ import { EBitcoinUnit } from '../../../store/types/wallet';
 import type { WalletScreenProps } from '../../../navigation/types';
 import { SkiaMutableValue } from '@shopify/react-native-skia/src/values/types';
 
-const updateHeight = ({
-	height = new Animated.Value(0),
-	toValue = 0,
-	duration = 250,
-}): void => {
+const updateHeight = ({ height, toValue = 0, duration = 250 }): void => {
 	try {
-		Animated.timing(height, {
-			toValue,
+		height.value = withTiming(toValue, {
 			duration,
-			easing: EasingNode.inOut(EasingNode.ease),
-		}).start();
+			easing: Easing.inOut(Easing.ease),
+		});
 	} catch {}
 };
 
@@ -96,7 +98,7 @@ const WalletsDetail = ({
 	const [showDetails, setShowDetails] = useState(true);
 	const [radiusContainerHeight, setRadiusContainerHeight] = useState(400);
 	const [headerHeight, setHeaderHeight] = useState(0);
-	const [height] = useState(new Animated.Value(0));
+	const height = useSharedValue(0);
 
 	const filter = useMemo(() => {
 		const types =

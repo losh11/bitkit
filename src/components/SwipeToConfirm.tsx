@@ -2,18 +2,12 @@ import React, {
 	ReactElement,
 	memo,
 	useEffect,
-	useMemo,
 	useRef,
 	useState,
+	useImperativeHandle,
+	forwardRef,
 } from 'react';
-import {
-	Animated,
-	PanResponder,
-	StyleProp,
-	StyleSheet,
-	View,
-	ViewStyle,
-} from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { View as ThemedView } from '../styles/components';
@@ -22,6 +16,17 @@ import { RightArrow } from '../styles/icons';
 import { IThemeColors } from '../styles/themes';
 import useColors from '../hooks/colors';
 import LoadingSpinner from './Spinner';
+
+import Animated, {
+	runOnJS,
+	useAnimatedGestureHandler,
+	useAnimatedStyle,
+	useSharedValue,
+	withSpring,
+	withTiming,
+} from 'react-native-reanimated';
+import { PanGestureHandler } from 'react-native-gesture-handler';
+import { sleep } from '../utils/helpers';
 
 const CIRCLE_SIZE = 60;
 const GRAB_SIZE = 120;
@@ -38,163 +43,144 @@ interface ISwipeToConfirm {
 	style?: StyleProp<ViewStyle>;
 }
 
-const SwipeToConfirm = ({
-	text,
-	color,
-	onConfirm,
-	icon,
-	loading,
-	confirmed,
-	style,
-}: ISwipeToConfirm): ReactElement => {
-	const { t } = useTranslation('other');
-	text = text ?? t('swipe');
-	const pan = useRef<any>(new Animated.ValueXY()).current;
-	const loadingOpacity = useRef(new Animated.Value(0)).current;
-	const colors = useColors();
-	const circleColor = color ? colors[color] : colors.green ?? colors.green;
-	const confirmedInternal = useRef(false);
-	const [containerWidth, setContainerWidth] = useState(0);
-	const endPosition = containerWidth === 0 ? 1 : containerWidth - CIRCLE_SIZE;
+export interface SwipeToConfirmRef {
+	reset: () => Promise<void>;
+}
 
-	const panResponder = useMemo(() => {
-		// wait for containerWidth to be set
-		if (endPosition === 1) {
-			return { panHandlers: {} };
-		}
+const SwipeToConfirm = forwardRef(
+	(
+		{
+			text,
+			color,
+			onConfirm,
+			icon,
+			loading,
+			confirmed,
+			style,
+		}: ISwipeToConfirm,
+		ref,
+	): ReactElement => {
+		const { t } = useTranslation('other');
+		text = text ?? t('swipe');
+		const colors = useColors();
+		const circleColor = color ? colors[color] : colors.green ?? colors.green;
+		const confirmedInternal = useRef(false);
+		const [containerWidth, setContainerWidth] = useState(0);
+		const endPosition = containerWidth === 0 ? 1 : containerWidth - CIRCLE_SIZE;
 
-		return PanResponder.create({
-			onStartShouldSetPanResponder: () => true,
-			onMoveShouldSetPanResponder: () => !confirmedInternal.current,
-			onPanResponderGrant: () => {
-				pan.setOffset({
-					x: pan.x._value,
-					y: pan.y._value,
-				});
+		const panX = useSharedValue(0);
+		const loadingOpacity = useSharedValue(loading ? 1 : 0);
+
+		const panGestureHandler = useAnimatedGestureHandler({
+			onStart: (_, ctx) => {
+				// @ts-ignore
+				ctx.offsetX = panX.value;
 			},
-			onPanResponderMove: Animated.event([null, { dx: pan.x }], {
-				useNativeDriver: false,
-			}),
-			onPanResponderRelease: () => {
-				pan.flattenOffset();
-				const finished = pan.x._value > endPosition * 0.8;
-				Animated.spring(pan, {
-					toValue: { x: finished ? endPosition : 0, y: 0 },
-					useNativeDriver: false,
-				}).start(() => {
-					if (finished) {
-						confirmedInternal.current = true;
-						onConfirm?.();
-					}
-				});
+			onActive: (event, ctx) => {
+				// @ts-ignore
+				panX.value = ctx.offsetX + event.translationX;
+			},
+			onEnd: (_) => {
+				const finished = panX.value > endPosition * 0.8;
+				panX.value = withSpring(finished ? endPosition : 0);
+
+				if (finished) {
+					confirmedInternal.current = true;
+					// @ts-ignore
+					runOnJS(onConfirm)?.();
+				}
 			},
 		});
-	}, [endPosition, pan, onConfirm]);
 
-	const circleTranslateX = pan.x.interpolate({
-		inputRange: [0, endPosition],
-		outputRange: [0, endPosition],
-	});
+		useImperativeHandle(ref, () => ({
+			reset: async (): Promise<void> => {
+				panX.value = withSpring(0);
+				loadingOpacity.value = withTiming(0, { duration: 150 });
+				confirmedInternal.current = false;
+				await sleep(150);
+			},
+		}));
 
-	const shadowOpacity = pan.x.interpolate({
-		inputRange: [0, endPosition],
-		outputRange: [0, 0.16],
-	});
+		// Animated styles
+		const circleTranslateXStyle = useAnimatedStyle(() => {
+			const translateX = panX.value;
+			return { transform: [{ translateX }] };
+		});
 
-	const shadowWidth = pan.x.interpolate({
-		inputRange: [0, endPosition],
-		outputRange: [CIRCLE_SIZE / 2, endPosition + CIRCLE_SIZE / 2],
-	});
+		const textOpacityStyle = useAnimatedStyle(() => {
+			const opacity = 1 - panX.value / endPosition;
+			return { opacity };
+		});
 
-	const textOpacity = pan.x.interpolate({
-		inputRange: [0, endPosition],
-		outputRange: [1, 0],
-	});
+		const startIconOpacityStyle = useAnimatedStyle(() => {
+			const opacity = 1 - panX.value / (endPosition / 2);
+			return { opacity };
+		});
 
-	const startIconOpacity = pan.x.interpolate({
-		inputRange: [0, endPosition / 2],
-		outputRange: [1, 0],
-	});
+		// hide if loading is visible
+		const endIconOpacityStyle = useAnimatedStyle(() => {
+			const opacity =
+				(panX.value - endPosition / 2) / (endPosition / 2) -
+				loadingOpacity.value;
+			return { opacity };
+		});
 
-	// hide if loading is visible
-	const endIconOpacity = Animated.subtract(
-		pan.x.interpolate({
-			inputRange: [endPosition / 2, endPosition],
-			outputRange: [0, 1],
-		}),
-		loadingOpacity,
-	);
+		const loadingIconOpacityStyle = useAnimatedStyle(() => {
+			return { opacity: loadingOpacity.value };
+		});
 
-	useEffect(() => {
-		Animated.timing(loadingOpacity, {
-			toValue: loading ? 1 : 0,
-			delay: loading ? 1 : 0,
-			duration: 300,
-			useNativeDriver: false,
-		}).start();
-	}, [loading, loadingOpacity]);
+		useEffect(() => {
+			loadingOpacity.value = withTiming(loading ? 1 : 0, {
+				duration: 300,
+			});
+		}, [loading, loadingOpacity]);
 
-	useEffect(() => {
-		Animated.spring(pan, {
-			toValue: { x: confirmed ? endPosition : 0, y: 0 },
-			useNativeDriver: false,
-		}).start();
-		confirmedInternal.current = confirmed;
-	}, [confirmed, endPosition, pan]);
+		useEffect(() => {
+			panX.value = withSpring(confirmed ? endPosition : 0);
+			confirmedInternal.current = confirmed;
+		}, [confirmed, endPosition, panX]);
 
-	return (
-		<ThemedView color="white08" style={[styles.root, style]}>
-			<View
-				style={styles.container}
-				onLayout={(e): void => {
-					const ww = e.nativeEvent.layout.width;
-					setContainerWidth((w) => (w === 0 ? ww : w));
-				}}>
-				<Animated.View
-					style={[
-						styles.shadow,
-						{
-							backgroundColor: circleColor,
-							width: shadowWidth,
-							opacity: shadowOpacity,
-						},
-					]}
-				/>
-				<Animated.View style={{ opacity: textOpacity }}>
-					<Text02M>{text}</Text02M>
-				</Animated.View>
-				<Animated.View
-					style={[
-						styles.grab,
-						{
-							height: GRAB_SIZE,
-							width: GRAB_SIZE,
-							transform: [
-								{
-									translateX: circleTranslateX,
-								},
-							],
-						},
-					]}
-					testID="GRAB"
-					{...panResponder.panHandlers}>
-					<Animated.View
-						style={[styles.circle, { backgroundColor: circleColor }]}>
-						<Animated.View style={[styles.icon, { opacity: startIconOpacity }]}>
-							<RightArrow color="black" />
-						</Animated.View>
-						<Animated.View style={[styles.icon, { opacity: endIconOpacity }]}>
-							{icon}
-						</Animated.View>
-						<Animated.View style={[styles.icon, { opacity: loadingOpacity }]}>
-							<LoadingSpinner size={34} />
-						</Animated.View>
+		return (
+			<ThemedView color="white08" style={[styles.root, style]}>
+				<View
+					style={styles.container}
+					onLayout={(e): void => {
+						const ww = e.nativeEvent.layout.width;
+						setContainerWidth((w) => (w === 0 ? ww : w));
+					}}>
+					<Animated.View style={textOpacityStyle}>
+						<Text02M>{text}</Text02M>
 					</Animated.View>
-				</Animated.View>
-			</View>
-		</ThemedView>
-	);
-};
+					<PanGestureHandler onGestureEvent={panGestureHandler}>
+						<Animated.View
+							style={[
+								styles.grab,
+								{
+									height: GRAB_SIZE,
+									width: GRAB_SIZE,
+								},
+								circleTranslateXStyle,
+							]}
+							testID="GRAB">
+							<Animated.View
+								style={[styles.circle, { backgroundColor: circleColor }]}>
+								<Animated.View style={[styles.icon, startIconOpacityStyle]}>
+									<RightArrow color="black" />
+								</Animated.View>
+								<Animated.View style={[styles.icon, endIconOpacityStyle]}>
+									{icon}
+								</Animated.View>
+								<Animated.View style={[styles.icon, loadingIconOpacityStyle]}>
+									<LoadingSpinner size={34} />
+								</Animated.View>
+							</Animated.View>
+						</Animated.View>
+					</PanGestureHandler>
+				</View>
+			</ThemedView>
+		);
+	},
+);
 
 const styles = StyleSheet.create({
 	root: {

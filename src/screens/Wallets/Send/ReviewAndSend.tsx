@@ -6,6 +6,7 @@ import React, {
 	useState,
 	useEffect,
 	ReactNode,
+	useRef,
 } from 'react';
 import { StyleSheet, View, TouchableOpacity, Keyboard } from 'react-native';
 import { useSelector } from 'react-redux';
@@ -26,7 +27,9 @@ import {
 } from '../../../styles/icons';
 import BottomSheetNavigationHeader from '../../../components/BottomSheetNavigationHeader';
 import GradientView from '../../../components/GradientView';
-import SwipeToConfirm from '../../../components/SwipeToConfirm';
+import SwipeToConfirm, {
+	SwipeToConfirmRef,
+} from '../../../components/SwipeToConfirm';
 import AmountToggle from '../../../components/AmountToggle';
 import Tag from '../../../components/Tag';
 import ContactSmall from '../../../components/ContactSmall';
@@ -172,6 +175,8 @@ const ReviewAndSend = ({
 	const selectedFeeId = transaction.selectedFeeId;
 	const satsPerByte = transaction.satsPerByte;
 	const address = transaction?.outputs[outputIndex]?.address ?? '';
+
+	const swipeToConfirmRef = useRef<SwipeToConfirmRef | null>(null);
 
 	useEffect(() => {
 		setupFeeForOnChainTransaction();
@@ -697,6 +702,7 @@ const ReviewAndSend = ({
 
 					<View style={styles.buttonContainer}>
 						<SwipeToConfirm
+							ref={swipeToConfirmRef}
 							text={t('send_swipe')}
 							onConfirm={onSwipeToPay}
 							icon={<Checkmark width={30} height={30} color="black" />}
@@ -711,8 +717,9 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog1')}
 					confirmText={t('send_yes')}
-					onCancel={(): void => {
+					onCancel={async (): Promise<void> => {
 						setShowDialog1(false);
+						await swipeToConfirmRef.current?.reset();
 						setTimeout(() => navigation.goBack(), 100);
 					}}
 					onConfirm={(): void => {
@@ -725,8 +732,9 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog2')}
 					confirmText={t('send_yes')}
-					onCancel={(): void => {
+					onCancel={async (): Promise<void> => {
 						setShowDialog2(false);
+						await swipeToConfirmRef.current?.reset();
 						setTimeout(() => navigation.goBack(), 100);
 					}}
 					onConfirm={(): void => {
@@ -740,8 +748,9 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog3')}
 					confirmText={t('send_yes')}
-					onCancel={(): void => {
+					onCancel={async (): Promise<void> => {
 						setShowDialog3(false);
+						await swipeToConfirmRef.current?.reset();
 						setTimeout(() => navigation.goBack(), 100);
 					}}
 					onConfirm={(): void => {
@@ -754,8 +763,9 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog4')}
 					confirmText={t('send_yes')}
-					onCancel={(): void => {
+					onCancel={async (): Promise<void> => {
 						setShowDialog4(false);
+						await swipeToConfirmRef.current?.reset();
 						setTimeout(() => navigation.goBack(), 100);
 					}}
 					onConfirm={(): void => {
