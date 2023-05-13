@@ -9,11 +9,6 @@ jobs:
   e2e:
     runs-on: macos-12
 
-    strategy:
-      fail-fast: false
-      matrix:
-        attempt: [1, 2]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -86,7 +81,12 @@ jobs:
 
       - name: Test attempt 3
         id: test3
-        if: steps.test2.outcome != 'success'
+        if: steps.test1.outcome != 'success' && steps.test2.outcome != 'success'
+        run: yarn e2e:test:ios-release --record-videos all --take-screenshots all --record-logs all
+
+      - name: Test attempt 4
+        id: test4
+        if: steps.test1.outcome != 'success' && steps.test2.outcome != 'success' && steps.test3.outcome != 'success'
         run: yarn e2e:test:ios-release --record-videos all --take-screenshots all --record-logs all
 
       - uses: actions/upload-artifact@v3
