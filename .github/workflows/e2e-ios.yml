@@ -15,24 +15,16 @@ jobs:
         attempt: [1, 2]
 
     steps:
-      - name: Echo attempt
-        run: echo ${{ matrix.attempt }}
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      - name: Setup Docker on macOS attempt 1
-        id: docker1
-        continue-on-error: true
-        uses: docker-practice/actions-setup-docker@1.0.11
-        timeout-minutes: 30
+      - name: Setup Docker
+        uses: douglascamata/setup-docker-macos-action@v1-alpha
 
-      - name: Setup Docker on macOS attempt 2
-        if: steps.docker1.outcome != 'success'
-        uses: docker-practice/actions-setup-docker@1.0.11
-        timeout-minutes: 30
+      - name: Install AppleSimulatorUtils
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew tap wix/brew && brew install applesimutils
 
       - name: Run regtest setup
         run: cd __tests__ && docker-compose up -d
@@ -56,7 +48,7 @@ jobs:
         with:
           token: '${{ secrets.NPMJS_READ }}'
 
-      - name: Node
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -77,9 +69,6 @@ jobs:
 
       - name: Yarn Install
         run: yarn --no-audit --prefer-offline
-
-      - name: Install applesimutils
-        run: HOMEBREW_NO_AUTO_UPDATE=1 brew tap wix/brew && brew install applesimutils
 
       - name: Build
         run: yarn e2e:build:ios-release

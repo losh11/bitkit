@@ -9,10 +9,8 @@ import {
 	launchAndWait,
 	completeOnboarding,
 	isButtonEnabled,
+	bitcoinURL,
 } from './helpers';
-
-const bitcoinURL =
-	'http://electrumx:1VmSUVGBuLNWvZl0LExRDW0tvl6196-47RfXIzS384g=@localhost:43782';
 
 describe('LN Channel Onboarding', () => {
 	let waitForElectrum;

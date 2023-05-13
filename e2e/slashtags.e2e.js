@@ -6,11 +6,9 @@ import {
 	markComplete,
 	launchAndWait,
 	completeOnboarding,
+	bitcoinURL,
 } from './helpers';
 import initWaitForElectrumToSync from '../__tests__/utils/wait-for-electrum';
-
-const bitcoinURL =
-	'http://electrumx:1VmSUVGBuLNWvZl0LExRDW0tvl6196-47RfXIzS384g=@localhost:43782';
 
 describe('Profile and Contacts', () => {
 	let waitForElectrum;
