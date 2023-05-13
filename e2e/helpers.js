@@ -3,6 +3,9 @@ import path from 'path';
 
 const LOCK_PATH = '/tmp/';
 
+export const bitcoinURL =
+	'http://electrumx:1VmSUVGBuLNWvZl0LExRDW0tvl6196-47RfXIzS384g=@0.0.0.0:43782';
+
 export const checkComplete = (name) => {
 	if (!process.env.CI) {
 		return;
