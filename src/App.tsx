@@ -6,7 +6,7 @@ import React, {
 	useCallback,
 	useState,
 } from 'react';
-import { Platform, UIManager, NativeModules, StyleSheet } from 'react-native';
+import { Platform, NativeModules, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import { ThemeProvider } from 'styled-components/native';
@@ -29,12 +29,6 @@ import { themeSelector } from './store/reselect/settings';
 import { walletExistsSelector } from './store/reselect/wallet';
 import { requiresRemoteRestoreSelector } from './store/reselect/user';
 import { availableUpdateSelector } from './store/reselect/ui';
-
-if (Platform.OS === 'android') {
-	if (UIManager.setLayoutAnimationEnabledExperimental) {
-		UIManager.setLayoutAnimationEnabledExperimental(true);
-	}
-}
 
 const App = (): ReactElement => {
 	const [isListening, setIsListening] = useState(true);

@@ -711,9 +711,10 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog1')}
 					confirmText={t('send_yes')}
-					onCancel={(): void => {
+					onCancel={async (): Promise<void> => {
 						setShowDialog1(false);
-						setTimeout(() => navigation.goBack(), 100);
+						setIsLoading(false);
+						setTimeout(() => navigation.goBack(), 300);
 					}}
 					onConfirm={(): void => {
 						setShowDialog1(false);
@@ -725,9 +726,10 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog2')}
 					confirmText={t('send_yes')}
-					onCancel={(): void => {
+					onCancel={async (): Promise<void> => {
 						setShowDialog2(false);
-						setTimeout(() => navigation.goBack(), 100);
+						setIsLoading(false);
+						setTimeout(() => navigation.goBack(), 300);
 					}}
 					onConfirm={(): void => {
 						setShowDialog2(false);
@@ -740,9 +742,10 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog3')}
 					confirmText={t('send_yes')}
-					onCancel={(): void => {
+					onCancel={async (): Promise<void> => {
 						setShowDialog3(false);
-						setTimeout(() => navigation.goBack(), 100);
+						setIsLoading(false);
+						setTimeout(() => navigation.goBack(), 300);
 					}}
 					onConfirm={(): void => {
 						setShowDialog3(false);
@@ -754,9 +757,10 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog4')}
 					confirmText={t('send_yes')}
-					onCancel={(): void => {
+					onCancel={async (): Promise<void> => {
 						setShowDialog4(false);
-						setTimeout(() => navigation.goBack(), 100);
+						setIsLoading(false);
+						setTimeout(() => navigation.goBack(), 300);
 					}}
 					onConfirm={(): void => {
 						setShowDialog4(false);
@@ -772,7 +776,8 @@ const ReviewAndSend = ({
 					confirmText={t('continue')}
 					onCancel={(): void => {
 						setShowDialog5(false);
-						setTimeout(() => navigation.goBack(), 100);
+						setIsLoading(false);
+						setTimeout(() => navigation.goBack(), 300);
 					}}
 					onConfirm={async (): Promise<void> => {
 						setShowDialog5(false);
