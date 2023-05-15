@@ -12,7 +12,6 @@ import initWaitForElectrumToSync from '../__tests__/utils/wait-for-electrum';
 
 const __DEV__ = process.env.DEBUG === 'true';
 
->>>>>>> 6fe62744 (test: fix e2e tests)
 describe('Profile and Contacts', () => {
 	let waitForElectrum;
 	const rpc = new BitcoinJsonRpc(bitcoinURL);
