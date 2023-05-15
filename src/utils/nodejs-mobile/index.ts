@@ -1,5 +1,6 @@
 import nodejs from 'nodejs-mobile-react-native';
 import { err, ok, Result } from '@synonymdev/result';
+import { v4 as uuidv4 } from 'uuid';
 
 import { TAvailableNetworks } from '../networks';
 import { ENodeJsMethod, TNodeJsMethodsData } from './types';
@@ -31,11 +32,11 @@ const listeners = {};
  * @returns {void}
  */
 const setupListener = ({
-	id,
+	id = uuidv4(),
 	method,
 	resolve,
 }: {
-	id: string;
+	id?: string;
 	method: ENodeJsMethod;
 	resolve: (data: string) => void;
 }): void => {
