@@ -26,11 +26,8 @@ import {
 	resetOnChainTransaction,
 	setupOnChainTransaction,
 } from '../../store/actions/wallet';
-import {
-	convertCurrency,
-	convertToSats,
-	getFiatDisplayValues,
-} from '../../utils/exchange-rate';
+import { convertCurrency, convertToSats } from '../../utils/conversion';
+import { getFiatDisplayValues } from '../../utils/displayValues';
 import { showErrorNotification } from '../../utils/notifications';
 import { startChannelPurchase } from '../../store/actions/blocktank';
 import { EBalanceUnit, EBitcoinUnit } from '../../store/types/wallet';

@@ -21,7 +21,7 @@ import { activityItemsState } from '../../store/reselect/activity';
 import { EActivityType } from '../../store/types/activity';
 import { blocktankSelector } from '../../store/reselect/blocktank';
 import { showErrorNotification } from '../notifications';
-import { __DISABLE_PERIODIC_REMINDERS__ } from '../../constants/env';
+import { __E2E__ } from '../../constants/env';
 
 const BACKUP_DEBOUNCE = 5000; // 5 seconds
 const BACKUP_CHECK_INTERVAL = 60 * 1000; // 1 minute
@@ -100,6 +100,7 @@ const EnabledSlashtag = (): ReactElement => {
 			if (backup.remoteMetadataBackupSynced) {
 				return;
 			}
+			console.info('perform metadata backup');
 			performRemoteBackup({
 				slashtag,
 				isSyncedKey: 'remoteMetadataBackupSynced',
@@ -172,7 +173,7 @@ const EnabledSlashtag = (): ReactElement => {
 	);
 
 	const shouldShowBackupWarning = useMemo(() => {
-		if (__DISABLE_PERIODIC_REMINDERS__) {
+		if (__E2E__) {
 			return false;
 		}
 
@@ -229,7 +230,7 @@ const EnabledSlashtag = (): ReactElement => {
 	}, [t, shouldShowBackupWarning]);
 
 	useEffect(() => {
-		if (__DISABLE_PERIODIC_REMINDERS__) {
+		if (__E2E__) {
 			return;
 		}
 

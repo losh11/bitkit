@@ -1,8 +1,8 @@
-import { resetKeychainValue, setKeychainValue } from '../helpers';
-import { updateSettings } from '../../store/actions/settings';
+import { resetKeychainValue, setKeychainValue } from '../keychain';
 import { getSettingsStore } from '../../store/helpers';
-import { PIN_ATTEMPTS } from '../../components/PinPad';
 import { removeTodo } from '../../store/actions/todos';
+import { updateSettings } from '../../store/actions/settings';
+import { PIN_ATTEMPTS } from '../../components/PinPad';
 
 /**
  * @async

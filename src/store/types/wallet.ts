@@ -1,5 +1,5 @@
 import { TAvailableNetworks } from '../../utils/networks';
-import { IExchangeRates } from '../../utils/exchange-rate/types';
+import { IExchangeRates } from '../../utils/exchange-rate';
 import { IAddressTypeContent } from '../shapes/wallet';
 import { EFeeId } from './fees';
 import { IHeader } from '../../utils/types/electrum';

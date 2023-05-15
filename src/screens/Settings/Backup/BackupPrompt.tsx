@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
-import { __DISABLE_PERIODIC_REMINDERS__ } from '../../../constants/env';
+import { __E2E__ } from '../../../constants/env';
 import { Text01S } from '../../../styles/text';
 import BottomSheetWrapper from '../../../components/BottomSheetWrapper';
 import SafeAreaInset from '../../../components/SafeAreaInset';
@@ -68,7 +68,7 @@ const BackupPrompt = ({ enabled }: { enabled: boolean }): ReactElement => {
 		const isTimeoutOver = Number(new Date()) - ignoreTimestamp > ASK_INTERVAL;
 		return (
 			enabled &&
-			!__DISABLE_PERIODIC_REMINDERS__ &&
+			!__E2E__ &&
 			!backupVerified &&
 			!empty &&
 			isTimeoutOver &&

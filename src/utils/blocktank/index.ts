@@ -19,9 +19,10 @@ import {
 } from '../../store/helpers';
 import { TGeoBlockResponse } from '../../store/types/blocktank';
 import { setGeoBlock, updateUser } from '../../store/actions/user';
-import { fiatToBitcoinUnit, getFiatDisplayValues } from '../exchange-rate';
 import { getBalance, refreshWallet } from '../wallet';
-import { IDisplayValues } from '../exchange-rate/types';
+import { fiatToBitcoinUnit } from '../conversion';
+import { getFiatDisplayValues } from '../displayValues';
+import { IDisplayValues } from '../displayValues/types';
 import { EBitcoinUnit } from '../../store/types/wallet';
 
 // https://github.com/synonymdev/blocktank-server/blob/master/src/Orders/Order.js#L27

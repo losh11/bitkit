@@ -168,6 +168,7 @@ describe('Settings', () => {
 			await element(by.id('ReceiveTagsSubmit')).tap();
 			await expect(element(by.text(tag))).toBeVisible();
 			await element(by.id('ReceiveScreen')).swipe('down');
+			await sleep(1000);
 
 			// open tag manager, delete tag
 			await element(by.id('Settings')).tap();
@@ -453,7 +454,9 @@ describe('Settings', () => {
 			await element(by.id('RefreshLDK')).tap();
 			await element(by.id('RestartLDK')).tap();
 			await element(by.id('RebroadcastLDKTXS')).tap();
-			await sleep(1000);
+			await waitFor(element(by.id('NavigationBack')))
+				.toBeVisible()
+				.withTimeout(5000);
 			await element(by.id('NavigationBack')).tap();
 
 			await element(by.id('LightningNodeInfo')).tap();

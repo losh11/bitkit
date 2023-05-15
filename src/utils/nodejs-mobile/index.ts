@@ -1,6 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
 import nodejs from 'nodejs-mobile-react-native';
 import { err, ok, Result } from '@synonymdev/result';
+import { v4 as uuidv4 } from 'uuid';
 
 import { TAvailableNetworks } from '../networks';
 import { ENodeJsMethod, TNodeJsMethodsData } from './types';
@@ -29,17 +29,17 @@ const listeners = {};
  * @param {string} [id]
  * @param {ENodeJsMethod} method
  * @param {(data: any) => void} resolve
- * @returns {Promise<void>}
+ * @returns {void}
  */
-async function setupListener({
+const setupListener = ({
 	id = uuidv4(),
 	method,
 	resolve,
 }: {
 	id?: string;
 	method: ENodeJsMethod;
-	resolve: (data: any) => void;
-}): Promise<void> {
+	resolve: (data: string) => void;
+}): void => {
 	try {
 		methods[method][id] = (msg): void => {
 			const parsedMessage = JSON.parse(msg);
@@ -56,14 +56,14 @@ async function setupListener({
 		console.log(e);
 		return resolve(JSON.stringify({ id, error: true, value: e }));
 	}
-}
+};
 
 /**
  * Used to invoke the methods provided in ENodeJsMethod
  * @param {TNodeJsMethodsData} data
  * @returns {Promise<{id: string; method: ENodeJsMethod; error: boolean; value: string }>}
  */
-export const invokeNodeJsMethod = <T = string>(
+export const invokeNodeJsMethod = async <T = string>(
 	data: TNodeJsMethodsData,
 ): Promise<{
 	id: string;
@@ -71,18 +71,18 @@ export const invokeNodeJsMethod = <T = string>(
 	error: boolean;
 	value: T;
 }> => {
-	return new Promise(async (resolve) => {
-		if (data.method !== 'setup' && !isSetup) {
-			await setupNodejsMobile();
-		}
-		const parseAndResolve = (res: string): void => {
-			const parsedData = JSON.parse(res);
-			resolve(parsedData);
-		};
-		const id: string = data?.id ?? uuidv4();
-		const { method } = data;
+	const { id, method } = data;
+	if (method !== 'setup' && !isSetup) {
+		await setupNodejsMobile();
+	}
+
+	return new Promise((resolve) => {
 		try {
-			await setupListener({ id, method, resolve: parseAndResolve });
+			const parseAndResolve = (res: string): void => {
+				const parsedData = JSON.parse(res);
+				resolve(parsedData);
+			};
+			setupListener({ id, method, resolve: parseAndResolve });
 			nodejs.channel.send(JSON.stringify(data));
 		} catch (e) {
 			console.log(e);

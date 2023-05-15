@@ -44,7 +44,7 @@ import { useCurrency } from '../../../hooks/displayValues';
 import { updateSettings } from '../../../store/actions/settings';
 import { updateBitcoinTransaction } from '../../../store/actions/wallet';
 import { getNumberPadText } from '../../../utils/numberpad';
-import { convertToSats } from '../../../utils/exchange-rate';
+import { convertToSats } from '../../../utils/conversion';
 import { TRANSACTION_DEFAULTS } from '../../../utils/wallet/constants';
 import type { SendScreenProps } from '../../../navigation/types';
 

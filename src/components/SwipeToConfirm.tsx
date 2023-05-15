@@ -27,7 +27,7 @@ const PADDING = 8;
 interface ISwipeToConfirm {
 	text?: string;
 	color?: keyof IThemeColors;
-	onConfirm?: Function;
+	onConfirm?: () => void;
 	icon?: ReactElement;
 	loading?: boolean;
 	confirmed: boolean;

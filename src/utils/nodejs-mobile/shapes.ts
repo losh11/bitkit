@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import {
 	ENodeJsMethod,
 	INodeJsGenerateMnemonic,
@@ -6,7 +7,6 @@ import {
 	INodeJsGetScriptHash,
 	INodeJsSetup,
 } from './types';
-import { v4 as uuidv4 } from 'uuid';
 
 export const DefaultNodeJsMethodsShape = {
 	setup: (): INodeJsSetup => {

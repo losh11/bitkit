@@ -88,7 +88,11 @@ const Day = ({
 	);
 };
 
-const Calendar = ({ onChange }: { onChange: Function }): ReactElement => {
+const Calendar = ({
+	onChange,
+}: {
+	onChange: (timeRange: number[]) => void;
+}): ReactElement => {
 	const { t } = useTranslation('wallet');
 	const timeZone = useAppSelector(timeZoneSelector);
 	const language = useAppSelector(languageSelector);
@@ -280,7 +284,7 @@ const Calendar = ({ onChange }: { onChange: Function }): ReactElement => {
 const TimeRangePrompt = ({
 	onChange,
 }: {
-	onChange: Function;
+	onChange: (timeRange: number[]) => void;
 }): ReactElement => {
 	const { t } = useTranslation('wallet');
 	const snapPoints = useSnapPoints('calendar');

@@ -41,7 +41,8 @@ import {
 	IGenerateAddressesResponse,
 	IGetAddressResponse,
 } from '../types';
-import { getKeychainValue, btcToSats, setKeychainValue } from '../helpers';
+import { btcToSats } from '../conversion';
+import { getKeychainValue, setKeychainValue } from '../keychain';
 import {
 	getLightningStore,
 	getSettingsStore,
@@ -73,8 +74,7 @@ import {
 	subscribeToAddresses,
 	TTxResult,
 } from './electrum';
-import { getDisplayValues } from '../exchange-rate';
-import { IDisplayValues } from '../exchange-rate/types';
+import { getDisplayValues } from '../displayValues';
 import { IncludeBalances } from '../../hooks/wallet';
 import { invokeNodeJsMethod } from '../nodejs-mobile';
 import { DefaultNodeJsMethodsShape } from '../nodejs-mobile/shapes';
@@ -88,6 +88,7 @@ import { moveMetaIncTxTags } from '../../store/actions/metadata';
 import { refreshOrdersList } from '../../store/actions/blocktank';
 import { IDefaultLightningShape } from '../../store/types/lightning';
 import { objectKeys } from '../objectKeys';
+import { IDisplayValues } from '../displayValues/types';
 
 export const refreshWallet = async ({
 	onchain = true,
@@ -108,9 +109,9 @@ export const refreshWallet = async ({
 } = {}): Promise<Result<string>> => {
 	try {
 		// wait for interactions/animations to be completed
-		await new Promise((resolve) =>
-			InteractionManager.runAfterInteractions(() => resolve(null)),
-		);
+		await new Promise((resolve) => {
+			InteractionManager.runAfterInteractions(() => resolve(null));
+		});
 		const isConnectedToElectrum = getUiStore().isConnectedToElectrum;
 		if (!selectedWallet) {
 			selectedWallet = getSelectedWallet();

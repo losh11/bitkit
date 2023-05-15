@@ -77,7 +77,6 @@ const Button = ({
 	const Text = size === 'small' ? Caption13M : Text02M;
 
 	return (
-		// @ts-ignore react-native and styled-components types clashing
 		<TouchableOpacity
 			activeOpacity={0.6}
 			color={buttonColor}

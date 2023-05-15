@@ -34,7 +34,7 @@ import {
 	showErrorNotification,
 	showSuccessNotification,
 } from '../../utils/notifications';
-import { getDisplayValues } from '../../utils/exchange-rate';
+import { getDisplayValues } from '../../utils/displayValues';
 import i18n from '../../utils/i18n';
 import { setupLdk } from '../../utils/lightning';
 import { TWalletName } from '../types/wallet';

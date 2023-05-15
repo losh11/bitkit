@@ -54,7 +54,7 @@ import {
 	decodeLightningInvoice,
 	payLightningInvoice,
 } from '../../../utils/lightning';
-import { getFiatDisplayValues } from '../../../utils/exchange-rate';
+import { getFiatDisplayValues } from '../../../utils/displayValues';
 import { showErrorNotification } from '../../../utils/notifications';
 import { refreshWallet } from '../../../utils/wallet';
 import type { SendScreenProps } from '../../../navigation/types';

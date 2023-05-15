@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { AnimatedView } from '../../../styles/components';
 import { Text02S } from '../../../styles/text';
 import useColors from '../../../hooks/colors';
-import { getKeychainValue, vibrate } from '../../../utils/helpers';
+import { vibrate } from '../../../utils/helpers';
+import { getKeychainValue } from '../../../utils/keychain';
 import { showBottomSheet } from '../../../store/actions/ui';
 import NumberPad from '../../../components/NumberPad';
 

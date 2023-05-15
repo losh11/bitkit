@@ -1,5 +1,5 @@
 import React, { memo, useEffect } from 'react';
-import { __DISABLE_ANIMATION__ } from '../constants/env';
+import { __E2E__ } from '../constants/env';
 import Animated, {
 	cancelAnimation,
 	Easing,
@@ -36,7 +36,7 @@ const LoadingSpinner = memo(({ size = 45 }: { size?: number }) => {
 		};
 	}, [spinValue.value]);
 
-	if (__DISABLE_ANIMATION__) {
+	if (__E2E__) {
 		return (
 			<Animated.Image style={{ height: size, width: size }} source={imageSrc} />
 		);

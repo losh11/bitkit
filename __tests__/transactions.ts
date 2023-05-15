@@ -1,3 +1,5 @@
+// Fix 'getDispatch is not a function'
+import '../src/store/actions/ui';
 import {
 	createWallet,
 	setupOnChainTransaction,

@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { getDisplayValues, getExchangeRate } from '../utils/exchange-rate';
-import { IDisplayValues } from '../utils/exchange-rate/types';
+import { getExchangeRate } from '../utils/exchange-rate';
+import { getDisplayValues } from '../utils/displayValues';
+import { IDisplayValues } from '../utils/displayValues/types';
 import { EBitcoinUnit } from '../store/types/wallet';
+import { exchangeRatesSelector } from '../store/reselect/wallet';
 import {
 	bitcoinUnitSelector,
 	selectedCurrencySelector,
 } from '../store/reselect/settings';
-import { exchangeRatesSelector } from '../store/reselect/wallet';
 
 export default function useDisplayValues(
 	satoshis: number,

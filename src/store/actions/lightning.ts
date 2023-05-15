@@ -142,22 +142,20 @@ export const updateLightningChannels = async ({
  * @param {string} lnurl
  * @returns {Promise<Result<string>>}
  */
-export const claimChannelFromLnurlString = (
+export const claimChannelFromLnurlString = async (
 	lnurl: string,
 ): Promise<Result<string>> => {
-	return new Promise(async (resolve) => {
-		const res = await getLNURLParams(lnurl);
-		if (res.isErr()) {
-			return resolve(err(res.error));
-		}
+	const res = await getLNURLParams(lnurl);
+	if (res.isErr()) {
+		return err(res.error);
+	}
 
-		const params = res.value as LNURLChannelParams;
-		if (params.tag !== 'channelRequest') {
-			return resolve(err('Not a channel request lnurl'));
-		}
+	const params = res.value as LNURLChannelParams;
+	if (params.tag !== 'channelRequest') {
+		return err('Not a channel request lnurl');
+	}
 
-		resolve(claimChannel(params));
-	});
+	return claimChannel(params);
 };
 
 /**
@@ -165,24 +163,22 @@ export const claimChannelFromLnurlString = (
  * @param {LNURLChannelParams} params
  * @returns {Promise<Result<string>>}
  */
-export const claimChannel = (
+export const claimChannel = async (
 	params: LNURLChannelParams,
 ): Promise<Result<string>> => {
-	return new Promise(async (resolve) => {
-		// TODO: Connect to peer from URI.
-		const lnurlRes = await lnurlChannel({
-			params,
-			isPrivate: true,
-			cancel: false,
-			localNodeId: '',
-		});
-
-		if (lnurlRes.isErr()) {
-			return resolve(err(lnurlRes.error));
-		}
-
-		resolve(ok(lnurlRes.value));
+	// TODO: Connect to peer from URI.
+	const lnurlRes = await lnurlChannel({
+		params,
+		isPrivate: true,
+		cancel: false,
+		localNodeId: '',
 	});
+
+	if (lnurlRes.isErr()) {
+		return err(lnurlRes.error);
+	}
+
+	return ok(lnurlRes.value);
 };
 
 /**

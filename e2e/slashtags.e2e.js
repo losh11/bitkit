@@ -10,6 +10,8 @@ import {
 } from './helpers';
 import initWaitForElectrumToSync from '../__tests__/utils/wait-for-electrum';
 
+const __DEV__ = process.env.DEBUG === 'true';
+
 describe('Profile and Contacts', () => {
 	let waitForElectrum;
 	const rpc = new BitcoinJsonRpc(bitcoinURL);
@@ -123,6 +125,10 @@ describe('Profile and Contacts', () => {
 			await element(by.id('NavigationBack')).atIndex(2).tap();
 
 			// Corey
+			// TODO: fix bottom sheet not closing
+			if (__DEV__) {
+				await element(by.id('AddContact')).tap();
+			}
 			await element(by.id('ContactURLInput')).replaceText(
 				'slash:rhbmdu3wn7916nok3n8ui4d3wiua3rtisihqpzpeakuci55fa8yy',
 			);
@@ -160,6 +166,7 @@ describe('Profile and Contacts', () => {
 			// RECEIVE MONEY AND ATTACH CONTACT TO THE TRANSACTION
 			await element(by.id('Receive')).tap();
 			await element(by.id('UnderstoodButton')).tap();
+			await sleep(1000);
 			let { label: wAddress } = await element(by.id('QRCode')).getAttributes();
 			wAddress = wAddress.replace('bitcoin:', '');
 			await rpc.sendToAddress(wAddress, '1');
@@ -180,6 +187,8 @@ describe('Profile and Contacts', () => {
 				element(by.text('John Carvalho').withAncestor(by.id('ContactSmall'))),
 			).toBeVisible();
 			await element(by.id('NavigationClose')).tap();
+			// give it time to perform the metadata backup
+			await sleep(5000);
 
 			// GET SEED
 			await element(by.id('Settings')).tap();

@@ -8,7 +8,7 @@ import NumberPadButtons from '../Wallets/NumberPadButtons';
 import { EBalanceUnit } from '../../store/types/wallet';
 import { balanceUnitSelector } from '../../store/reselect/settings';
 import { handleNumberPadPress } from '../../utils/numberpad';
-import { convertToSats } from '../../utils/exchange-rate';
+import { convertToSats } from '../../utils/conversion';
 import { vibrate } from '../../utils/helpers';
 
 const NumberPadLightning = ({

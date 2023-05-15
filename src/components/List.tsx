@@ -7,7 +7,6 @@ import {
 	ViewStyle,
 	TouchableOpacity,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { SvgProps } from 'react-native-svg';
 import isEqual from 'lodash.isequal';
 
@@ -61,7 +60,7 @@ export type SwitchItem = {
 	iconColor?: string;
 	enabled?: boolean;
 	hide?: boolean;
-	onPress?: Function;
+	onPress?: () => void;
 	testID?: string;
 };
 
@@ -75,7 +74,7 @@ export type ButtonItem = {
 	disabled?: boolean;
 	enabled?: boolean;
 	hide?: boolean;
-	onPress?: Function;
+	onPress?: () => void;
 	testID?: string;
 };
 
@@ -88,7 +87,7 @@ export type TextButtonItem = {
 	iconColor?: string;
 	enabled?: boolean;
 	hide?: boolean;
-	onPress?: Function;
+	onPress?: () => void;
 	testID?: string;
 };
 
@@ -102,7 +101,6 @@ export type DraggableItem = {
 };
 
 const _Item = memo((item: ItemData): ReactElement => {
-	const navigation = useNavigation();
 	const type = item.type;
 	const hide = item.hide ?? false;
 
@@ -159,7 +157,7 @@ const _Item = memo((item: ItemData): ReactElement => {
 			testID,
 		} = item as TextButtonItem;
 
-		const _onPress = (): void => onPress?.(navigation);
+		const _onPress = (): void => onPress?.();
 
 		return (
 			<TouchableOpacity
@@ -219,7 +217,7 @@ const _Item = memo((item: ItemData): ReactElement => {
 		} = item as ButtonItem;
 
 		const useCheckmark = typeof value === 'boolean';
-		const _onPress = (): void => onPress?.(navigation);
+		const _onPress = (): void => onPress?.();
 
 		return (
 			<TouchableOpacity

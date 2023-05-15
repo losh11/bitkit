@@ -79,7 +79,8 @@ import {
 } from '../../store/actions/metadata';
 import { getTransactions } from '../../utils/wallet/electrum';
 import { ITransaction, ITxHash } from '../../utils/wallet';
-import { btcToSats, openURL } from '../../utils/helpers';
+import { openURL } from '../../utils/helpers';
+import { btcToSats } from '../../utils/conversion';
 import { getBoostedTransactionParents } from '../../utils/boost';
 import {
 	showErrorNotification,

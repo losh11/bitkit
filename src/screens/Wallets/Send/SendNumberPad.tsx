@@ -6,7 +6,7 @@ import NumberPad from '../../../components/NumberPad';
 import { vibrate } from '../../../utils/helpers';
 import { EBalanceUnit } from '../../../store/types/wallet';
 import { handleNumberPadPress } from '../../../utils/numberpad';
-import { convertToSats } from '../../../utils/exchange-rate';
+import { convertToSats } from '../../../utils/conversion';
 import { balanceUnitSelector } from '../../../store/reselect/settings';
 
 const SendNumberPad = ({
