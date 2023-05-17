@@ -101,8 +101,10 @@ const OnchainListItem = ({
 				<TimerIconAlt height={13} color="yellow" />
 			</ThemedView>
 		);
-	} else {
+	} else if (feeRateDescription) {
 		description = t('activity_confirms_in', { feeRateDescription });
+	} else {
+		description = t('activity_low_fee');
 	}
 
 	if (isTransfer) {

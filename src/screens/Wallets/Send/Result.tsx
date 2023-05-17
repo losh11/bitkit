@@ -198,12 +198,13 @@ const Result = ({
 			<GlowImage image={imageSrc} imageSize={200} glowColor={glowColor} />
 
 			<View style={styles.buttonContainer}>
-				{success && activityItem && (
+				{success && (
 					<>
 						<Button
 							style={styles.button}
 							variant="primary"
 							size="large"
+							disabled={!activityItem}
 							text={t('send_details')}
 							onPress={navigateToTxDetails}
 						/>

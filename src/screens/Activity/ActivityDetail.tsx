@@ -48,6 +48,10 @@ import Button from '../../components/Button';
 import Money from '../../components/Money';
 import ContactSmall from '../../components/ContactSmall';
 import NavigationHeader from '../../components/NavigationHeader';
+import SafeAreaInset from '../../components/SafeAreaInset';
+import Tag from '../../components/Tag';
+import { useSlashtags } from '../../components/SlashtagsProvider';
+import ActivityTagsPrompt from './ActivityTagsPrompt';
 import {
 	EActivityType,
 	TLightningActivityItem,
@@ -57,13 +61,12 @@ import {
 	canBoost,
 	getBlockExplorerLink,
 } from '../../utils/wallet/transactions';
-import SafeAreaInset from '../../components/SafeAreaInset';
-import Tag from '../../components/Tag';
 import useColors from '../../hooks/colors';
 import { useAppSelector } from '../../hooks/redux';
 import useDisplayValues from '../../hooks/displayValues';
 import Store from '../../store/types';
 import { showBottomSheet } from '../../store/actions/ui';
+import { IContactRecord } from '../../store/types/slashtags';
 import {
 	EPaymentType,
 	EBoostType,
@@ -86,7 +89,6 @@ import {
 	showErrorNotification,
 	showInfoNotification,
 } from '../../utils/notifications';
-import ActivityTagsPrompt from './ActivityTagsPrompt';
 import {
 	boostedTransactionsSelector,
 	selectedNetworkSelector,
@@ -166,6 +168,7 @@ const OnchainActivityDetail = ({
 	} = item;
 
 	const { t } = useTranslation('wallet');
+	const contacts = useSlashtags().contacts as { [url: string]: IContactRecord };
 	const tags = useAppSelector((state) => tagSelector(state, id));
 	const selectedNetwork = useSelector(selectedNetworkSelector);
 	const activityItems = useSelector(activityItemsSelector);
@@ -253,7 +256,12 @@ const OnchainActivityDetail = ({
 	};
 
 	const navigateToContact = (url: string): void => {
-		navigation.navigate('Contact', { url });
+		const hasContact = Object.keys(contacts).includes(url);
+		if (hasContact) {
+			navigation.navigate('Contact', { url });
+		} else {
+			navigation.navigate('ContactEdit', { url });
+		}
 	};
 
 	const blockExplorerUrl = getBlockExplorerLink(id);

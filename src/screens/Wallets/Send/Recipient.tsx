@@ -123,6 +123,7 @@ const Recipient = ({
 		await processInputData({
 			data: textFieldValue,
 			source: 'sendScanner',
+			showErrors: false,
 			sdk,
 			selectedNetwork,
 			selectedWallet,

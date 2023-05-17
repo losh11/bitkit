@@ -84,6 +84,7 @@
 	"activity_transfer_spending_done": "Moved to Spending Balance",
 	"activity_confirms_in": "Confirms in {{feeRateDescription}}",
 	"activity_confirms_in_boosted": "Boosting. Confirms in {{feeRateDescription}}",
+	"activity_low_fee": "Fee potentially too low",
 	"activity_bitcoin_sent": "Sent Bitcoin",
 	"activity_bitcoin_received": "Received Bitcoin",
 	"activity_tether_sent": "Sent Tether",
