@@ -40,7 +40,7 @@ const Dialog = ({
 		cancelText = t('dialog_cancel');
 	}
 	if (confirmText === undefined) {
-		confirmText = t('dialog_confirm');
+		confirmText = t('ok');
 	}
 
 	return (
@@ -89,6 +89,7 @@ const Dialog = ({
 
 const styles = StyleSheet.create({
 	centeredView: {
+		backgroundColor: 'rgba(0, 0, 0, 0.6)',
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -125,7 +126,6 @@ const styles = StyleSheet.create({
 		fontSize: 17,
 		lineHeight: 22,
 		letterSpacing: -0.41,
-		textTransform: 'capitalize',
 		color: colors.white,
 		marginBottom: 5,
 		...Platform.select({
@@ -186,7 +186,6 @@ const styles = StyleSheet.create({
 		lineHeight: 22,
 		textAlign: 'center',
 		letterSpacing: -0.41,
-		textTransform: 'capitalize',
 		color: colors.brand,
 	},
 });

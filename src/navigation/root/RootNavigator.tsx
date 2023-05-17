@@ -4,10 +4,13 @@ import React, {
 	memo,
 	useEffect,
 	useRef,
+	useState,
 } from 'react';
 import { AppState, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
 import { createNavigationContainerRef } from '@react-navigation/native';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { useTranslation } from 'react-i18next';
 import {
 	createStackNavigator,
 	StackNavigationOptions,
@@ -16,10 +19,11 @@ import {
 
 import { NavigationContainer } from '../../styles/components';
 import { processInputData } from '../../utils/scanner';
-import { readClipboardData } from '../../utils/send';
+import { checkClipboardData } from '../../utils/clipboard';
 import Store from '../../store/types';
 import { enableAutoReadClipboardSelector } from '../../store/reselect/settings';
 import AuthCheck from '../../components/AuthCheck';
+import Dialog from '../../components/Dialog';
 import WalletNavigator from '../wallet/WalletNavigator';
 import ActivityDetail from '../../screens/Activity/ActivityDetail';
 import ActivityAssignContact from '../../screens/Activity/ActivityAssignContact';
@@ -50,8 +54,8 @@ import BackupNavigation from '../bottom-sheet/BackupNavigation';
 import PINNavigation from '../bottom-sheet/PINNavigation';
 import ForceTransfer from '../bottom-sheet/ForceTransfer';
 import CloseChannelSuccess from '../bottom-sheet/CloseChannelSuccess';
-import type { RootStackParamList, RootStackScreenProps } from '../types';
 import { __E2E__ } from '../../constants/env';
+import type { RootStackParamList, RootStackScreenProps } from '../types';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -87,7 +91,9 @@ export const rootNavigation = {
 export type TInitialRoutes = 'Wallet' | 'RootAuthCheck';
 
 const RootNavigator = (): ReactElement => {
+	const { t } = useTranslation('other');
 	const appState = useRef(AppState.currentState);
+	const [showDialog, setShowDialog] = useState(false);
 	const pin = useSelector((state: Store) => state.settings.pin);
 	const pinOnLaunch = useSelector((state: Store) => state.settings.pinOnLaunch);
 	const enableAutoReadClipboard = useSelector(enableAutoReadClipboardSelector);
@@ -120,9 +126,16 @@ const RootNavigator = (): ReactElement => {
 		},
 	};
 
+	const checkClipboard = async (): Promise<void> => {
+		const result = await checkClipboardData();
+		if (result.isOk()) {
+			setShowDialog(true);
+		}
+	};
+
 	useEffect(() => {
-		if (enableAutoReadClipboard && !showAuth) {
-			readClipboardData().then();
+		if (!showAuth) {
+			checkClipboard().then();
 		}
 
 		// on App to foreground
@@ -132,8 +145,8 @@ const RootNavigator = (): ReactElement => {
 				if (appState.current.match(/background/) && nextAppState === 'active') {
 					const currentRoute = navigationRef.getCurrentRoute()?.name;
 					// prevent redirecting while on AuthCheck
-					if (enableAutoReadClipboard && currentRoute !== 'RootAuthCheck') {
-						readClipboardData().then();
+					if (currentRoute !== 'RootAuthCheck') {
+						checkClipboard().then();
 					}
 				}
 
@@ -144,7 +157,7 @@ const RootNavigator = (): ReactElement => {
 		return () => {
 			appStateSubscription.remove();
 		};
-	}, [enableAutoReadClipboard, showAuth]);
+	}, [showAuth]);
 
 	const AuthCheckComponent = useCallback(
 		({
@@ -159,7 +172,7 @@ const RootNavigator = (): ReactElement => {
 
 					// check clipboard for payment data
 					if (enableAutoReadClipboard) {
-						readClipboardData().then();
+						checkClipboard().then();
 					}
 				}
 			};
@@ -229,6 +242,18 @@ const RootNavigator = (): ReactElement => {
 			<ForceTransfer />
 			<CloseChannelSuccess />
 			<BackupSubscriber />
+
+			<Dialog
+				visible={showDialog}
+				title={t('clipboard_redirect_title')}
+				description={t('clipboard_redirect_msg')}
+				onCancel={(): void => setShowDialog(false)}
+				onConfirm={async (): Promise<void> => {
+					setShowDialog(false);
+					const clipboardData = await Clipboard.getString();
+					await processInputData({ data: clipboardData, showErrors: false });
+				}}
+			/>
 		</NavigationContainer>
 	);
 };
