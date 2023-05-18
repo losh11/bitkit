@@ -1,5 +1,9 @@
 import { Platform } from 'react-native';
-import { getBuildNumber, getVersion } from 'react-native-device-info';
+import {
+	getBuildNumber,
+	getSystemVersion,
+	getVersion,
+} from 'react-native-device-info';
 import { getNodeId, getNodeVersion } from './lightning';
 import { getStore } from '../store/helpers';
 
@@ -22,7 +26,7 @@ export const createSupportLink = async (
 		body += `${message}\n`;
 	}
 
-	body += `\nPlatform: ${Platform.OS}`;
+	body += `\nPlatform: ${Platform.OS} ${getSystemVersion()}`;
 	body += `\nVersion: ${getVersion()} (${getBuildNumber()})`;
 
 	const ldkVersion = await getNodeVersion();

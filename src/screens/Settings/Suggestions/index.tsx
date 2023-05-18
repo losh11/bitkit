@@ -52,6 +52,7 @@ const SuggestionsSettings = (): ReactElement => {
 				visible={showDialog}
 				title={t('general.reset_title')}
 				description={t('general.reset_desc')}
+				confirmText={t('general.reset_confirm')}
 				onCancel={(): void => {
 					setShowDialog(false);
 				}}
