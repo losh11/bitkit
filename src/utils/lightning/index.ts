@@ -1258,13 +1258,13 @@ export const recoverOutputs = async (): Promise<Result<string>> => {
  * @param {TAvailableNetworks} [selectedNetwork]
  * @returns {Promise<number>}
  */
-export const getLightningReserveBalance = async ({
+export const getLightningReserveBalance = ({
 	selectedWallet,
 	selectedNetwork,
 }: {
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
-}): Promise<number> => {
+}): number => {
 	if (!selectedWallet) {
 		selectedWallet = getSelectedWallet();
 	}
@@ -1274,9 +1274,10 @@ export const getLightningReserveBalance = async ({
 	const node = getLightningStore().nodes[selectedWallet];
 	const openChannelIds = node.openChannelIds[selectedNetwork];
 	const channels = node.channels[selectedNetwork];
-	const openChannels = Object.values(channels).filter((channel) =>
-		openChannelIds.includes(channel.channel_id),
-	);
+	const openChannels = Object.values(channels).filter((channel) => {
+		return openChannelIds.includes(channel.channel_id);
+	});
+
 	const reserveBalances = reduceValue({
 		arr: openChannels,
 		value: 'unspendable_punishment_reserve',
@@ -1309,11 +1310,9 @@ export const getClaimableBalance = async ({
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
 	}
-	const lightningBalance = getBalance({
-		lightning: true,
+	const { spendingBalance, reserveBalance } = getBalance({
 		selectedWallet,
 		selectedNetwork,
-		subtractReserveBalance: false,
 	});
 	const claimableBalanceRes = await ldk.claimableBalances(ignoreOpenChannels);
 	if (claimableBalanceRes.isErr()) {
@@ -1326,7 +1325,7 @@ export const getClaimableBalance = async ({
 	if (claimableBalance.isErr()) {
 		return 0;
 	}
-	return Math.abs(lightningBalance.satoshis - claimableBalance.value);
+	return Math.abs(spendingBalance + reserveBalance - claimableBalance.value);
 };
 
 /**
@@ -1411,9 +1410,9 @@ export const removeUnusedPeers = async ({
  * @param {TWalletName} [selectedWallet]
  * @param {TAvailableNetworks} [selectedNetwork]
  * @param {boolean} [includeReserveBalance] Whether or not to include each channel's reserve balance (~1% per channel participant) in the returned balance.
- * @returns {Promise<{ localBalance: number; remoteBalance: number; }>}
+ * @returns {{ localBalance: number; remoteBalance: number; }}
  */
-export const getLightningBalance = async ({
+export const getLightningBalance = ({
 	selectedWallet,
 	selectedNetwork,
 	includeReserveBalance = true,
@@ -1421,24 +1420,23 @@ export const getLightningBalance = async ({
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
 	includeReserveBalance?: boolean;
-}): Promise<{
+}): {
 	localBalance: number;
 	remoteBalance: number;
-}> => {
+} => {
 	if (!selectedWallet) {
 		selectedWallet = getSelectedWallet();
 	}
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
 	}
-	const lightning = await getLightningStore();
 
-	const openChannelIds =
-		lightning.nodes[selectedWallet].openChannelIds[selectedNetwork];
-	const channels = lightning.nodes[selectedWallet].channels[selectedNetwork];
+	const node = getLightningStore().nodes[selectedWallet];
+	const openChannelIds = node.openChannelIds[selectedNetwork];
+	const channels = node.channels[selectedNetwork];
 	const openChannels = openChannelIds.filter((channelId) => {
 		const channel = channels[channelId];
-		return channel?.is_channel_ready;
+		return channel.is_channel_ready;
 	});
 
 	const localBalance = Object.values(channels).reduce((acc, cur) => {
@@ -1449,7 +1447,7 @@ export const getLightningBalance = async ({
 				return (
 					acc +
 					cur.outbound_capacity_sat +
-					(cur?.unspendable_punishment_reserve ?? 0)
+					(cur.unspendable_punishment_reserve ?? 0)
 				);
 			}
 		}
@@ -1464,7 +1462,7 @@ export const getLightningBalance = async ({
 				return (
 					acc +
 					cur.inbound_capacity_sat +
-					(cur?.unspendable_punishment_reserve ?? 0)
+					(cur.unspendable_punishment_reserve ?? 0)
 				);
 			}
 		}
