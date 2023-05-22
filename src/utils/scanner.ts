@@ -714,6 +714,7 @@ export const handleData = async ({
 				transaction: {
 					label: message,
 					outputs: [{ address, value: amount, index: 0 }],
+					lightningInvoice: undefined,
 					slashTagsUrl,
 				},
 			});
