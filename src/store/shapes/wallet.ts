@@ -50,7 +50,7 @@ export const getNetworkContent = <T>(data: T): Readonly<IWalletItem<T>> => {
 		content[network] = data;
 	});
 
-	return content;
+	return cloneDeep(content);
 };
 
 export const getAddressTypeContent = <T>(
