@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
 	input: {
 		fontSize: 17,
 		fontWeight: '400',
+		letterSpacing: 0.4,
 		flex: 1,
 		backgroundColor: 'transparent',
 		paddingLeft: 0,

@@ -13,6 +13,8 @@ import {
 /**
  * Converts a formatted transaction to an activity item
  * @param {IFormattedTransaction} transaction
+ * @param {TPaidBlocktankOrders} blocktankTransactions
+ * @param {IGetOrderResponse[]} blocktankOrders
  * @returns {TOnchainActivityItem} activityItem
  */
 export const onChainTransactionToActivityItem = ({
@@ -91,11 +93,20 @@ export const mergeActivityItems = (
 	return sortedItems;
 };
 
+export type TActivityFilter = {
+	search?: string;
+	types?: EActivityType[];
+	tags?: string[];
+	txType?: EPaymentType;
+	transfer?: boolean;
+	timerange?: number[];
+};
+
 /**
  * Filters activity items based on search string, type list or tags
- * @param items
- * @param metaTags
- * @param filter
+ * @param {IActivityItem[]} items
+ * @param {{ [txid: string]: string[] }} metaTags
+ * @param {TActivityFilter} filter
  */
 export const filterActivityItems = (
 	items: IActivityItem[],
@@ -103,18 +114,14 @@ export const filterActivityItems = (
 	{
 		search = '',
 		types = [],
+		transfer,
 		tags = [],
 		txType,
 		timerange = [],
-	}: {
-		search?: string;
-		types?: EActivityType[];
-		tags?: string[];
-		txType?: EPaymentType;
-		timerange?: number[];
-	},
+	}: TActivityFilter,
 ): IActivityItem[] => {
 	const lowerSearch = search.toLowerCase();
+
 	return items.filter((item) => {
 		const isOnchain = item.activityType === EActivityType.onchain;
 		const isLightning = item.activityType === EActivityType.lightning;
@@ -136,6 +143,15 @@ export const filterActivityItems = (
 
 		// type doesn't match
 		if (types.length > 0 && !types.includes(item.activityType)) {
+			return false;
+		}
+
+		// isTransfer doesn't match
+		if (
+			transfer &&
+			item.activityType === EActivityType.onchain &&
+			transfer !== item.isTransfer
+		) {
 			return false;
 		}
 

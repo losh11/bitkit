@@ -177,8 +177,8 @@ describe('Onchain', () => {
 			).toHaveText('+');
 			await expect(element(by.id('Activity-3'))).not.toExist();
 
-			// Instant, 0 transactions
-			await element(by.id('Tab-instant')).tap();
+			// Other, 0 transactions
+			await element(by.id('Tab-other')).tap();
 			await expect(element(by.id('Activity-1'))).not.toExist();
 			await element(by.id('Tab-all')).tap();
 

@@ -120,7 +120,7 @@
 		"all": "Все",
 		"sent": "Исходящие",
 		"received": "Входящие",
-		"instant": "Мгновенные"
+		"other": "другой"
 	},
 	"details_savings_title": "Баланс Сбережений",
 	"details_savings_subtitle": "On-chain BTC",
