@@ -11,7 +11,7 @@ const dispatch = getDispatch();
 
 /**
  * Adds the provided activity item to the activity list.
- * @param {IActivityItem<TActivityItems>} activityItem
+ * @param {IActivityItem} activityItem
  * @returns {Result<string>}
  */
 export const addActivityItem = (
@@ -25,7 +25,7 @@ export const addActivityItem = (
 };
 
 export const addActivityItems = (
-	activityItems: Array<IActivityItem>,
+	activityItems: IActivityItem[],
 ): Result<string> => {
 	dispatch({
 		type: actions.ADD_ACTIVITY_ITEMS,
@@ -36,7 +36,7 @@ export const addActivityItems = (
 
 /**
  * @param {string} id
- * @param {IActivityItem} newActivityItem
+ * @param {Partial<IActivityItem>} data
  */
 export const updateActivityItem = (
 	id: string,
@@ -50,7 +50,7 @@ export const updateActivityItem = (
 
 /**
  * Updates activity list with all wallet stores
- * @returns {Promise<Result<string>>}
+ * @returns {Result<string>}
  */
 export const updateActivityList = (): Result<string> => {
 	updateOnChainActivityList();
@@ -59,7 +59,7 @@ export const updateActivityList = (): Result<string> => {
 
 /**
  * Converts on-chain transactions to activity items and saves them to store
- * @returns {Promise<Result<string>>}
+ * @returns {Result<string>}
  */
 export const updateOnChainActivityList = (): Result<string> => {
 	const { currentWallet, selectedNetwork, selectedWallet } = getCurrentWallet();
@@ -92,7 +92,7 @@ export const updateOnChainActivityList = (): Result<string> => {
 	});
 
 	dispatch({
-		type: actions.UPDATE_ACTIVITY_ENTRIES,
+		type: actions.UPDATE_ACTIVITY_ITEMS,
 		payload: boostFormattedItems,
 	});
 

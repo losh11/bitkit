@@ -1396,7 +1396,6 @@ export interface ITransaction<T> {
 	data: T;
 	result: {
 		blockhash: string;
-		blocktime: number;
 		confirmations: number;
 		hash: string;
 		hex: string;
@@ -1408,6 +1407,7 @@ export interface ITransaction<T> {
 		vout: IVout[];
 		vsize: number;
 		weight: number;
+		blocktime?: number;
 		time?: number;
 	};
 }
@@ -1590,10 +1590,11 @@ export const formatTransactions = async ({
 		const fee = Number(Math.abs(totalValue).toFixed(8));
 		const satsPerByte = btcToSats(fee) / result.vsize;
 		const { address, height, scriptHash } = data;
-		let timestamp = Date.now();
+		const timestamp = Date.now();
+		let confirmTimestamp: number | undefined;
 
 		if (height > 0 && result.blocktime) {
-			timestamp = result.blocktime * 1000;
+			confirmTimestamp = result.blocktime * 1000;
 		}
 
 		formattedTransactions[txid] = {
@@ -1611,6 +1612,7 @@ export const formatTransactions = async ({
 			txid,
 			messages,
 			timestamp,
+			confirmTimestamp,
 			vin: result.vin,
 		};
 	});

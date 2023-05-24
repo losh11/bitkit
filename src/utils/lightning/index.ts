@@ -1157,7 +1157,7 @@ export const payLightningInvoice = async (
 			activityType: EActivityType.lightning,
 			txType: EPaymentType.sent,
 			txId: decodedInvoice.value.payment_hash,
-			message: decodedInvoice?.value.description ?? '',
+			message: decodedInvoice.value.description ?? '',
 			address: invoice,
 			value: -value,
 			// TODO: show fee?

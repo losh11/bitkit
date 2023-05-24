@@ -273,7 +273,6 @@ export const formatBoostedActivityItems = ({
 			value,
 			fee: rootParent.fee + item.fee,
 			address: rootParent.address,
-			timestamp: item.timestamp,
 			isBoosted: true,
 		});
 	});

@@ -15,9 +15,8 @@ import Money from '../../components/Money';
 import ProfileImage from '../../components/ProfileImage';
 import {
 	EActivityType,
-	IActivityItemFormatted,
-	TLightningActivityItemFormatted,
-	TOnchainActivityItemFormatted,
+	TLightningActivityItem,
+	TOnchainActivityItem,
 } from '../../store/types/activity';
 import { useAppSelector } from '../../hooks/redux';
 import { useProfile } from '../../hooks/slashtags';
@@ -25,6 +24,7 @@ import { useFeeText } from '../../hooks/fees';
 import { EPaymentType } from '../../store/types/wallet';
 import { slashTagsUrlSelector } from '../../store/reselect/metadata';
 import { truncate } from '../../utils/helpers';
+import { getActivityItemDate } from '../../utils/activity';
 
 export const ListItem = ({
 	title,
@@ -71,7 +71,7 @@ const OnchainListItem = ({
 	item,
 	icon,
 }: {
-	item: TOnchainActivityItemFormatted;
+	item: TOnchainActivityItem;
 	icon: JSX.Element;
 }): ReactElement => {
 	const { t } = useTranslation('wallet');
@@ -80,9 +80,10 @@ const OnchainListItem = ({
 		value,
 		feeRate,
 		confirmed,
+		confirmTimestamp,
+		timestamp,
 		isBoosted,
 		isTransfer,
-		formattedDate,
 	} = item;
 	const { shortRange: feeRateDescription } = useFeeText(feeRate);
 
@@ -93,7 +94,8 @@ const OnchainListItem = ({
 
 	let description;
 	if (confirmed) {
-		description = formattedDate;
+		// NOTE: for users with earlier versions use the timestamp
+		description = getActivityItemDate(confirmTimestamp ?? timestamp);
 	} else if (isBoosted) {
 		description = t('activity_confirms_in_boosted', { feeRateDescription });
 		icon = (
@@ -150,15 +152,15 @@ const LightningListItem = ({
 	item,
 	icon,
 }: {
-	item: TLightningActivityItemFormatted;
+	item: TLightningActivityItem;
 	icon: JSX.Element;
 }): ReactElement => {
 	const { t } = useTranslation('wallet');
-	const { txType, value, message, formattedDate } = item;
+	const { txType, value, message, timestamp } = item;
 	const title = t(
 		txType === EPaymentType.sent ? 'activity_sent' : 'activity_received',
 	);
-	const description = message || formattedDate;
+	const description = message || getActivityItemDate(timestamp);
 	const isSend = txType === EPaymentType.sent;
 
 	return (

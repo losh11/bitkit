@@ -25,6 +25,7 @@ export type TOnchainActivityItem = {
 	timestamp: number;
 	isBoosted: boolean;
 	isTransfer: boolean;
+	confirmTimestamp?: number;
 };
 
 export type TLightningActivityItem = {
@@ -45,18 +46,6 @@ export type TTetherActivityItem = {
 	txId: string;
 	value: number;
 	timestamp: number;
-};
-
-export type IActivityItemFormatted = IActivityItem & {
-	formattedDate: string;
-};
-
-export type TOnchainActivityItemFormatted = TOnchainActivityItem & {
-	formattedDate: string;
-};
-
-export type TLightningActivityItemFormatted = TLightningActivityItem & {
-	formattedDate: string;
 };
 
 export interface IActivity {

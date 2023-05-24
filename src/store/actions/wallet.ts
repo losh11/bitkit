@@ -670,40 +670,42 @@ export const updateTransactions = async ({
 	if (getTransactionsResponse.isErr()) {
 		return err(getTransactionsResponse.error.message);
 	}
-	const transactions = getTransactionsResponse.value.data;
 
 	const formatTransactionsResponse = await formatTransactions({
 		selectedNetwork,
 		selectedWallet,
-		transactions,
+		transactions: getTransactionsResponse.value.data,
 	});
 	if (formatTransactionsResponse.isErr()) {
 		return err(formatTransactionsResponse.error.message);
 	}
+	const transactions = formatTransactionsResponse.value;
 
 	if (replaceStoredTransactions) {
 		// No need to check the existing txs. Update with the returned formatTransactionsResponse.
 		dispatch({
 			type: actions.UPDATE_TRANSACTIONS,
 			payload: {
-				transactions: formatTransactionsResponse.value,
+				transactions,
 				selectedNetwork,
 				selectedWallet,
 			},
 		});
 		updateSlashPayConfig({ sdk, selectedWallet, selectedNetwork });
-		return ok(formatTransactionsResponse.value);
+		return ok(transactions);
 	}
+
+	// Handle new or updated transactions.
 	const formattedTransactions: IFormattedTransactions = {};
 	const storedTransactions = currentWallet.transactions[selectedNetwork];
 	const blocktankOrders = getBlocktankStore().orders;
 
 	let notificationTxid: string | undefined;
 
-	Object.keys(formatTransactionsResponse.value).forEach((txid) => {
+	Object.keys(transactions).forEach((txid) => {
 		// check if tx is a payment from Blocktank (i.e. transfer to savings)
 		const isTransferToSavings = !!blocktankOrders.find((order) => {
-			return !!formatTransactionsResponse.value[txid].vin.find(
+			return !!transactions[txid].vin.find(
 				(input) => input.txid === order.channel_close_tx?.transaction_id,
 			);
 		});
@@ -711,16 +713,19 @@ export const updateTransactions = async ({
 		//If the tx is new or the tx now has a block height (state changed to confirmed)
 		if (
 			!storedTransactions[txid] ||
-			storedTransactions[txid].height !==
-				formatTransactionsResponse.value[txid].height
+			storedTransactions[txid].height !== transactions[txid].height
 		) {
-			formattedTransactions[txid] = formatTransactionsResponse.value[txid];
+			formattedTransactions[txid] = {
+				...transactions[txid],
+				// Keep the previous timestamp if the tx is not new.
+				timestamp: storedTransactions[txid]?.timestamp ?? Date.now(),
+			};
 		}
 
 		// if the tx is new, incoming but not from a transfer - show notification
 		if (
 			!storedTransactions[txid] &&
-			formatTransactionsResponse.value[txid].type === EPaymentType.received &&
+			transactions[txid].type === EPaymentType.received &&
 			!isTransferToSavings
 		) {
 			notificationTxid = txid;
@@ -741,12 +746,14 @@ export const updateTransactions = async ({
 		type: actions.UPDATE_TRANSACTIONS,
 		payload,
 	});
+
 	if (notificationTxid && showNotification) {
 		showBottomSheet('newTxPrompt', { txId: notificationTxid });
 		closeBottomSheet('receiveNavigation');
 	}
 
 	updateSlashPayConfig({ sdk, selectedWallet, selectedNetwork });
+
 	return ok(formattedTransactions);
 };
 

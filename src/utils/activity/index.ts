@@ -1,13 +1,12 @@
 import { IGetOrderResponse } from '@synonymdev/blocktank-client';
 
-import { btcToSats } from '../conversion';
 import i18n from '../../utils/i18n';
+import { btcToSats } from '../conversion';
 import { TPaidBlocktankOrders } from '../../store/types/blocktank';
 import { EPaymentType, IFormattedTransaction } from '../../store/types/wallet';
 import {
 	EActivityType,
 	IActivityItem,
-	IActivityItemFormatted,
 	TOnchainActivityItem,
 } from '../../store/types/activity';
 
@@ -56,6 +55,7 @@ export const onChainTransactionToActivityItem = ({
 		isBoosted: false,
 		isTransfer: isTransferToSavings || isTransferToSpending,
 		timestamp: transaction.timestamp,
+		confirmTimestamp: transaction.confirmTimestamp,
 	};
 };
 
@@ -170,7 +170,7 @@ export const filterActivityItems = (
 
 export const groupActivityItems = (
 	activityItems: IActivityItem[],
-): Array<string | IActivityItemFormatted> => {
+): Array<string | IActivityItem> => {
 	const date = new Date();
 	const beginningOfDay = +new Date(
 		date.getFullYear(),
@@ -183,164 +183,137 @@ export const groupActivityItems = (
 		date.getDate() - 1,
 	);
 	const beginningOfMonth = +new Date(date.getFullYear(), date.getMonth());
-	const beginningOfYear = +new Date(date.getFullYear());
+	const beginningOfYear = new Date(date.getFullYear(), 0, 1).getTime();
 
-	const today: IActivityItemFormatted[] = [];
-	const yesterday: IActivityItemFormatted[] = [];
-	const month: IActivityItemFormatted[] = [];
-	const year: IActivityItemFormatted[] = [];
-	const earlier: IActivityItemFormatted[] = [];
+	const today: IActivityItem[] = [];
+	const yesterday: IActivityItem[] = [];
+	const month: IActivityItem[] = [];
+	const year: IActivityItem[] = [];
+	const earlier: IActivityItem[] = [];
 
 	for (let item of activityItems) {
 		if (item.timestamp >= beginningOfDay) {
-			// today format as 22:40
-			today.push({
-				...item,
-				formattedDate: i18n.t('intl:dateTime', {
-					v: new Date(item.timestamp),
-					formatParams: {
-						v: {
-							hour: 'numeric',
-							minute: 'numeric',
-							hour12: false,
-						},
-					},
-				}),
-			});
+			today.push(item);
 		} else if (item.timestamp >= beginningOfYesterday) {
-			// yesterday format as 22:40
-			yesterday.push({
-				...item,
-				formattedDate: i18n.t('intl:dateTime', {
-					v: new Date(item.timestamp),
-					formatParams: {
-						v: {
-							hour: 'numeric',
-							minute: 'numeric',
-							hour12: false,
-						},
-					},
-				}),
-			});
+			yesterday.push(item);
 		} else if (item.timestamp >= beginningOfMonth) {
-			// month, format as April 4, 08:29
-			month.push({
-				...item,
-				formattedDate: i18n.t('intl:dateTime', {
-					v: new Date(item.timestamp),
-					formatParams: {
-						v: {
-							month: 'long',
-							day: 'numeric',
-							hour: 'numeric',
-							minute: 'numeric',
-							hour12: false,
-						},
-					},
-				}),
-			});
+			month.push(item);
 		} else if (item.timestamp >= beginningOfYear) {
-			// year, format as April 4, 08:29
-			year.push({
-				...item,
-				formattedDate: i18n.t('intl:dateTime', {
-					v: new Date(item.timestamp),
-					formatParams: {
-						v: {
-							month: 'long',
-							day: 'numeric',
-							hour: 'numeric',
-							minute: 'numeric',
-							hour12: false,
-						},
-					},
-				}),
-			});
+			year.push(item);
 		} else {
-			// earlier, format as February 2, 2021, 09:14
-			earlier.push({
-				...item,
-				formattedDate: i18n.t('intl:dateTime', {
-					v: new Date(item.timestamp),
-					formatParams: {
-						v: {
-							month: 'long',
-							day: 'numeric',
-							hour: 'numeric',
-							minute: 'numeric',
-							hour12: false,
-						},
-					},
-				}),
-			});
+			earlier.push(item);
 		}
 	}
 
-	let result: Array<string | IActivityItemFormatted> = [];
+	let result: Array<string | IActivityItem> = [];
 	if (today.length > 0) {
-		result = [
-			...result,
-			// 'TODAY'
-			i18n
-				.t('intl:relativeTime', {
-					v: 0,
-					range: 'day',
-					numeric: 'auto',
-				})
-				.toUpperCase(),
-			...today,
-		];
+		// 'TODAY'
+		const grpupName = i18n
+			.t('intl:relativeTime', {
+				v: 0,
+				range: 'day',
+				numeric: 'auto',
+			})
+			.toUpperCase();
+
+		result = [...result, grpupName, ...today];
 	}
 	if (yesterday.length > 0) {
-		result = [
-			...result,
-			// 'YESTERDAY'
-			i18n
-				.t('intl:relativeTime', {
-					v: -1,
-					range: 'day',
-					numeric: 'auto',
-				})
-				.toUpperCase(),
-			...yesterday,
-		];
+		// 'YESTERDAY'
+		const groupName = i18n
+			.t('intl:relativeTime', {
+				v: -1,
+				range: 'day',
+				numeric: 'auto',
+			})
+			.toUpperCase();
+
+		result = [...result, groupName, ...yesterday];
 	}
 	if (month.length > 0) {
-		result = [
-			...result,
-			// 'THIS MONTH'
-			i18n
-				.t('intl:relativeTime', {
-					v: 0,
-					range: 'month',
-					numeric: 'auto',
-				})
-				.toUpperCase(),
-			...month,
-		];
+		// 'THIS MONTH'
+		const groupName = i18n
+			.t('intl:relativeTime', {
+				v: 0,
+				range: 'month',
+				numeric: 'auto',
+			})
+			.toUpperCase();
+
+		result = [...result, groupName, ...month];
 	}
 	if (year.length > 0) {
-		result = [
-			...result,
-			// 'THIS YEAR'
-			i18n
-				.t('intl:relativeTime', {
-					v: 0,
-					range: 'year',
-					numeric: 'auto',
-				})
-				.toUpperCase(),
-			...year,
-		];
+		// 'THIS YEAR'
+		const groupName = i18n
+			.t('intl:relativeTime', {
+				v: 0,
+				range: 'year',
+				numeric: 'auto',
+			})
+			.toUpperCase();
+
+		result = [...result, groupName, ...year];
 	}
 	if (earlier.length > 0) {
-		result = [
-			...result,
-			// EARLIER
-			i18n.t('other:earlier').toUpperCase(),
-			...earlier,
-		];
+		// EARLIER
+		const groupName = i18n.t('other:earlier').toUpperCase();
+		result = [...result, groupName, ...earlier];
 	}
 
 	return result;
+};
+
+export const getActivityItemDate = (timestamp: number): string => {
+	const date = new Date();
+	const beginningOfYesterday = +new Date(
+		date.getFullYear(),
+		date.getMonth(),
+		date.getDate() - 1,
+	);
+	const beginningOfYear = new Date(date.getFullYear(), 0, 1).getTime();
+
+	if (timestamp >= beginningOfYesterday) {
+		// today & yesterday, format as 22:40
+		return i18n.t('intl:dateTime', {
+			v: new Date(timestamp),
+			formatParams: {
+				v: {
+					hour: 'numeric',
+					minute: 'numeric',
+					hour12: false,
+				},
+			},
+		});
+	}
+
+	if (timestamp >= beginningOfYear) {
+		// current year, format as April 4, 08:29
+		return i18n.t('intl:dateTime', {
+			v: new Date(timestamp),
+			formatParams: {
+				v: {
+					month: 'long',
+					day: 'numeric',
+					hour: 'numeric',
+					minute: 'numeric',
+					hour12: false,
+				},
+			},
+		});
+	}
+
+	// before current year, format as February 2, 2021, 09:14
+	return i18n.t('intl:dateTime', {
+		v: new Date(timestamp),
+		formatParams: {
+			v: {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+				hour: 'numeric',
+				minute: 'numeric',
+				hour12: false,
+			},
+		},
+	});
 };
