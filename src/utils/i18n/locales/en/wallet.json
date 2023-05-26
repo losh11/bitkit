@@ -125,7 +125,7 @@
 		"all": "All",
 		"sent": "Sent",
 		"received": "Received",
-		"instant": "Instant"
+		"other": "Other"
 	},
 	"details_savings_title": "Savings Balance",
 	"details_savings_subtitle": "On-chain BTC",

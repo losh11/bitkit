@@ -26,7 +26,7 @@ import ListItem from './ListItem';
 import { RootNavigationProp } from '../../navigation/types';
 import { activityItemsSelector } from '../../store/reselect/activity';
 import { tagsSelector } from '../../store/reselect/metadata';
-import type { IActivityItemFormatted } from '../../store/types/activity';
+import { IActivityItem } from '../../store/types/activity';
 
 const ListHeaderComponent = memo(
 	(): ReactElement => {
@@ -73,7 +73,7 @@ const ActivityList = ({
 			index,
 		}: {
 			// eslint-disable-next-line react/no-unused-prop-types
-			item: string | IActivityItemFormatted;
+			item: string | IActivityItem;
 			// eslint-disable-next-line react/no-unused-prop-types
 			index: number;
 		}): ReactElement => {

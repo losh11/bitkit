@@ -15,9 +15,9 @@ import Money from '../../components/Money';
 import ProfileImage from '../../components/ProfileImage';
 import {
 	EActivityType,
-	IActivityItemFormatted,
-	TLightningActivityItemFormatted,
-	TOnchainActivityItemFormatted,
+	IActivityItem,
+	TLightningActivityItem,
+	TOnchainActivityItem,
 } from '../../store/types/activity';
 import { useAppSelector } from '../../hooks/redux';
 import { useProfile } from '../../hooks/slashtags';
@@ -25,6 +25,7 @@ import { useFeeText } from '../../hooks/fees';
 import { EPaymentType } from '../../store/types/wallet';
 import { slashTagsUrlSelector } from '../../store/reselect/metadata';
 import { truncate } from '../../utils/helpers';
+import { getActivityItemDate } from '../../utils/activity';
 
 export const ListItem = ({
 	title,
@@ -71,7 +72,7 @@ const OnchainListItem = ({
 	item,
 	icon,
 }: {
-	item: TOnchainActivityItemFormatted;
+	item: TOnchainActivityItem;
 	icon: JSX.Element;
 }): ReactElement => {
 	const { t } = useTranslation('wallet');
@@ -80,9 +81,10 @@ const OnchainListItem = ({
 		value,
 		feeRate,
 		confirmed,
+		confirmTimestamp,
+		timestamp,
 		isBoosted,
 		isTransfer,
-		formattedDate,
 	} = item;
 	const { shortRange: feeRateDescription } = useFeeText(feeRate);
 
@@ -93,7 +95,8 @@ const OnchainListItem = ({
 
 	let description;
 	if (confirmed) {
-		description = formattedDate;
+		// NOTE: for users with earlier versions use the timestamp
+		description = getActivityItemDate(confirmTimestamp ?? timestamp);
 	} else if (isBoosted) {
 		description = t('activity_confirms_in_boosted', { feeRateDescription });
 		icon = (
@@ -128,8 +131,8 @@ const OnchainListItem = ({
 					: 'activity_transfer_savings_inprogress',
 			);
 			icon = (
-				<ThemedView style={styles.icon} color="orange16">
-					<TransferIcon height={13} color="orange" />
+				<ThemedView style={styles.icon} color="brand16">
+					<TransferIcon height={13} color="brand" />
 				</ThemedView>
 			);
 		}
@@ -150,15 +153,15 @@ const LightningListItem = ({
 	item,
 	icon,
 }: {
-	item: TLightningActivityItemFormatted;
+	item: TLightningActivityItem;
 	icon: JSX.Element;
 }): ReactElement => {
 	const { t } = useTranslation('wallet');
-	const { txType, value, message, formattedDate } = item;
+	const { txType, value, message, timestamp } = item;
 	const title = t(
 		txType === EPaymentType.sent ? 'activity_sent' : 'activity_received',
 	);
-	const description = message || formattedDate;
+	const description = message || getActivityItemDate(timestamp);
 	const isSend = txType === EPaymentType.sent;
 
 	return (
@@ -210,22 +213,23 @@ const ActivityListItem = ({
 	onPress,
 	testID,
 }: {
-	item: IActivityItemFormatted;
+	item: IActivityItem;
 	onPress: () => void;
 	testID?: string;
 }): ReactElement => {
 	const { id, activityType, txType } = item;
 	const profileUrl = useAppSelector((state) => slashTagsUrlSelector(state, id));
 	const isSend = txType === EPaymentType.sent;
+	const isInstant = activityType === EActivityType.lightning;
 
 	const icon = profileUrl ? (
 		<Avatar url={profileUrl} />
 	) : (
-		<ThemedView style={styles.icon} color={isSend ? 'red16' : 'green16'}>
+		<ThemedView style={styles.icon} color={isInstant ? 'purple16' : 'brand16'}>
 			{isSend ? (
-				<SendIcon height={13} color="red" />
+				<SendIcon height={13} color={isInstant ? 'purple' : 'brand'} />
 			) : (
-				<ReceiveIcon height={13} color="green" />
+				<ReceiveIcon height={13} color={isInstant ? 'purple' : 'brand'} />
 			)}
 		</ThemedView>
 	);

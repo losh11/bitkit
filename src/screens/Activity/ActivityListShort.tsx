@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Caption13Up, Text02M } from '../../styles/text';
 import { groupActivityItems } from '../../utils/activity';
 import { showBottomSheet } from '../../store/actions/ui';
-import { IActivityItemFormatted } from '../../store/types/activity';
+import { IActivityItem } from '../../store/types/activity';
 import { activityItemsSelector } from '../../store/reselect/activity';
 import Button from '../../components/Button';
 import ListItem, { EmptyItem } from './ListItem';
@@ -37,7 +37,7 @@ const ActivityListShort = (): ReactElement => {
 			index,
 		}: {
 			// eslint-disable-next-line react/no-unused-prop-types
-			item: string | IActivityItemFormatted;
+			item: string | IActivityItem;
 			// eslint-disable-next-line react/no-unused-prop-types
 			index: number;
 		}): ReactNode => {

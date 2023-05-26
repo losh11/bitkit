@@ -177,8 +177,9 @@ export interface IFormattedTransaction {
 	value: number;
 	txid: string;
 	messages: string[];
-	timestamp: number;
 	vin: IVin[];
+	timestamp: number;
+	confirmTimestamp?: number;
 }
 
 export interface IFormattedTransactions {

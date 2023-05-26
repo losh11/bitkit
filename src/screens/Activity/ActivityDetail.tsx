@@ -163,6 +163,7 @@ const OnchainActivityDetail = ({
 		fee,
 		confirmed,
 		timestamp,
+		confirmTimestamp,
 		isBoosted,
 		address,
 	} = item;
@@ -391,7 +392,7 @@ const OnchainActivityDetail = ({
 							<ClockIcon style={styles.rowIcon} color="brand" />
 							<Text02M>
 								{t('intl:dateTime', {
-									v: new Date(timestamp),
+									v: new Date(confirmed ? confirmTimestamp! : timestamp),
 									formatParams: {
 										v: {
 											hour: 'numeric',
