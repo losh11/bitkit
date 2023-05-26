@@ -95,6 +95,8 @@
 	"activity_copied_tx_text": "Transaction ID copied to clipboard.",
 	"activity_confirming": "Confirming",
 	"activity_confirmed": "Confirmed",
+	"activity_removed": "Removed from Mempool",
+	"activity_removed_msg": "Please check your activity list. Any impacted transactions will be highlighted in red.",
 	"activity_boosting": "Boosting",
 	"activity_fee": "Fee",
 	"activity_status": "Status",
@@ -149,5 +151,11 @@
 	"error_broadcast_tx_connection": "Please check your connection and try again.\n{{message}}",
 	"filter_title": "Select Range",
 	"filter_clear": "Clear",
-	"filter_apply": "Apply"
+	"filter_apply": "Apply",
+	"transaction": "Transaction",
+	"transactions": "Transactions",
+	"reorg_detected": "Reorg Detected",
+	"reorg_msg_begin_singular": "of your transactions is no longer confirmed.",
+	"reorg_msg_begin_plural": "of your transactions are no longer confirmed.",
+	"reorg_msg_end": "Please check your activity list for affected transactions."
 }

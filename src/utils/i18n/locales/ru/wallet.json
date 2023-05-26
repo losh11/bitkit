@@ -90,6 +90,8 @@
 	"activity_copied_tx_text": "ID транзакции скопирован в буфер обмена.",
 	"activity_confirming": "Подтверждение",
 	"activity_confirmed": "Подтверждена",
+	"activity_removed": "Удалено из мемпула",
+	"activity_removed_msg": "Пожалуйста, проверьте свой список действий. Любые затронутые транзакции будут выделены красным цветом.",
 	"activity_boosting": "Ускоряем",
 	"activity_fee": "Комиссия",
 	"activity_status": "Статус",
@@ -141,5 +143,14 @@
 	"payment_confirming": "Еще подтверждается...",
 	"error_create_tx": "Не удалось создать транзакцию",
 	"error_broadcast_tx": "Не удалось отправить транзакцию",
-	"error_broadcast_tx_connection": "Пожалуйста, проверьте своё соединение и попробуйте ещё раз.\n{{message}}"
+	"error_broadcast_tx_connection": "Пожалуйста, проверьте своё соединение и попробуйте ещё раз.\n{{message}}",
+	"filter_title": "Выберите диапазон",
+	"filter_clear": "Прозрачный",
+	"filter_apply": "Применять",
+	"transaction": "Сделка",
+	"transactions": "Транзакции",
+	"reorg_detected": "Реорг обнаружен",
+	"reorg_msg_begin_singular": "ваших транзакций больше не подтверждается.",
+	"reorg_msg_begin_plural": "ваших транзакций больше не подтверждаются.",
+	"reorg_msg": "Пожалуйста, проверьте свой список операций на наличие затронутых транзакций."
 }

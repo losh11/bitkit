@@ -166,6 +166,7 @@ const OnchainActivityDetail = ({
 		confirmTimestamp,
 		isBoosted,
 		address,
+		exists,
 	} = item;
 
 	const { t } = useTranslation('wallet');
@@ -321,6 +322,15 @@ const OnchainActivityDetail = ({
 			<View style={styles.row}>
 				<CheckCircleIcon style={styles.rowIcon} color="green" />
 				<Text02M color="green">{t('activity_confirmed')}</Text02M>
+			</View>
+		);
+	}
+
+	if (!exists) {
+		status = (
+			<View style={styles.row}>
+				<CheckCircleIcon style={styles.rowIcon} color="red" />
+				<Text02M color="red">{t('activity_removed')}</Text02M>
 			</View>
 		);
 	}

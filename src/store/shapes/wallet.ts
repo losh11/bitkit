@@ -157,6 +157,7 @@ export const defaultWalletShape: Readonly<IWallet> = {
 	utxos: getNetworkContent([]),
 	blacklistedUtxos: getNetworkContent([]),
 	boostedTransactions: getNetworkContent({}),
+	unconfirmedTransactions: getNetworkContent({}),
 	transactions: getNetworkContent({}),
 	transaction: getNetworkContent(defaultSendTransaction),
 	balance: getNetworkContent(0),

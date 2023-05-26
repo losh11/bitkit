@@ -5,6 +5,7 @@ import { __DISABLE_SLASHTAGS__ } from '../../../constants/env';
 import actions from '../../../store/actions/actions';
 import {
 	clearUtxos,
+	injectFakeTransaction,
 	resetSelectedWallet,
 	resetWalletStore,
 	updateWallet,
@@ -31,6 +32,8 @@ import type { SettingsScreenProps } from '../../../navigation/types';
 import { getWalletStore } from '../../../store/helpers';
 import { runChecks } from '../../../utils/wallet/checks';
 import { warningsSelector } from '../../../store/reselect/checks';
+import { getFakeTransaction } from '../../../utils/wallet/testing';
+import { refreshWallet } from '../../../utils/wallet';
 
 const DevSettings = ({
 	navigation,
@@ -56,6 +59,63 @@ const DevSettings = ({
 					onPress: (): void => {
 						navigation.navigate('SlashtagsSettings');
 					},
+				},
+			],
+		},
+		{
+			title: 'Debug',
+			data: [
+				{
+					title: 'Trigger exception in React render',
+					type: EItemType.button,
+					testID: 'TriggerRenderError',
+					onPress: (): void => {
+						setThrowError(true);
+					},
+				},
+				{
+					title: 'Trigger exception in action handler',
+					type: EItemType.button,
+					testID: 'TriggerActionError',
+					onPress: (): void => {
+						throw new Error('test action error');
+					},
+				},
+				{
+					title: 'Trigger unhandled async exception',
+					type: EItemType.button,
+					testID: 'TriggerAsyncError',
+					onPress: async (): Promise<void> => {
+						throw new Error('test async error');
+					},
+				},
+				{
+					title: 'Inject Fake Transaction',
+					type: EItemType.button,
+					testID: 'InjectFakeTransaction',
+					onPress: async (): Promise<void> => {
+						const id =
+							'9c0bed5b4c0833824210d29c3c847f47132c03f231ef8df228862132b3a8d80a';
+						const fakeTx = getFakeTransaction(id);
+						fakeTx[id].height = 0;
+						await injectFakeTransaction({
+							selectedWallet,
+							selectedNetwork,
+							fakeTx,
+						});
+						refreshWallet({ selectedWallet, selectedNetwork }).then();
+					},
+				},
+			],
+		},
+		{
+			title: 'Wallet Checks',
+			data: [
+				{
+					title: `Warnings: ${warnings.length}`,
+					type: EItemType.textButton,
+					value: '',
+					testID: 'Warnings',
 				},
 			],
 		},
@@ -145,46 +205,6 @@ const DevSettings = ({
 					title: 'Wipe App',
 					type: EItemType.button,
 					onPress: wipeApp,
-				},
-			],
-		},
-		{
-			title: 'Debug',
-			data: [
-				{
-					title: 'Trigger exception in React render',
-					type: EItemType.button,
-					testID: 'TriggerRenderError',
-					onPress: (): void => {
-						setThrowError(true);
-					},
-				},
-				{
-					title: 'Trigger exception in action handler',
-					type: EItemType.button,
-					testID: 'TriggerActionError',
-					onPress: (): void => {
-						throw new Error('test action error');
-					},
-				},
-				{
-					title: 'Trigger unhandled async exception',
-					type: EItemType.button,
-					testID: 'TriggerAsyncError',
-					onPress: async (): Promise<void> => {
-						throw new Error('test async error');
-					},
-				},
-			],
-		},
-		{
-			title: 'Wallet Checks',
-			data: [
-				{
-					title: `Warnings: ${warnings.length}`,
-					type: EItemType.textButton,
-					value: '',
-					testID: 'Warnings',
 				},
 			],
 		},

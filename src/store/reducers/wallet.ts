@@ -192,6 +192,79 @@ const wallet = (
 				},
 			};
 
+		case actions.RESET_TRANSACTIONS:
+			return {
+				...state,
+				wallets: {
+					...state.wallets,
+					[selectedWallet]: {
+						...state.wallets[selectedWallet],
+						transactions: {
+							...state.wallets[selectedWallet].transactions,
+							[selectedNetwork]: {},
+						},
+						unconfirmedTransactions: {
+							...state.wallets[selectedWallet].transactions,
+							[selectedNetwork]: {},
+						},
+					},
+				},
+			};
+
+		case actions.RESET_ADDRESSES:
+			return {
+				...state,
+				wallets: {
+					...state.wallets,
+					[selectedWallet]: {
+						...state.wallets[selectedWallet],
+						addresses: {
+							...state.wallets[selectedWallet].addresses,
+							[selectedNetwork]: {},
+						},
+						changeAddresses: {
+							...state.wallets[selectedWallet].changeAddresses,
+							[selectedNetwork]: {},
+						},
+					},
+				},
+			};
+
+		case actions.ADD_UNCONFIRMED_TRANSACTIONS:
+			return {
+				...state,
+				wallets: {
+					...state.wallets,
+					[selectedWallet]: {
+						...state.wallets[selectedWallet],
+						unconfirmedTransactions: {
+							...state.wallets[selectedWallet].unconfirmedTransactions,
+							[selectedNetwork]: {
+								...state.wallets[selectedWallet].unconfirmedTransactions[
+									selectedNetwork
+								],
+								...(action.payload?.unconfirmedTransactions ?? {}),
+							},
+						},
+					},
+				},
+			};
+
+		case actions.UPDATE_UNCONFIRMED_TRANSACTIONS:
+			return {
+				...state,
+				wallets: {
+					...state.wallets,
+					[selectedWallet]: {
+						...state.wallets[selectedWallet],
+						unconfirmedTransactions: {
+							...state.wallets[selectedWallet].unconfirmedTransactions,
+							[selectedNetwork]: action.payload?.unconfirmedTransactions ?? {},
+						},
+					},
+				},
+			};
+
 		case actions.RESET_SELECTED_WALLET:
 			return {
 				...state,

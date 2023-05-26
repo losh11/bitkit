@@ -325,6 +325,7 @@ export const handleLightningPaymentSubscription = async ({
 			// fee: 0,
 			// feeRate: 0,
 			timestamp: new Date().getTime(),
+			exists: true,
 		};
 		addActivityItem(activityItem);
 		addLightningPayment({
@@ -1164,6 +1165,7 @@ export const payLightningInvoice = async (
 			// fee: payResponse.value.fee_paid_sat,
 			// feeRate: 0,
 			timestamp: new Date().getTime(),
+			exists: true,
 		};
 		addActivityItem(activityItem);
 		refreshLdk().then();
