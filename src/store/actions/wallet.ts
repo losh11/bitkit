@@ -843,7 +843,7 @@ export const checkUnconfirmedTransactions = async ({
 				title: i18n.t('wallet:reorg_detected'),
 				message: `${outdatedTxs.length} ${
 					outdatedTxs.length === 1 ? singular : plural
-				} ${i18n.t('wallet:reorg_msg')}`,
+				}`,
 				autoHide: false,
 			});
 			//We need to update the height of the transactions that were reorg'd out.
