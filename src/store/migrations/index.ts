@@ -120,19 +120,16 @@ const migrations = {
 		};
 	},
 	13: (state): PersistedState => {
-		return {
-			...state,
-			wallet: {
-				...state.wallet,
-				wallets: {
-					...state.wallet.wallets,
-					[state.wallet.selectedWallet]: {
-						...state.wallet.wallets[state.wallet.selectedWallet],
-						unconfirmedTransactions: getNetworkContent({}),
-					},
-				},
-			},
-		};
+		const newState = { ...state };
+		// Loop through all wallets
+		for (const walletName in newState.wallet.wallets) {
+			// Add unconfirmedTransactions to each wallet, with the initial value set.
+			newState.wallet.wallets[walletName] = {
+				...newState.wallet.wallets[walletName],
+				unconfirmedTransactions: getNetworkContent({}),
+			};
+		}
+		return newState;
 	},
 };
 
