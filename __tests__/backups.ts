@@ -232,7 +232,6 @@ describe('Remote backups', () => {
 			address: 'invoice',
 			value: 1,
 			timestamp: new Date().getTime(),
-			exists: true,
 		});
 
 		const backup = getActivityStore().items.filter(

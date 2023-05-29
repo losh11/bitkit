@@ -38,7 +38,6 @@ export type TLightningActivityItem = {
 	address: string;
 	message: string;
 	timestamp: number;
-	exists: boolean;
 };
 
 export type TTetherActivityItem = {
@@ -48,7 +47,6 @@ export type TTetherActivityItem = {
 	txId: string;
 	value: number;
 	timestamp: number;
-	exists: boolean;
 };
 
 export interface IActivity {

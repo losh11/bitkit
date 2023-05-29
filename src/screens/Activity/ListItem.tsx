@@ -33,7 +33,7 @@ export const ListItem = ({
 	amount,
 	icon,
 	isSend,
-	exists,
+	exists = true,
 }: {
 	title: string;
 	description: string;
@@ -90,6 +90,7 @@ const OnchainListItem = ({
 		timestamp,
 		isBoosted,
 		isTransfer,
+		exists = true,
 	} = item;
 	const { shortRange: feeRateDescription } = useFeeText(feeRate);
 
@@ -149,7 +150,7 @@ const OnchainListItem = ({
 			description={description}
 			amount={value}
 			icon={icon}
-			exists={item.exists}
+			exists={exists}
 			isSend={isSend}
 		/>
 	);

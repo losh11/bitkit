@@ -326,7 +326,7 @@ const OnchainActivityDetail = ({
 		);
 	}
 
-	if (!exists) {
+	if (activityType === EActivityType.onchain && !exists) {
 		status = (
 			<View style={styles.row}>
 				<CheckCircleIcon style={styles.rowIcon} color="red" />

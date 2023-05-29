@@ -82,7 +82,7 @@ import {
 import { TGetImpactedAddressesRes } from '../types/checks';
 import { updateActivityItem, updateActivityList } from './activity';
 import { getActivityItemById } from '../../utils/activity';
-import { IActivityItem } from '../types/activity';
+import { EActivityType, TOnchainActivityItem } from '../types/activity';
 import {
 	showErrorNotification,
 	showInfoNotification,
@@ -934,12 +934,14 @@ export const updateGhostTransactions = async ({
 		txIds.forEach((txId) => {
 			const activity = getActivityItemById(txId);
 			if (activity.isOk() && activity.value) {
-				//Update the activity item to reflect that the transaction no longer exists, but that it did at one point in time.
-				const item: IActivityItem = {
-					...activity.value,
-					exists: false,
-				};
-				updateActivityItem(txId, item);
+				if (activity.value.activityType === EActivityType.onchain) {
+					//Update the activity item to reflect that the transaction no longer exists, but that it did at one point in time.
+					const item: TOnchainActivityItem = {
+						...activity.value,
+						exists: false,
+					};
+					updateActivityItem(txId, item);
+				}
 			}
 		});
 
