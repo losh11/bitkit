@@ -122,7 +122,7 @@ const migrations = {
 	13: (state): PersistedState => {
 		const newState = { ...state };
 		// Loop through all wallets
-		for (const walletName in newState.wallet.wallets) {
+		for (const walletName in Object.keys(newState.wallet.wallets)) {
 			// Add unconfirmedTransactions to each wallet, with the initial value set.
 			newState.wallet.wallets[walletName] = {
 				...newState.wallet.wallets[walletName],
