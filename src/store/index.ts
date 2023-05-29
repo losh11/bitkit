@@ -1,7 +1,7 @@
 import { configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit';
 import createDebugger from 'redux-flipper';
 import logger from 'redux-logger';
-import hardSet from 'redux-persist/lib/stateReconciler/hardSet';
+import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 import {
 	persistReducer,
 	persistStore,
@@ -38,7 +38,7 @@ const persistConfig = {
 	storage: mmkvStorage,
 	// increase version after store shape changes
 	version: 13,
-	stateReconciler: hardSet,
+	stateReconciler: autoMergeLevel2,
 	blacklist: ['ui'],
 	migrate: createMigrate(migrations, { debug: __ENABLE_MIGRATION_DEBUG__ }),
 };
