@@ -9,9 +9,6 @@ services:
     ports:
       - '43782:43782'
       - '39388:39388'
-    volumes:
-      - 'bitcoin_datadir:/data'
-      - 'bitcoin_wallet_datadir:/walletdata'
     environment:
       BITCOIN_NETWORK: ${NBITCOIN_NETWORK:-regtest}
       CREATE_WALLET: 'true'

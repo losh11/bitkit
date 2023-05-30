@@ -15,8 +15,6 @@ describe('Onchain', () => {
 	const rpc = new BitcoinJsonRpc(bitcoinURL);
 
 	beforeAll(async () => {
-		await completeOnboarding();
-
 		let balance = await rpc.getBalance();
 		const address = await rpc.getNewAddress();
 
@@ -29,6 +27,8 @@ describe('Onchain', () => {
 			{ port: 60001, host: '127.0.0.1' },
 			bitcoinURL,
 		);
+
+		await completeOnboarding();
 	});
 
 	beforeEach(async () => {
@@ -58,7 +58,9 @@ describe('Onchain', () => {
 			for (let i = 0; i < 2; i++) {
 				await element(by.id('Receive')).tap();
 				if (i === 0) {
-					await element(by.id('UnderstoodButton')).tap();
+					try {
+						await element(by.id('UnderstoodButton')).tap();
+					} catch (e) {}
 				}
 				await sleep(1000); // animation
 				// get address from qrcode
@@ -228,6 +230,9 @@ describe('Onchain', () => {
 			}
 
 			await element(by.id('Receive')).tap();
+			try {
+				await element(by.id('UnderstoodButton')).tap();
+			} catch (e) {}
 			await sleep(1000); // animation
 			// get address from qrcode
 			let { label: wAddress } = await element(by.id('QRCode')).getAttributes();

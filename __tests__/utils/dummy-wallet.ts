@@ -749,4 +749,9 @@ export const walletState: IWallet = {
 		bitcoinTestnet: defaultSendTransaction,
 		bitcoinRegtest: defaultSendTransaction,
 	},
+	unconfirmedTransactions: {
+		bitcoin: {},
+		bitcoinTestnet: {},
+		bitcoinRegtest: {},
+	},
 };

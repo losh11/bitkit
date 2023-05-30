@@ -33,23 +33,28 @@ export const ListItem = ({
 	amount,
 	icon,
 	isSend,
+	exists = true,
 }: {
 	title: string;
 	description: string;
 	icon: ReactNode;
 	amount?: number;
 	isSend?: boolean;
+	exists?: boolean;
 }): ReactElement => (
 	<>
 		{icon}
 		<View style={styles.text}>
-			<Text01M>{title}</Text01M>
-			<Caption13M color="gray1">{truncate(description, 35)}</Caption13M>
+			<Text01M color={exists ? undefined : 'red'}>{title}</Text01M>
+			<Caption13M color={exists ? 'gray1' : 'red'}>
+				{truncate(description, 35)}
+			</Caption13M>
 		</View>
 
 		{amount ? (
 			<View style={styles.amount}>
 				<Money
+					color={exists ? undefined : 'red'}
 					sats={amount}
 					enableHide={true}
 					size="text01m"
@@ -61,7 +66,7 @@ export const ListItem = ({
 					enableHide={true}
 					size="caption13M"
 					showFiat={true}
-					color="gray1"
+					color={exists ? 'gray1' : 'red'}
 				/>
 			</View>
 		) : null}
@@ -85,6 +90,7 @@ const OnchainListItem = ({
 		timestamp,
 		isBoosted,
 		isTransfer,
+		exists = true,
 	} = item;
 	const { shortRange: feeRateDescription } = useFeeText(feeRate);
 
@@ -144,6 +150,7 @@ const OnchainListItem = ({
 			description={description}
 			amount={value}
 			icon={icon}
+			exists={exists}
 			isSend={isSend}
 		/>
 	);

@@ -4,6 +4,7 @@ import {
 	IAddresses,
 	IAddress,
 	ICreateWallet,
+	IFormattedTransaction,
 	IFormattedTransactions,
 	IKeyDerivationPath,
 	ISendTransaction,
@@ -13,8 +14,11 @@ import {
 	EBoostType,
 	TWalletName,
 	IWalletStore,
+	TProcessUnconfirmedTransactions,
 } from '../types/wallet';
 import {
+	blockHeightToConfirmations,
+	confirmationsToBlockHeight,
 	createDefaultWallet,
 	formatTransactions,
 	generateAddresses,
@@ -26,8 +30,12 @@ import {
 	getSelectedAddressType,
 	getSelectedNetwork,
 	getSelectedWallet,
+	getUnconfirmedTransactions,
+	ITransaction,
+	ITxHash,
 	refreshWallet,
 	removeDuplicateAddresses,
+	rescanAddresses,
 } from '../../utils/wallet';
 import {
 	getBlocktankStore,
@@ -72,6 +80,15 @@ import {
 	TAddressIndexInfo,
 } from '../shapes/wallet';
 import { TGetImpactedAddressesRes } from '../types/checks';
+import { updateActivityItem, updateActivityList } from './activity';
+import { getActivityItemById } from '../../utils/activity';
+import { EActivityType, TOnchainActivityItem } from '../types/activity';
+import {
+	showErrorNotification,
+	showInfoNotification,
+} from '../../utils/notifications';
+import { getFakeTransaction } from '../../utils/wallet/testing';
+import i18n from '../../utils/i18n';
 
 const dispatch = getDispatch();
 
@@ -576,6 +593,66 @@ export const clearUtxos = async ({
 	return "Successfully cleared UTXO's.";
 };
 
+/**
+ * Clears the transactions object for a given wallet and network.
+ * @param {TWalletName} [selectedWallet]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @returns {string}
+ */
+export const clearTransactions = ({
+	selectedWallet,
+	selectedNetwork,
+}: {
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+}): string => {
+	if (!selectedNetwork) {
+		selectedNetwork = getSelectedNetwork();
+	}
+	if (!selectedWallet) {
+		selectedWallet = getSelectedWallet();
+	}
+	const payload = {
+		selectedWallet,
+		selectedNetwork,
+	};
+	dispatch({
+		type: actions.RESET_TRANSACTIONS,
+		payload,
+	});
+	return 'Successfully reset transactions.';
+};
+
+/**
+ * Clears the addresses and changeAddresses object for a given wallet and network.
+ * @param {TWalletName} [selectedWallet]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @returns {string}
+ */
+export const clearAddresses = ({
+	selectedWallet,
+	selectedNetwork,
+}: {
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+}): string => {
+	if (!selectedNetwork) {
+		selectedNetwork = getSelectedNetwork();
+	}
+	if (!selectedWallet) {
+		selectedWallet = getSelectedWallet();
+	}
+	const payload = {
+		selectedWallet,
+		selectedNetwork,
+	};
+	dispatch({
+		type: actions.RESET_ADDRESSES,
+		payload,
+	});
+	return 'Successfully reset transactions.';
+};
+
 export const updateWalletBalance = ({
 	balance,
 	selectedWallet,
@@ -620,6 +697,375 @@ export interface ITransactionData {
 }
 
 /**
+ * This method processes all transactions with less than 6 confirmations and returns the following:
+ * 1. Transactions that still have less than 6 confirmations and can be considered unconfirmed. (unconfirmedTxs)
+ * 2. Transactions that have fewer confirmations than before due to a reorg. (outdatedTxs)
+ * 3. Transactions that have been removed from the mempool. (ghostTxs)
+ * @param {TWalletName} [selectedWallet]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @returns {Promise<Result<TProcessUnconfirmedTransactions>>
+ */
+export const processUnconfirmedTransactions = async ({
+	selectedWallet,
+	selectedNetwork,
+}: {
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+}): Promise<Result<TProcessUnconfirmedTransactions>> => {
+	try {
+		if (!selectedNetwork) {
+			selectedNetwork = getSelectedNetwork();
+		}
+		if (!selectedWallet) {
+			selectedWallet = getSelectedWallet();
+		}
+
+		//Retrieve all unconfirmed transactions (tx less than 6 confirmations in this case) from the store
+		const oldUnconfirmedTxsRes = await getUnconfirmedTransactions({
+			selectedWallet,
+			selectedNetwork,
+		});
+		if (oldUnconfirmedTxsRes.isErr()) {
+			return err(oldUnconfirmedTxsRes.error);
+		}
+		const oldUnconfirmedTxs = oldUnconfirmedTxsRes.value;
+
+		//Use electrum to check if the transaction was removed/bumped from the mempool or if it still exists.
+		const tx_hashes: ITxHash[] = Object.values(oldUnconfirmedTxs).map(
+			(transaction: IFormattedTransaction) => {
+				return { tx_hash: transaction.txid };
+			},
+		);
+		const txs = await getTransactions({
+			selectedNetwork,
+			txHashes: tx_hashes,
+		});
+		if (txs.isErr()) {
+			return err(txs.error);
+		}
+
+		const unconfirmedTxs: IFormattedTransactions = {};
+		const outdatedTxs: IUtxo[] = []; //Transactions that have been pushed back into the mempool due to a reorg. We need to update the height.
+		const ghostTxs: string[] = []; //Transactions that have been removed from the mempool and are no longer in the blockchain.
+		txs.value.data.forEach((txData: ITransaction<IUtxo>) => {
+			// Check if the transaction has been removed from the mempool/still exists.
+			if (
+				//TODO: Update types for electrum response.
+				// @ts-ignore
+				txData?.error &&
+				//TODO: Update types for electrum response.
+				// @ts-ignore
+				txData?.error?.message &&
+				/No such mempool or blockchain transaction|Invalid tx hash/.test(
+					//TODO: Update types for electrum response.
+					// @ts-ignore
+					txData?.error?.message,
+				)
+			) {
+				//Transaction may have been removed/bumped from the mempool or potentially reorg'd out.
+				ghostTxs.push(txData.data.tx_hash);
+				return;
+			}
+
+			const newHeight = confirmationsToBlockHeight({
+				confirmations: txData.result?.confirmations ?? 0,
+				selectedNetwork,
+			});
+
+			if (!txData.result?.confirmations) {
+				const oldHeight = oldUnconfirmedTxs[txData.data.tx_hash]?.height ?? 0;
+				if (oldHeight > newHeight) {
+					//Transaction was reorg'd back to zero confirmations. Add it to the outdatedTxs array.
+					outdatedTxs.push(txData.data);
+				}
+				unconfirmedTxs[txData.data.tx_hash] = {
+					...oldUnconfirmedTxs[txData.data.tx_hash],
+					height: newHeight,
+				};
+				return;
+			}
+
+			//Check if the transaction has been confirmed.
+			if (txData.result?.confirmations < 6) {
+				unconfirmedTxs[txData.data.tx_hash] = {
+					...oldUnconfirmedTxs[txData.data.tx_hash],
+					height: newHeight,
+				};
+			}
+		});
+		return ok({
+			unconfirmedTxs,
+			outdatedTxs,
+			ghostTxs,
+		});
+	} catch (e) {
+		return err(e);
+	}
+};
+
+/**
+ * Checks existing unconfirmed transactions that have been received and removes any that have >= 6 confirmations.
+ * If the tx is reorg'd or bumped from the mempool and no longer exists, the transaction
+ * will be removed from the store and updated in the activity list.
+ * @param {TWalletName} [selectedWallet]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @returns {Promise<Result<string>>}
+ */
+export const checkUnconfirmedTransactions = async ({
+	selectedWallet,
+	selectedNetwork,
+}: {
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+}): Promise<Result<string>> => {
+	try {
+		if (!selectedNetwork) {
+			selectedNetwork = getSelectedNetwork();
+		}
+		if (!selectedWallet) {
+			selectedWallet = getSelectedWallet();
+		}
+
+		const processRes = await processUnconfirmedTransactions({
+			selectedNetwork,
+			selectedWallet,
+		});
+		if (processRes.isErr()) {
+			return err(processRes.error.message);
+		}
+
+		const { unconfirmedTxs, outdatedTxs, ghostTxs } = processRes.value;
+		if (outdatedTxs.length) {
+			// Notify user that a reorg has occurred and that the transaction has been pushed back into the mempool.
+			const singular = i18n.t('wallet:reorg_msg_begin_singular');
+			const plural = i18n.t('wallet:reorg_msg_begin_plural');
+			showInfoNotification({
+				title: i18n.t('wallet:reorg_detected'),
+				message: `${outdatedTxs.length} ${
+					outdatedTxs.length === 1 ? singular : plural
+				}`,
+				autoHide: false,
+			});
+			//We need to update the height of the transactions that were reorg'd out.
+			await updateTransactionHeights(outdatedTxs);
+		}
+		if (ghostTxs.length) {
+			// Notify user that a transaction has been removed from the mempool.
+			const titleIntro =
+				ghostTxs.length === 1
+					? i18n.t('wallet:transaction')
+					: i18n.t('wallet:transactions');
+			await showErrorNotification({
+				title: `${ghostTxs.length} ${titleIntro} ${i18n.t(
+					'wallet:activity_removed',
+				)}`,
+				message: i18n.t('wallet:activity_removed_msg'),
+				autoHide: false,
+			});
+			//We need to update the ghost transactions in the store & activity-list and rescan the addresses to get the correct balance.
+			await updateGhostTransactions({
+				selectedWallet,
+				selectedNetwork,
+				txIds: ghostTxs,
+			});
+		}
+		const payload = {
+			selectedNetwork,
+			selectedWallet,
+			unconfirmedTransactions: unconfirmedTxs,
+		};
+
+		dispatch({
+			type: actions.UPDATE_UNCONFIRMED_TRANSACTIONS,
+			payload,
+		});
+		return ok('Successfully updated unconfirmed transactions.');
+	} catch (e) {
+		return err(e);
+	}
+};
+
+/**
+ * Updates the confirmation state of activity item transactions that were reorg'd out.
+ * @param {IUtxo[]} txs
+ */
+export const updateTransactionHeights = async (
+	txs: IUtxo[],
+): Promise<string> => {
+	txs.forEach((tx) => {
+		const txId = tx.tx_hash;
+		const activity = getActivityItemById(txId);
+		if (activity.isOk() && activity.value) {
+			//Update the activity item to reflect that the transaction has a new height.
+			const item = {
+				...activity.value,
+				confirmed: false,
+			};
+			updateActivityItem(txId, item);
+		}
+	});
+	return 'Successfully updated reorg transactions.';
+};
+
+/**
+ * Removes transactions from the store and activity list.
+ * @param {string[]} txIds
+ * @param {TWalletName} [selectedWallet]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @returns {Promise<Result<string>>}
+ */
+export const updateGhostTransactions = async ({
+	txIds,
+	selectedWallet,
+	selectedNetwork,
+}: {
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+	txIds: string[];
+}): Promise<Result<string>> => {
+	try {
+		if (!selectedNetwork) {
+			selectedNetwork = getSelectedNetwork();
+		}
+		if (!selectedWallet) {
+			selectedWallet = getSelectedWallet();
+		}
+
+		txIds.forEach((txId) => {
+			const activity = getActivityItemById(txId);
+			if (activity.isOk() && activity.value) {
+				if (activity.value.activityType === EActivityType.onchain) {
+					//Update the activity item to reflect that the transaction no longer exists, but that it did at one point in time.
+					const item: TOnchainActivityItem = {
+						...activity.value,
+						exists: false,
+					};
+					updateActivityItem(txId, item);
+				}
+			}
+		});
+
+		//Rescan the addresses to get the correct balance.
+		await rescanAddresses({
+			selectedWallet,
+			selectedNetwork,
+			shouldClearAddresses: false, // No need to clear addresses since we are only updating the balance.
+		});
+		return ok('Successfully deleted transactions.');
+	} catch (e) {
+		return err(e);
+	}
+};
+
+/**
+ * Parses and adds unconfirmed transactions to the store.
+ * @param {TWalletName} [selectedWallet]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @param {IFormattedTransactions} transactions
+ * @returns {Result<string>}
+ */
+export const addUnconfirmedTransactions = ({
+	selectedWallet,
+	selectedNetwork,
+	transactions,
+}: {
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+	transactions: IFormattedTransactions;
+}): Result<string> => {
+	try {
+		if (!selectedNetwork) {
+			selectedNetwork = getSelectedNetwork();
+		}
+		if (!selectedWallet) {
+			selectedWallet = getSelectedWallet();
+		}
+
+		let unconfirmedTransactions: IFormattedTransactions = {};
+		Object.keys(transactions).forEach((key) => {
+			const confirmations = blockHeightToConfirmations({
+				blockHeight: transactions[key].height,
+				selectedNetwork,
+			});
+			if (confirmations < 6) {
+				unconfirmedTransactions[key] = transactions[key];
+			}
+		});
+
+		if (!Object.keys(unconfirmedTransactions).length) {
+			return ok('No unconfirmed transactions found.');
+		}
+
+		const payload = {
+			selectedNetwork,
+			selectedWallet,
+			unconfirmedTransactions,
+		};
+
+		dispatch({
+			type: actions.ADD_UNCONFIRMED_TRANSACTIONS,
+			payload,
+		});
+		return ok('Successfully updated unconfirmed transactions.');
+	} catch (e) {
+		console.log(e);
+		return err(e);
+	}
+};
+
+/**
+ * FOR TESTING PURPOSES ONLY. DO NOT USE.
+ * Injects a fake transaction into the store for testing.
+ * @param {string} [id]
+ * @param {IFormattedTransaction} [fakeTx]
+ * @param {boolean} [shouldRefreshWallet]
+ * @param {TWalletName} [selectedWallet]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ */
+export const injectFakeTransaction = async ({
+	id = 'fake-transaction',
+	fakeTx,
+	selectedWallet,
+	selectedNetwork,
+}: {
+	id?: string;
+	fakeTx?: IFormattedTransactions;
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+}): Promise<Result<string>> => {
+	try {
+		if (!selectedNetwork) {
+			selectedNetwork = getSelectedNetwork();
+		}
+		if (!selectedWallet) {
+			selectedWallet = getSelectedWallet();
+		}
+
+		const fakeTransaction = fakeTx ?? getFakeTransaction(id);
+
+		const payload = {
+			selectedNetwork,
+			selectedWallet,
+			transactions: fakeTransaction,
+		};
+		dispatch({
+			type: actions.UPDATE_TRANSACTIONS,
+			payload,
+		});
+		await addUnconfirmedTransactions({
+			selectedNetwork,
+			selectedWallet,
+			transactions: fakeTransaction,
+		});
+		await updateActivityList();
+
+		return ok('Successfully injected fake transactions.');
+	} catch (e) {
+		return err(e);
+	}
+};
+
+/**
  * Retrieves, formats & stores the transaction history for the selected wallet/network.
  * @param {boolean} [scanAllAddresses]
  * @param {boolean} [replaceStoredTransactions] Setting this to true will set scanAllAddresses to true as well.
@@ -651,6 +1097,10 @@ export const updateTransactions = async ({
 		selectedNetwork,
 	});
 
+	//Check existing unconfirmed transactions and remove any that are confirmed.
+	//If the tx is reorg'd or bumped from the mempool and no longer exists, the transaction will be removed from the store and updated in the activity list.
+	await checkUnconfirmedTransactions({ selectedWallet, selectedNetwork });
+
 	const history = await getAddressHistory({
 		selectedNetwork,
 		selectedWallet,
@@ -680,6 +1130,14 @@ export const updateTransactions = async ({
 		return err(formatTransactionsResponse.error.message);
 	}
 	const transactions = formatTransactionsResponse.value;
+
+	// Add unconfirmed transactions.
+	// No need to wait for this to finish.
+	addUnconfirmedTransactions({
+		selectedNetwork,
+		selectedWallet,
+		transactions,
+	});
 
 	if (replaceStoredTransactions) {
 		// No need to check the existing txs. Update with the returned formatTransactionsResponse.

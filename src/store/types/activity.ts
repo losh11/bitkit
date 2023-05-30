@@ -26,6 +26,7 @@ export type TOnchainActivityItem = {
 	isBoosted: boolean;
 	isTransfer: boolean;
 	confirmTimestamp?: number;
+	exists: boolean; // Used to determine if the transaction exists on the blockchain or if it was reorg'd/bumped from the mempool.
 };
 
 export type TLightningActivityItem = {

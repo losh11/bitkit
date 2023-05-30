@@ -106,6 +106,12 @@ export interface IKeyDerivationPathData {
 	pathObject: IKeyDerivationPath;
 }
 
+export type TProcessUnconfirmedTransactions = {
+	unconfirmedTxs: IFormattedTransactions; // zero-conf transactions
+	outdatedTxs: IUtxo[]; // Transactions that are no longer confirmed.
+	ghostTxs: string[]; // Transactions that have been removed from the mempool.
+};
+
 export type TWalletName = `wallet${number}`;
 
 export interface IWalletStore {
@@ -229,6 +235,7 @@ export interface IWallet {
 	utxos: IWalletItem<IUtxo[]>;
 	blacklistedUtxos: IWalletItem<[]>;
 	boostedTransactions: IWalletItem<IBoostedTransactions>;
+	unconfirmedTransactions: IWalletItem<IFormattedTransactions>;
 	transactions: IWalletItem<IFormattedTransactions>;
 	transaction: IWalletItem<ISendTransaction>;
 	balance: IWalletItem<number>;

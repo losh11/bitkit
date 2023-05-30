@@ -4,7 +4,7 @@ import { defaultTodosShape } from '../shapes/todos';
 import { defaultViewControllers } from '../shapes/ui';
 import { defaultChecksShape } from '../shapes/checks';
 import { defaultBackupShape } from '../shapes/backup';
-
+import { getNetworkContent } from '../shapes/wallet';
 // add migrations for every persisted store version change
 // NOTE: state reconciliation works only 2 levels deep
 // see https://github.com/rt2zz/redux-persist#state-reconciler
@@ -118,6 +118,18 @@ const migrations = {
 				lightningSettingUpStep: 0,
 			},
 		};
+	},
+	13: (state): PersistedState => {
+		const newState = { ...state };
+		// Loop through all wallets
+		for (const walletName in newState.wallet.wallets) {
+			// Add unconfirmedTransactions to each wallet, with the initial value set.
+			newState.wallet.wallets[walletName] = {
+				...newState.wallet.wallets[walletName],
+				unconfirmedTransactions: getNetworkContent({}),
+			};
+		}
+		return newState;
 	},
 };
 

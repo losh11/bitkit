@@ -9,6 +9,8 @@ import {
 	IActivityItem,
 	TOnchainActivityItem,
 } from '../../store/types/activity';
+import { err, ok, Result } from '@synonymdev/result';
+import { getActivityStore } from '../../store/helpers';
 
 /**
  * Converts a formatted transaction to an activity item
@@ -45,6 +47,7 @@ export const onChainTransactionToActivityItem = ({
 	});
 
 	return {
+		exists: true,
 		id: transaction.txid,
 		activityType: EActivityType.onchain,
 		txType: transaction.type,
@@ -62,6 +65,20 @@ export const onChainTransactionToActivityItem = ({
 };
 
 /**
+ * Retrieves an activity item by its id.
+ * @param {string} id
+ * @returns Result<IActivityItem>
+ */
+export const getActivityItemById = (id: string): Result<IActivityItem> => {
+	const activities = getActivityStore().items;
+	const activity = activities.find((item) => item.id === id);
+	if (!activity) {
+		return err('Activity item not found');
+	}
+	return ok(activity);
+};
+
+/**
  * Appends any new activity items while leaving known ones
  * @param {IActivityItem[]} oldItems
  * @param {IActivityItem[]} newItems
@@ -71,16 +88,26 @@ export const mergeActivityItems = (
 	oldItems: IActivityItem[],
 	newItems: IActivityItem[],
 ): IActivityItem[] => {
+	const newItemIds = new Map(
+		newItems.map((item) => [`${item.activityType}${item.id}`, item]),
+	);
 	const reduced = oldItems.filter(
-		(oldItem) =>
-			!newItems.find((newItem) => {
-				return (
-					newItem.activityType === oldItem.activityType &&
-					newItem.id === oldItem.id
-				);
-			}),
+		(item) => !newItemIds.has(`${item.activityType}${item.id}`),
 	);
 	const mergedItems = reduced.concat(newItems);
+
+	// Check if sorting is necessary (This is faster than performing the sort every time)
+	let needsSorting = false;
+	for (let i = 1; i < mergedItems.length; i++) {
+		if (mergedItems[i].timestamp > mergedItems[i - 1].timestamp) {
+			needsSorting = true;
+			break;
+		}
+	}
+
+	if (!needsSorting) {
+		return mergedItems;
+	}
 
 	// 'Received' should be before 'Sent' if they have same timestamp
 	const sortOrder = ['received', 'sent'];

@@ -51,6 +51,8 @@ import {
 } from '../../store/helpers';
 import {
 	addAddresses,
+	clearAddresses,
+	clearTransactions,
 	clearUtxos,
 	generateNewReceiveAddress,
 	resetAddressIndexes,
@@ -68,6 +70,7 @@ import { updateActivityList } from '../../store/actions/activity';
 import { getByteCount } from './transactions';
 import {
 	getAddressHistory,
+	getBlockHeader,
 	getTransactions,
 	getTransactionsFromInputs,
 	isConnectedElectrum,
@@ -2664,13 +2667,17 @@ export const getAddressIndexInfo = ({
  * the app will rescan the wallet's addresses from index zero.
  * @param selectedWallet
  * @param selectedNetwork
+ * @param {boolean} [shouldClearAddresses] - Clears and re-generates all addresses when true.
+ * @returns {Promise<Result<string>>}
  */
 export const rescanAddresses = async ({
 	selectedWallet,
 	selectedNetwork,
+	shouldClearAddresses = true,
 }: {
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
+	shouldClearAddresses?: boolean;
 }): Promise<Result<string>> => {
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
@@ -2678,6 +2685,10 @@ export const rescanAddresses = async ({
 	if (!selectedWallet) {
 		selectedWallet = getSelectedWallet();
 	}
+	if (shouldClearAddresses) {
+		clearAddresses({ selectedWallet, selectedNetwork });
+	}
+	clearTransactions({ selectedWallet, selectedNetwork });
 	await clearUtxos({ selectedWallet, selectedNetwork }).then();
 	await resetAddressIndexes({ selectedWallet, selectedNetwork });
 	// Wait to generate our zero index addresses.
@@ -2689,6 +2700,7 @@ export const rescanAddresses = async ({
 		selectedWallet,
 		selectedNetwork,
 		updateAllAddressTypes: true,
+		showNotification: false,
 	});
 };
 
@@ -2724,4 +2736,90 @@ export const createZeroIndexAddresses = async ({
 			});
 		}),
 	);
+};
+
+/**
+ * Returns the current wallet's unconfirmed transactions.
+ * @param {TWalletName} [selectedWallet]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @returns {Promise<Result<IFormattedTransactions>>}
+ */
+export const getUnconfirmedTransactions = async ({
+	selectedWallet,
+	selectedNetwork,
+}: {
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+}): Promise<Result<IFormattedTransactions>> => {
+	if (!selectedWallet) {
+		selectedWallet = getSelectedWallet();
+	}
+	if (!selectedNetwork) {
+		selectedNetwork = getSelectedNetwork();
+	}
+
+	const { currentWallet } = getCurrentWallet({
+		selectedWallet,
+		selectedNetwork,
+	});
+
+	return ok(currentWallet?.unconfirmedTransactions[selectedNetwork] ?? {});
+};
+
+/**
+ * Returns the number of confirmations for a given block height.
+ * @param {number} height
+ * @param {number} [currentHeight]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @returns {number}
+ */
+export const blockHeightToConfirmations = ({
+	blockHeight,
+	currentHeight,
+	selectedNetwork,
+}: {
+	blockHeight?: number;
+	currentHeight?: number;
+	selectedNetwork?: TAvailableNetworks;
+}): number => {
+	if (!blockHeight) {
+		return 0;
+	}
+	if (!currentHeight) {
+		const header = getBlockHeader({ selectedNetwork });
+		currentHeight = header.height;
+	}
+	if (currentHeight < blockHeight) {
+		return 0;
+	}
+	return currentHeight - blockHeight + 1;
+};
+
+/**
+ * Returns the block height for a given number of confirmations.
+ * @param {number} confirmations
+ * @param {number} [currentHeight]
+ * @param {TAvailableNetworks} [selectedNetwork]
+ * @returns {number}
+ */
+export const confirmationsToBlockHeight = ({
+	confirmations,
+	currentHeight,
+	selectedNetwork,
+}: {
+	confirmations: number;
+	currentHeight?: number;
+	selectedNetwork?: TAvailableNetworks;
+}): number => {
+	if (!selectedNetwork) {
+		selectedNetwork = getSelectedNetwork();
+	}
+	if (!currentHeight) {
+		const header = getBlockHeader({ selectedNetwork });
+		currentHeight = header.height;
+	}
+	if (confirmations > currentHeight) {
+		return 0;
+	}
+	return currentHeight - confirmations;
 };

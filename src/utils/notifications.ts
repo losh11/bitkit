@@ -4,6 +4,10 @@ import { __E2E__ } from '../constants/env';
 type AppNotification = {
 	title?: string;
 	message: string;
+	autoHide?: boolean;
+	visibilityTime?: number;
+	topOffset?: number;
+	bottomOffset?: number;
 };
 
 const defaultOptions = {
@@ -14,7 +18,11 @@ const defaultOptions = {
 };
 
 export const showErrorNotification = (
-	{ title = 'Something went wrong', message }: AppNotification,
+	{
+		title = 'Something went wrong',
+		message = ' ', // Toast.show fails if we accidentally provide an empty string
+		...options
+	}: AppNotification,
 	position: ToastPosition = 'top',
 ): void => {
 	if (__E2E__) {
@@ -24,14 +32,15 @@ export const showErrorNotification = (
 	Toast.show({
 		type: 'error',
 		text1: title,
-		text2: message || ' ', // Toast.show fails if we accidentally provide an empty string
+		text2: message,
 		...defaultOptions,
+		...options,
 		position,
 	});
 };
 
 export const showSuccessNotification = (
-	{ title = 'Success!', message }: AppNotification,
+	{ title = 'Success!', message, ...options }: AppNotification,
 	position: ToastPosition = 'top',
 ): void => {
 	if (__E2E__) {
@@ -41,14 +50,15 @@ export const showSuccessNotification = (
 	Toast.show({
 		type: 'success',
 		text1: title,
-		text2: message || ' ', // Toast.show fails if we accidentally provide an empty string
+		text2: message,
 		...defaultOptions,
+		...options,
 		position,
 	});
 };
 
 export const showInfoNotification = (
-	{ title = '', message }: AppNotification,
+	{ title = '', message, ...options }: AppNotification,
 	position: ToastPosition = 'top',
 ): void => {
 	if (__E2E__) {
@@ -58,8 +68,9 @@ export const showInfoNotification = (
 	Toast.show({
 		type: 'info',
 		text1: title,
-		text2: message || ' ', // Toast.show fails if we accidentally provide an empty string
+		text2: message,
 		...defaultOptions,
+		...options,
 		position,
 	});
 };
