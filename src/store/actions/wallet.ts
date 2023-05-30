@@ -839,7 +839,7 @@ export const checkUnconfirmedTransactions = async ({
 			// Notify user that a reorg has occurred and that the transaction has been pushed back into the mempool.
 			const singular = i18n.t('wallet:reorg_msg_begin_singular');
 			const plural = i18n.t('wallet:reorg_msg_begin_plural');
-			await showInfoNotification({
+			showInfoNotification({
 				title: i18n.t('wallet:reorg_detected'),
 				message: `${outdatedTxs.length} ${
 					outdatedTxs.length === 1 ? singular : plural
@@ -962,8 +962,9 @@ export const updateGhostTransactions = async ({
  * @param {TWalletName} [selectedWallet]
  * @param {TAvailableNetworks} [selectedNetwork]
  * @param {IFormattedTransactions} transactions
+ * @returns {Result<string>}
  */
-export const addUnconfirmedTransactions = async ({
+export const addUnconfirmedTransactions = ({
 	selectedWallet,
 	selectedNetwork,
 	transactions,
@@ -971,7 +972,7 @@ export const addUnconfirmedTransactions = async ({
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
 	transactions: IFormattedTransactions;
-}): Promise<Result<string>> => {
+}): Result<string> => {
 	try {
 		if (!selectedNetwork) {
 			selectedNetwork = getSelectedNetwork();
@@ -1136,7 +1137,7 @@ export const updateTransactions = async ({
 		selectedNetwork,
 		selectedWallet,
 		transactions,
-	}).then();
+	});
 
 	if (replaceStoredTransactions) {
 		// No need to check the existing txs. Update with the returned formatTransactionsResponse.
