@@ -1,4 +1,9 @@
-import { ColorValue, Platform, Switch as RNSwitch } from 'react-native';
+import {
+	ColorValue,
+	Platform,
+	Switch as RNSwitch,
+	ScrollViewProps,
+} from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaProvider as _SafeAreaProvider } from 'react-native-safe-area-context';
 import { BottomSheetTextInput as _BottomSheetTextInput } from '@gorhom/bottom-sheet';
@@ -66,11 +71,13 @@ export const AnimatedView = styled(Animated.View)<ComponentProps>((props) => ({
 		: props.theme.colors.background,
 }));
 
-export const ScrollView = styled.ScrollView<ComponentProps>((props) => ({
+export const ScrollView = styled.ScrollView.attrs<ScrollViewProps>((props) => ({
 	backgroundColor: props.color
 		? props.theme.colors[props.color]
 		: props.theme.colors.background,
-}));
+	keyboardShouldPersistTaps: 'handled',
+	...props,
+}))({});
 
 export const TouchableOpacity = styled.TouchableOpacity<ComponentProps>(
 	(props) => ({
