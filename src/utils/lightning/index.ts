@@ -103,7 +103,7 @@ export const wipeLdkStorage = async ({
 		selectedNetwork = getSelectedNetwork();
 	}
 
-	await ldk.reset();
+	await ldk.stop();
 	const path = `${RNFS.DocumentDirectoryPath}/ldk/${lm.account.name}`;
 
 	const deleteAllFiles = async (dirpath: string): Promise<void> => {
@@ -159,7 +159,7 @@ export const setupLdk = async ({
 		}
 
 		// start from a clean slate
-		await resetLdk();
+		await ldk.stop();
 
 		const account = await getAccount({ selectedWallet });
 		if (account.isErr()) {
@@ -414,13 +414,13 @@ export const unsubscribeFromLightningSubscriptions = (): void => {
 	onSpendableOutputsSubscription?.remove();
 };
 
-export const resetLdk = async (): Promise<Result<string>> => {
+export const restartLdk = async (): Promise<Result<string>> => {
 	// wait for interactions/animations to be completed
 	await new Promise((resolve) => {
 		InteractionManager.runAfterInteractions(() => resolve(null));
 	});
 
-	return await ldk.reset();
+	return await ldk.restart();
 };
 
 /**
@@ -450,8 +450,7 @@ export const refreshLdk = async ({
 
 		const isRunning = await isLdkRunning();
 		if (!isRunning) {
-			await resetLdk();
-			// Attempt to reset LDK.
+			// Attempt to setup and start LDK.
 			const setupResponse = await setupLdk({
 				selectedNetwork,
 				selectedWallet,

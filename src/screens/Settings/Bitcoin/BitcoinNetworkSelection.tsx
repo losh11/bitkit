@@ -18,7 +18,7 @@ import { connectToElectrum } from '../../../utils/wallet/electrum';
 import { startWalletServices } from '../../../utils/startup';
 import { EAvailableNetworks } from '../../../utils/networks';
 import { getNetworkData } from '../../../utils/helpers';
-import { resetLdk } from '../../../utils/lightning';
+import { restartLdk } from '../../../utils/lightning';
 import {
 	getCurrentWallet,
 	getSelectedAddressType,
@@ -62,7 +62,7 @@ const BitcoinNetworkSelection = ({
 								addressType,
 							});
 							// Switching networks requires us to reset LDK.
-							await resetLdk();
+							await restartLdk();
 							// Start wallet services with the newly selected network.
 							await startWalletServices({ selectedNetwork: network });
 							await updateOnchainFeeEstimates({

@@ -78,7 +78,7 @@ import {
 	resetActivityStore,
 	updateActivityList,
 } from '../../../store/actions/activity';
-import { resetLdk } from '../../../utils/lightning';
+import { restartLdk } from '../../../utils/lightning';
 import { startWalletServices } from '../../../utils/startup';
 import { updateOnchainFeeEstimates } from '../../../store/actions/fees';
 import { viewControllerIsOpenSelector } from '../../../store/reselect/ui';
@@ -820,7 +820,7 @@ const AddressViewer = ({
 				addressType: config.addressType,
 			});
 			// Switching networks requires us to reset LDK.
-			await resetLdk();
+			await restartLdk();
 			// Start wallet services with the newly selected network.
 			await startWalletServices({
 				selectedNetwork: config.selectedNetwork,
