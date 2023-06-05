@@ -1176,7 +1176,10 @@ export const updateTransactions = async ({
 			formattedTransactions[txid] = {
 				...transactions[txid],
 				// Keep the previous timestamp if the tx is not new.
-				timestamp: storedTransactions[txid]?.timestamp ?? Date.now(),
+				timestamp:
+					storedTransactions[txid]?.timestamp ??
+					transactions[txid]?.timestamp ??
+					Date.now(),
 			};
 		}
 
