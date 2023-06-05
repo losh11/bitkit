@@ -3,8 +3,9 @@ import {
 	deriveLinkingKeys,
 	getLNURLParams,
 	signK1,
-	LNURLAuthParams,
 } from '@synonymdev/react-native-lnurl';
+import { LNURLAuthParams } from 'js-lnurl';
+
 import { EAvailableNetworks } from '@synonymdev/react-native-lnurl/dist/utils/types';
 
 const mnemonic =
