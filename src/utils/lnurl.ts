@@ -3,11 +3,13 @@ import {
 	createPayRequestUrl,
 	createWithdrawCallbackUrl,
 	lnurlAuth as lnAuth,
+} from '@synonymdev/react-native-lnurl';
+import {
 	LNURLAuthParams,
 	LNURLChannelParams,
 	LNURLPayParams,
 	LNURLWithdrawParams,
-} from '@synonymdev/react-native-lnurl';
+} from 'js-lnurl';
 import { err, ok, Result } from '@synonymdev/result';
 
 import {
