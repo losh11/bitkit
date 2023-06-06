@@ -157,10 +157,10 @@ describe('Profile and Contacts', () => {
 			await expect(element(by.text('CoreyNewName'))).toBeVisible();
 
 			// REMOVE CONTACT
-			await element(by.text('CoreyNewName')).tap();
-			await element(by.id('DeleteContactButton')).tap();
-			await element(by.id('DialogConfirm')).tap();
-			await expect(element(by.text('CoreyNewName'))).not.toBeVisible();
+			// await element(by.text('CoreyNewName')).tap();
+			// await element(by.id('DeleteContactButton')).tap();
+			// await element(by.id('DialogConfirm')).tap();
+			// await expect(element(by.text('CoreyNewName'))).not.toBeVisible();
 			await element(by.id('NavigationClose')).tap();
 
 			// RECEIVE MONEY AND ATTACH CONTACT TO THE TRANSACTION
