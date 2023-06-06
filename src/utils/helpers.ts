@@ -425,18 +425,20 @@ export const timeAgo = (timestamp: number): string => {
 	});
 };
 
-export const openURL = async (url: string): Promise<void> => {
+export const openURL = async (url: string): Promise<boolean> => {
 	const supported = await Linking.canOpenURL(url);
-
 	try {
 		if (supported) {
 			await Linking.openURL(url);
+			return true;
 		} else {
 			console.log('Cannot open url: ', url);
+			return false;
 		}
 	} catch (e) {
 		console.log('Cannot open url: ', url);
 		console.error('Error open url: ', e);
+		return false;
 	}
 };
 
