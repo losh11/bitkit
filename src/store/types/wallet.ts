@@ -209,6 +209,7 @@ export interface ISendTransaction {
 	tags: string[];
 	slashTagsUrl?: string;
 	lightningInvoice?: string;
+	fromAddressViewer?: boolean;
 }
 
 export interface IBoostedTransaction {
