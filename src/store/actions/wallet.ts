@@ -246,6 +246,43 @@ export const updateAddressIndexes = async ({
 				lastUsedChangeAddressIndex = result.lastUsedChangeAddressIndex;
 			}
 
+			//Final check to ensure that both addresses and change addresses do not exceed the gap limit/scanning threshold.
+			//If either does, we generate a new addresses and/or change address at +1 the last used index.
+			if (
+				Math.abs(addressIndex.index - lastUsedAddressIndex.index) > GAP_LIMIT
+			) {
+				const _addressIndex = await generateAddresses({
+					selectedWallet,
+					selectedNetwork,
+					addressType: addressTypeKey,
+					addressAmount: 1,
+					changeAddressAmount: 0,
+					addressIndex: lastUsedAddressIndex.index + 1,
+				});
+				if (_addressIndex.isErr()) {
+					return err(_addressIndex.error.message);
+				}
+				addressIndex = _addressIndex.value.addresses[0];
+			}
+
+			if (
+				Math.abs(changeAddressIndex.index - lastUsedChangeAddressIndex.index) >
+				GAP_LIMIT
+			) {
+				const _changeAddressIndex = await generateAddresses({
+					selectedWallet,
+					selectedNetwork,
+					addressType: addressTypeKey,
+					addressAmount: 0,
+					changeAddressAmount: 1,
+					changeAddressIndex: lastUsedChangeAddressIndex.index + 1,
+				});
+				if (_changeAddressIndex.isErr()) {
+					return err(_changeAddressIndex.error.message);
+				}
+				changeAddressIndex = _changeAddressIndex.value.changeAddresses[0];
+			}
+
 			dispatch({
 				type: actions.UPDATE_ADDRESS_INDEX,
 				payload: {
