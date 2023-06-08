@@ -283,6 +283,20 @@ export const updateAddressIndexes = async ({
 				changeAddressIndex = _changeAddressIndex.value.changeAddresses[0];
 			}
 
+			//Ensure that the address indexes are integers.
+			if (!Number.isInteger(addressIndex.index)) {
+				return err('Invalid address index.');
+			}
+			if (!Number.isInteger(changeAddressIndex.index)) {
+				return err('Invalid change address index.');
+			}
+			if (!Number.isInteger(lastUsedAddressIndex.index)) {
+				return err('Invalid last used address index.');
+			}
+			if (!Number.isInteger(lastUsedChangeAddressIndex.index)) {
+				return err('Invalid last used change address index.');
+			}
+
 			dispatch({
 				type: actions.UPDATE_ADDRESS_INDEX,
 				payload: {
