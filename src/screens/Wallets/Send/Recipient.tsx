@@ -33,6 +33,7 @@ import {
 import {
 	resetSendTransaction,
 	setupOnChainTransaction,
+	updateSendTransaction,
 } from '../../../store/actions/wallet';
 
 const imageSrc = require('../../../assets/illustrations/coin-stack-logo.png');
@@ -116,15 +117,26 @@ const Recipient = ({
 	const onContinue = async (): Promise<void> => {
 		await Keyboard.dismiss();
 
-		// make sure transaction is up-to-date when navigating back and forth
-		await processInputData({
-			data: textFieldValue,
-			source: 'send',
-			showErrors: false,
-			sdk,
-			selectedNetwork,
-			selectedWallet,
-		});
+		if (transaction?.fromAddressViewer) {
+			//Skip processInputData if from address viewer so-as to not lose inputs.
+			updateSendTransaction({
+				selectedWallet,
+				selectedNetwork,
+				transaction: {
+					fromAddressViewer: false,
+				},
+			});
+		} else {
+			// make sure transaction is up-to-date when navigating back and forth
+			await processInputData({
+				data: textFieldValue,
+				source: 'send',
+				showErrors: false,
+				sdk,
+				selectedNetwork,
+				selectedWallet,
+			});
+		}
 
 		if (transaction.lightningInvoice && transaction.outputs[0].value > 0) {
 			navigation.navigate('ReviewAndSend');

@@ -1125,6 +1125,7 @@ export const updateFee = ({
 	const totalTransactionValue = getTransactionOutputValue({
 		selectedWallet,
 		selectedNetwork,
+		outputs,
 	});
 	const newTotalAmount = totalTransactionValue + newFee;
 	const _transaction: Partial<ISendTransaction> = {
@@ -1508,8 +1509,23 @@ export const getMaxSendAmount = ({
 				selectedNetwork,
 			});
 
+			const inputValue = getTransactionInputValue({
+				selectedNetwork,
+				selectedWallet,
+				inputs: transaction.inputs,
+			});
+			const amount = onchainBalance > inputValue ? onchainBalance : inputValue;
+
 			const currentWallet = getWalletStore().wallets[selectedWallet];
-			const utxos = currentWallet?.utxos[selectedNetwork] || [];
+			let utxos: IUtxo[] = [];
+			//Ensure we add the larger utxo set for a more accurate fee.
+			if (
+				transaction.inputs.length > currentWallet?.utxos[selectedNetwork].length
+			) {
+				utxos = transaction.inputs;
+			} else {
+				utxos = currentWallet?.utxos[selectedNetwork] ?? [];
+			}
 			const fees = getFeesStore().onchain;
 			const { transactionSpeed, customFeeRate } = getSettingsStore();
 
@@ -1540,11 +1556,11 @@ export const getMaxSendAmount = ({
 			});
 
 			const maxAmount = {
-				amount: onchainBalance - fee,
+				amount: amount - fee,
 				fee,
 			};
 
-			if (onchainBalance <= fee) {
+			if (amount <= fee) {
 				return err('Balance is too low to spend.');
 			}
 

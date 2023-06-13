@@ -121,6 +121,7 @@ export const defaultSendTransaction: ISendTransaction = {
 	max: false,
 	tags: [],
 	lightningInvoice: '',
+	fromAddressViewer: false, //When true, ensures tx inputs are not cleared when sweeping from address viewer.
 };
 
 export const defaultAddressContent: Readonly<IAddress> = {

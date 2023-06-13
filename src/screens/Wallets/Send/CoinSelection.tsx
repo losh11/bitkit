@@ -90,6 +90,27 @@ const CoinSelection = ({
 	const [autoSelectionEnabled, setAutoSelectionEnabled] = useState(
 		transaction.inputs.length === utxos.length,
 	);
+	const inputs = useMemo(() => {
+		return transaction.inputs;
+	}, [transaction.inputs]);
+
+	//Combine known utxo's with current transaction inputs in the event we're using utxo's from the address viewer.
+	const combinedUtxos = useMemo(() => {
+		const combined: IUtxo[] = [...inputs, ...utxos];
+		return combined.reduce((acc: IUtxo[], current) => {
+			const x = acc.find(
+				(item) =>
+					item.index === current.index &&
+					item.tx_pos === current.tx_pos &&
+					item.value === current.value,
+			);
+			if (!x) {
+				return acc.concat([current]);
+			} else {
+				return acc;
+			}
+		}, []);
+	}, [inputs, utxos]);
 
 	const preference = useMemo(
 		() => t(`preference_${coinSelectPreference}`),
@@ -128,7 +149,7 @@ const CoinSelection = ({
 		}
 
 		// If disabled, iterate over all utxos and re-add them to inputs if previously removed.
-		utxos.forEach((utxo) => {
+		combinedUtxos.forEach((utxo) => {
 			const key = getUtxoKey(utxo);
 			const isEnabled = inputKeys.includes(key);
 			if (!isEnabled) {
@@ -156,7 +177,7 @@ const CoinSelection = ({
 						/>
 					</View>
 
-					{utxos.map((item) => {
+					{combinedUtxos.map((item) => {
 						const key = getUtxoKey(item);
 						const isEnabled = inputKeys.includes(key);
 						const onPress = (): void => {

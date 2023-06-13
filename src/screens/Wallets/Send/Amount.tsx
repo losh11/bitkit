@@ -139,6 +139,7 @@ const Amount = ({ navigation }: SendScreenProps<'Amount'>): ReactElement => {
 			amount,
 			selectedWallet,
 			selectedNetwork,
+			transaction,
 		});
 		if (result.isErr()) {
 			return;
@@ -155,7 +156,7 @@ const Amount = ({ navigation }: SendScreenProps<'Amount'>): ReactElement => {
 		selectedWallet,
 		selectedNetwork,
 		coinSelectAuto,
-		transaction.lightningInvoice,
+		transaction,
 		navigation,
 	]);
 

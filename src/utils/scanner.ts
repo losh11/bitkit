@@ -19,6 +19,7 @@ import {
 
 import {
 	getOnchainTransactionData,
+	getTransactionInputValue,
 	parseOnChainPaymentRequest,
 } from './wallet/transactions';
 import { getLightningStore } from '../store/helpers';
@@ -523,10 +524,26 @@ export const processBitcoinTransactionData = async ({
 		let error: { title: string; message: string } | undefined; //Information that will be passed as a notification.
 		let requestedAmount = 0; //Amount requested in sats by the provided invoice.
 
-		const { onchainBalance, spendingBalance } = getBalance({
+		let { onchainBalance, spendingBalance } = getBalance({
 			selectedWallet,
 			selectedNetwork,
 		});
+		const transaction = getOnchainTransactionData({
+			selectedWallet,
+			selectedNetwork,
+		});
+		if (transaction.isErr()) {
+			return err(transaction.error.message);
+		}
+		const inputValue = getTransactionInputValue({
+			selectedWallet,
+			selectedNetwork,
+			inputs: transaction.value.inputs,
+		});
+		// In the event we have preset inputs from address viewer.
+		if (inputValue > onchainBalance) {
+			onchainBalance = inputValue;
+		}
 		const openLightningChannels =
 			getLightningStore().nodes[selectedWallet].openChannelIds[selectedNetwork];
 
@@ -598,15 +615,11 @@ export const processBitcoinTransactionData = async ({
 							amount: requestedAmount - onchainBalance,
 						}),
 					});
-					const transaction = getOnchainTransactionData({
-						selectedWallet,
-						selectedNetwork,
-					});
 
 					// If the user already specified an amount in the app, don't override it.
 					// Otherwise, set sats to 0.
 					let sats = 0;
-					if (transaction.isOk() && transaction.value.outputs) {
+					if (transaction.value.outputs) {
 						sats = transaction.value.outputs[0]?.value ?? 0;
 					}
 					response = {
