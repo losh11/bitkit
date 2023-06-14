@@ -29,6 +29,7 @@ import {
 	getScriptPubKeyHistory,
 	getTransactionMerkle,
 	getTransactions,
+	transactionExists,
 } from '../wallet/electrum';
 import {
 	getBalance,
@@ -621,7 +622,7 @@ export const getBestBlock = async (
 export const getTransactionData = async (
 	txId: string = '',
 	selectedNetwork?: TAvailableNetworks,
-): Promise<TTransactionData> => {
+): Promise<TTransactionData | undefined> => {
 	let transactionData = DefaultTransactionDataShape;
 	try {
 		const data = [{ tx_hash: txId }];
@@ -633,9 +634,18 @@ export const getTransactionData = async (
 			selectedNetwork,
 		});
 
+		//Unable to reach Electrumm server.
 		if (response.isErr()) {
 			return transactionData;
 		}
+
+		const txData = response.value.data[0];
+
+		if (!transactionExists(txData)) {
+			//Transaction was removed from the mempool or potentially reorg'd out of the chain.
+			return undefined;
+		}
+
 		const {
 			confirmations,
 			hex: hex_encoded_tx,

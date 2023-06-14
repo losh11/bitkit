@@ -62,6 +62,7 @@ import {
 	getAddressHistory,
 	getTransactions,
 	getUtxos,
+	transactionExists,
 } from '../../utils/wallet/electrum';
 import { EFeeId } from '../types/fees';
 import { ETransactionSpeed } from '../types/settings';
@@ -786,19 +787,7 @@ export const processUnconfirmedTransactions = async ({
 		const ghostTxs: string[] = []; //Transactions that have been removed from the mempool and are no longer in the blockchain.
 		txs.value.data.forEach((txData: ITransaction<IUtxo>) => {
 			// Check if the transaction has been removed from the mempool/still exists.
-			if (
-				//TODO: Update types for electrum response.
-				// @ts-ignore
-				txData?.error &&
-				//TODO: Update types for electrum response.
-				// @ts-ignore
-				txData?.error?.message &&
-				/No such mempool or blockchain transaction|Invalid tx hash/.test(
-					//TODO: Update types for electrum response.
-					// @ts-ignore
-					txData?.error?.message,
-				)
-			) {
+			if (!transactionExists(txData)) {
 				//Transaction may have been removed/bumped from the mempool or potentially reorg'd out.
 				ghostTxs.push(txData.data.tx_hash);
 				return;
