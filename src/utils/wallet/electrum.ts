@@ -365,6 +365,32 @@ interface IGetTransactions {
 	network: string;
 	data: ITransaction<IUtxo>[];
 }
+
+/**
+ * Determines whether a transaction exists based on the transaction response from electrum.
+ * @param {ITransaction<IUtxo>} txData
+ * @returns {boolean}
+ */
+export const transactionExists = (txData: ITransaction<IUtxo>): boolean => {
+	if (
+		//TODO: Update types for electrum response.
+		// @ts-ignore
+		txData?.error &&
+		//TODO: Update types for electrum response.
+		// @ts-ignore
+		txData?.error?.message &&
+		/No such mempool or blockchain transaction|Invalid tx hash/.test(
+			//TODO: Update types for electrum response.
+			// @ts-ignore
+			txData?.error?.message,
+		)
+	) {
+		//Transaction was removed/bumped from the mempool or potentially reorg'd out.
+		return false;
+	}
+	return true;
+};
+
 /**
  * Returns available transactions from electrum based on the provided txHashes.
  * @param {ITxHash[]} txHashes
