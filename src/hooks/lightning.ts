@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { TChannel } from '@synonymdev/react-native-ldk';
+import { IGetOrderResponse } from '@synonymdev/blocktank-client';
 
 import { ellipsis } from '../utils/helpers';
 import Store from '../store/types';
 import { TUseChannelBalance } from '../store/types/lightning';
-import { blocktankNodeInfoSelector } from '../store/reselect/blocktank';
 import {
 	selectedNetworkSelector,
 	selectedWalletSelector,
@@ -15,6 +15,7 @@ import {
 	openChannelsSelector,
 	openChannelIdsSelector,
 } from '../store/reselect/lightning';
+import { usePaidBlocktankOrders } from './blocktank';
 
 /**
  * Returns the lightning balance of all known open channels.
@@ -110,19 +111,22 @@ export const useLightningChannelBalance = (
 /**
  * Returns the name of a channel.
  * @param {TChannel} channel
+ * @param {IGetOrderResponse} blocktankOrder
  * @returns {string}
  */
-export const useLightningChannelName = (channel: TChannel): string => {
-	const blocktankNodeInfo = useSelector(blocktankNodeInfoSelector);
-	const isBlocktankChannel =
-		channel.counterparty_node_id === blocktankNodeInfo.public_key;
-	const shortChannelId = ellipsis(channel.channel_id, 10);
+export const useLightningChannelName = (
+	channel: TChannel,
+	blocktankOrder?: IGetOrderResponse,
+): string => {
+	const paidBlocktankOrders = usePaidBlocktankOrders();
 
-	if (isBlocktankChannel) {
-		return `Blocktank ${
-			channel.inbound_scid_alias?.toString() ?? shortChannelId
-		}`;
+	if (blocktankOrder) {
+		const index = paidBlocktankOrders.findIndex(
+			(order) => order._id === blocktankOrder._id,
+		);
+		return `Connection ${index + 1}`;
 	} else {
+		const shortChannelId = ellipsis(channel.channel_id, 10);
 		return channel.inbound_scid_alias?.toString() ?? shortChannelId;
 	}
 };
