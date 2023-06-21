@@ -45,6 +45,7 @@ const SettingUp = ({
 			<NavigationHeader
 				title={t('add_instant_payments')}
 				displayBackButton={false}
+				onClosePress={(): void => navigation.navigate('Wallet')}
 			/>
 			<View style={styles.content} testID="LightningSettingUp">
 				<Display color="purple">{t('setting_up_header')}</Display>
