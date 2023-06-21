@@ -128,6 +128,7 @@ const Suggestions = (): ReactElement => {
 								title={title}
 								description={description}
 								dismissable={item.dismissable}
+								temporary={item.temporary}
 								onPress={handleOnPress}
 								onClose={removeTodo}
 							/>

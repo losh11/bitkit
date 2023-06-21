@@ -420,7 +420,6 @@ const handleOrderStateChange = (order: IGetOrderResponse): void => {
 		if (!oneOtherOrderHasState([500])) {
 			// first channel
 			addTodo('lightningReady');
-			setTimeout(() => removeTodo('lightningReady'), 4000);
 			showSuccessNotification({
 				title: i18n.t('lightning:channel_opened_title'),
 				message: i18n.t('lightning:channel_opened_msg'),
@@ -431,7 +430,7 @@ const handleOrderStateChange = (order: IGetOrderResponse): void => {
 		}
 
 		// refresh LDK after channel open
-		refreshLdk({});
+		refreshLdk();
 	}
 };
 

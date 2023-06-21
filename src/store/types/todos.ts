@@ -20,6 +20,7 @@ export interface ITodo {
 	color: keyof IColors;
 	image: ImageSourcePropType;
 	dismissable: boolean;
+	temporary?: boolean;
 }
 
 export type ITodos = TTodoType[];
