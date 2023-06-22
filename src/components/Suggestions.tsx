@@ -40,7 +40,6 @@ const Suggestions = (): ReactElement => {
 	const showSuggestions = useSelector(showSuggestionsSelector);
 	const lightningSettingUpStep = useSelector(lightningSettingUpStepSelector);
 
-	const carouselStyle = useMemo(() => ({ width }), [width]);
 	const panGestureHandlerProps = useMemo(
 		() => ({ activeOffsetX: [-10, 10] }),
 		[],
@@ -101,7 +100,7 @@ const Suggestions = (): ReactElement => {
 			</Caption13Up>
 			<View style={styles.container} testID="Suggestions">
 				<Carousel
-					style={carouselStyle}
+					style={[styles.carousel, { width }]}
 					data={todoItems}
 					defaultIndex={defaultIndex}
 					loop={false}
@@ -159,6 +158,9 @@ const styles = StyleSheet.create({
 		marginLeft: 16,
 		flexDirection: 'row',
 		justifyContent: 'center',
+	},
+	carousel: {
+		overflow: 'visible',
 	},
 });
 
