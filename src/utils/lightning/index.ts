@@ -425,15 +425,6 @@ export const unsubscribeFromLightningSubscriptions = (): void => {
 	onSpendableOutputsSubscription?.remove();
 };
 
-export const restartLdk = async (): Promise<Result<string>> => {
-	// wait for interactions/animations to be completed
-	await new Promise((resolve) => {
-		InteractionManager.runAfterInteractions(() => resolve(null));
-	});
-
-	return await ldk.restart();
-};
-
 /**
  * This method syncs LDK, re-adds peers & updates lightning channels.
  * @param {TWalletName} [selectedWallet]
