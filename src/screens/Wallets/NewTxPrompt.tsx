@@ -18,7 +18,7 @@ import Lottie from 'lottie-react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Text02M } from '../../styles/text';
-import { ClockIcon } from '../../styles/icons';
+import { ClockIcon, LightningIcon } from '../../styles/icons';
 import BottomSheetWrapper from '../../components/BottomSheetWrapper';
 import Glow from '../../components/Glow';
 import AmountToggle from '../../components/AmountToggle';
@@ -34,7 +34,8 @@ import {
 import { viewControllerSelector } from '../../store/reselect/ui';
 import { EActivityType } from '../../store/types/activity';
 
-const confettiSrc = require('../../assets/lottie/confetti-orange.json');
+const confettiOrangeSrc = require('../../assets/lottie/confetti-orange.json');
+const confettiPurpleSrc = require('../../assets/lottie/confetti-purple.json');
 const imageSrc = require('../../assets/illustrations/coin-stack-x.png');
 
 const NewTxPrompt = (): ReactElement => {
@@ -102,7 +103,12 @@ const NewTxPrompt = (): ReactElement => {
 			backdrop={true}>
 			<View style={styles.container}>
 				<View style={styles.confetti} pointerEvents="none">
-					<Lottie ref={animationRef} source={confettiSrc} autoPlay loop />
+					<Lottie
+						ref={animationRef}
+						source={isOnchainItem ? confettiOrangeSrc : confettiPurpleSrc}
+						autoPlay
+						loop
+					/>
 				</View>
 				<BottomSheetNavigationHeader
 					title={t('payment_received')}
@@ -127,11 +133,20 @@ const NewTxPrompt = (): ReactElement => {
 				</View>
 
 				<TouchableOpacity style={styles.confirming} onPress={handlePress}>
-					{isOnchainItem && !activityItem?.confirmed && (
+					{isOnchainItem ? (
+						!activityItem?.confirmed && (
+							<>
+								<ClockIcon color="gray1" />
+								<Text02M color="gray1" style={styles.confirmingText}>
+									{t('payment_confirming')}
+								</Text02M>
+							</>
+						)
+					) : (
 						<>
-							<ClockIcon color="gray1" />
-							<Text02M color="gray1" style={styles.confirmingText}>
-								{t('payment_confirming')}
+							<LightningIcon color="purple" />
+							<Text02M color="purple" style={styles.confirmingText}>
+								Instant Payment
 							</Text02M>
 						</>
 					)}

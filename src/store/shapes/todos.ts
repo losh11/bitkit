@@ -36,6 +36,7 @@ const lightningReadyTodo: ITodo = {
 	color: 'purple',
 	image: imageLightning,
 	dismissable: false,
+	temporary: true,
 };
 const transferToSpendingTodo: ITodo = {
 	id: 'transferToSpending',

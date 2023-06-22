@@ -15,6 +15,8 @@ import LightningChannel, {
 	TStatus,
 } from '../../../components/LightningChannel';
 import Money from '../../../components/Money';
+import { useAppSelector } from '../../../hooks/redux';
+import { usePaidBlocktankOrders } from '../../../hooks/blocktank';
 import {
 	useLightningChannelBalance,
 	useLightningChannelName,
@@ -35,7 +37,6 @@ import {
 	channelIsOpenSelector,
 	openChannelIdsSelector,
 } from '../../../store/reselect/lightning';
-import { blocktankOrdersSelector } from '../../../store/reselect/blocktank';
 import { getStateMessage } from '../../../utils/blocktank';
 import {
 	ArrowCounterClock,
@@ -46,7 +47,6 @@ import {
 	XIcon,
 } from '../../../styles/icons';
 import type { SettingsScreenProps } from '../../../navigation/types';
-import { useAppSelector } from '../../../hooks/redux';
 import { i18nTime } from '../../../utils/i18n';
 
 export const getOrderStatus = (state: number): React.FC<SvgProps> => {
@@ -180,14 +180,13 @@ const ChannelDetails = ({
 	const { channel } = route.params;
 
 	const [txTime, setTxTime] = useState<string>();
-	const name = useLightningChannelName(channel);
 	const { spendingAvailable, receivingAvailable, capacity } =
 		useLightningChannelBalance(channel);
 	const selectedWallet = useSelector(selectedWalletSelector);
 	const selectedNetwork = useSelector(selectedNetworkSelector);
 	const enableDevOptions = useSelector(enableDevOptionsSelector);
-	const blocktankOrders = useSelector(blocktankOrdersSelector);
-	const blocktankOrder = Object.values(blocktankOrders).find((order) => {
+	const paidBlocktankOrders = usePaidBlocktankOrders();
+	const blocktankOrder = Object.values(paidBlocktankOrders).find((order) => {
 		// real channel
 		if (channel.funding_txid) {
 			return order.channel_open_tx?.transaction_id === channel.funding_txid;
@@ -196,6 +195,8 @@ const ChannelDetails = ({
 		// fake channel
 		return order._id === channel.channel_id;
 	});
+
+	const channelName = useLightningChannelName(channel, blocktankOrder);
 
 	const openChannelIds = useSelector((state: Store) => {
 		return openChannelIdsSelector(state, selectedWallet, selectedNetwork);
@@ -303,10 +304,8 @@ const ChannelDetails = ({
 		<ThemedView style={styles.root}>
 			<SafeAreaInset type="top" />
 			<NavigationHeader
-				title={name}
-				onClosePress={(): void => {
-					navigation.navigate('Wallet');
-				}}
+				title={channelName}
+				onClosePress={(): void => navigation.navigate('Wallet')}
 			/>
 			<ScrollView contentContainerStyle={styles.content}>
 				<View style={styles.channel}>

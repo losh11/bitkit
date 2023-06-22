@@ -1,16 +1,12 @@
-import React, {
-	ReactElement,
-	memo,
-	useState,
-	useMemo,
-	useCallback,
-} from 'react';
+import React, { ReactElement, memo, useState, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import { useSelector } from 'react-redux';
 import Share from 'react-native-share';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { IGetOrderResponse } from '@synonymdev/blocktank-client';
 import { TChannel } from '@synonymdev/react-native-ldk';
 import { useTranslation } from 'react-i18next';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 import {
 	AnimatedView,
@@ -43,9 +39,8 @@ import {
 	refreshLdk,
 	setupLdk,
 } from '../../../utils/lightning';
-import { useSelector } from 'react-redux';
 import Store from '../../../store/types';
-import Clipboard from '@react-native-clipboard/clipboard';
+import { usePaidBlocktankOrders } from '../../../hooks/blocktank';
 import {
 	useLightningChannelName,
 	useLightningBalance,
@@ -146,7 +141,18 @@ const Channel = memo(
 		closed?: boolean;
 		onPress: (channel: TChannel) => void;
 	}): ReactElement => {
-		const name = useLightningChannelName(channel);
+		const paidBlocktankOrders = usePaidBlocktankOrders();
+		const blocktankOrder = Object.values(paidBlocktankOrders).find((order) => {
+			// real channel
+			if (channel.funding_txid) {
+				return order.channel_open_tx?.transaction_id === channel.funding_txid;
+			}
+
+			// fake channel
+			return order._id === channel.channel_id;
+		});
+
+		const channelName = useLightningChannelName(channel, blocktankOrder);
 
 		const getChannelStatus = (): TStatus => {
 			if (pending) {
@@ -168,7 +174,7 @@ const Channel = memo(
 						color={closed ? 'gray1' : 'white'}
 						numberOfLines={1}
 						ellipsizeMode="middle">
-						{name}
+						{channelName}
 					</Text01M>
 					<ChevronRight color="gray1" height={15} />
 				</View>
@@ -210,14 +216,13 @@ const Channels = ({
 	navigation,
 }: SettingsScreenProps<'Channels'>): ReactElement => {
 	const { t } = useTranslation('lightning');
+	const [peer, setPeer] = useState('');
 	const [showClosed, setShowClosed] = useState(false);
 	const [payingInvoice, setPayingInvoice] = useState(false);
 	const [refreshingLdk, setRefreshingLdk] = useState(false);
 	const [restartingLdk, setRestartingLdk] = useState(false);
 	const [rebroadcastingLdk, setRebroadcastingLdk] = useState(false);
 	const [spendingStuckOutputs, setSpendingStuckOutputs] = useState(false);
-
-	const [peer, setPeer] = useState('');
 
 	const colors = useColors();
 	const { onchainBalance } = useBalance();
@@ -314,10 +319,6 @@ const Channels = ({
 		setRefreshingLdk(false);
 	}, [selectedNetwork, selectedWallet]);
 
-	const addConnectionIsDisabled = useMemo(() => {
-		return onchainBalance <= TRANSACTION_DEFAULTS.recommendedBaseFee;
-	}, [onchainBalance]);
-
 	const onAddPeer = useCallback(async () => {
 		if (!peer) {
 			// Attempt to grab and set peer string from clipboard.
@@ -349,6 +350,9 @@ const Channels = ({
 			message: t('peer_saved'),
 		});
 	}, [peer, selectedNetwork, selectedWallet, t]);
+
+	const addConnectionIsDisabled =
+		onchainBalance <= TRANSACTION_DEFAULTS.recommendedBaseFee;
 
 	return (
 		<ThemedView style={styles.root}>

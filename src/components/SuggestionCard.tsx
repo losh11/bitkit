@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useMemo } from 'react';
+import React, { memo, ReactElement, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, Image, View } from 'react-native';
 import { Canvas, RadialGradient, Rect, vec } from '@shopify/react-native-skia';
 
@@ -6,6 +6,7 @@ import { Pressable } from '../styles/components';
 import { Caption13M, Text01M } from '../styles/text';
 import { XIcon } from '../styles/icons';
 import { ITodo, TTodoType } from '../store/types/todos';
+import { removeTodo } from '../store/actions/todos';
 import useColors from '../hooks/colors';
 import Card from './Card';
 
@@ -39,10 +40,12 @@ const SuggestionCard = ({
 	title,
 	description,
 	dismissable,
+	temporary,
 	onPress,
 	onClose,
 }: CardProps): ReactElement => {
 	const colors = useColors();
+	const timeout = useRef<NodeJS.Timeout>();
 
 	const containerStyle = useMemo(
 		() => [
@@ -54,6 +57,16 @@ const SuggestionCard = ({
 		],
 		[dismissable, colors.purple],
 	);
+
+	useEffect(() => {
+		if (temporary) {
+			timeout.current = setTimeout(() => removeTodo(id), 4000);
+		}
+
+		return (): void => {
+			clearTimeout(timeout.current);
+		};
+	}, [id, temporary]);
 
 	return (
 		<Card style={containerStyle} testID={`Suggestion-${id}`}>

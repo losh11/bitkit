@@ -13,7 +13,7 @@ export interface IBlocktank {
 }
 
 export type TPaidBlocktankOrders = {
-	[key: string]: string;
+	[orderId: string]: string;
 };
 
 export type TGeoBlockResponse = { error?: 'GEO_BLOCKED'; accept?: boolean };
