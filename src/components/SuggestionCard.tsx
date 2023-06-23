@@ -1,6 +1,20 @@
 import React, { memo, ReactElement, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, Image, View } from 'react-native';
-import { Canvas, RadialGradient, Rect, vec } from '@shopify/react-native-skia';
+import Animated, {
+	useSharedValue,
+	withRepeat,
+	withTiming,
+} from 'react-native-reanimated';
+import {
+	Canvas,
+	RadialGradient,
+	vec,
+	Box,
+	BoxShadow,
+	rrect,
+	rect,
+	RoundedRect,
+} from '@shopify/react-native-skia';
 
 import { Pressable } from '../styles/components';
 import { Caption13M, Text01M } from '../styles/text';
@@ -10,19 +24,53 @@ import { removeTodo } from '../store/actions/todos';
 import useColors from '../hooks/colors';
 import Card from './Card';
 
+const CARD_SIZE = 152;
+const CARD_BORDER_RADIUS = 16;
+const GLOW_OFFSET = 25;
+
 const Glow = memo(({ color }: { color: string }): ReactElement => {
 	return (
-		<Rect x={0} y={0} width={160} height={160} opacity={0.3}>
+		<RoundedRect
+			x={GLOW_OFFSET}
+			y={GLOW_OFFSET}
+			width={CARD_SIZE}
+			height={CARD_SIZE}
+			r={CARD_BORDER_RADIUS}
+			opacity={0.3}>
 			<RadialGradient c={vec(0, 0)} r={250} colors={[color, 'black']} />
-		</Rect>
+		</RoundedRect>
 	);
 });
 
-const InnerShadow = memo(({ color }: { color: string }): ReactElement => {
+const IntenseGlow = memo((): ReactElement => {
+	const shadowBlur = 15;
+	const shadowSpread = 5;
+	const borderSpread = 1;
+
 	return (
-		<Rect x={0} y={0} width={160} height={160} opacity={0.3} color={color}>
-			<RadialGradient c={vec(80, 80)} r={110} colors={['black', color]} />
-		</Rect>
+		<Box
+			box={rrect(
+				rect(GLOW_OFFSET, GLOW_OFFSET, CARD_SIZE - 2, CARD_SIZE - 2),
+				CARD_BORDER_RADIUS,
+				CARD_BORDER_RADIUS,
+			)}>
+			<BoxShadow
+				blur={shadowBlur}
+				spread={shadowSpread}
+				color="rgb(130, 65, 175)"
+			/>
+			<BoxShadow
+				blur={shadowBlur}
+				spread={shadowSpread}
+				color="rgb(130, 65, 175)"
+				inner
+			/>
+			<BoxShadow
+				blur={borderSpread}
+				spread={borderSpread}
+				color="rgb(185, 92, 232)"
+			/>
+		</Box>
 	);
 });
 
@@ -46,6 +94,7 @@ const SuggestionCard = ({
 }: CardProps): ReactElement => {
 	const colors = useColors();
 	const timeout = useRef<NodeJS.Timeout>();
+	const glowOpacity = useSharedValue(0);
 
 	const containerStyle = useMemo(
 		() => [
@@ -59,6 +108,10 @@ const SuggestionCard = ({
 	);
 
 	useEffect(() => {
+		glowOpacity.value = withRepeat(withTiming(1, { duration: 1100 }), -1, true);
+	}, [glowOpacity]);
+
+	useEffect(() => {
 		if (temporary) {
 			timeout.current = setTimeout(() => removeTodo(id), 4000);
 		}
@@ -70,13 +123,38 @@ const SuggestionCard = ({
 
 	return (
 		<Card style={containerStyle} testID={`Suggestion-${id}`}>
-			<Canvas style={styles.canvas}>
-				{dismissable ? (
-					<Glow color={colors[color]} />
-				) : (
-					<InnerShadow color={colors[color]} />
-				)}
-			</Canvas>
+			{dismissable ? (
+				<View style={styles.glowWrapper}>
+					<Canvas style={styles.canvas}>
+						<Glow color={colors[color]} />
+					</Canvas>
+				</View>
+			) : (
+				<>
+					<Animated.View style={[styles.glowWrapper, { opacity: glowOpacity }]}>
+						<Canvas style={styles.canvas}>
+							<IntenseGlow />
+						</Canvas>
+					</Animated.View>
+					<View style={styles.glowWrapper}>
+						<Canvas style={styles.canvas}>
+							<RoundedRect
+								x={GLOW_OFFSET}
+								y={GLOW_OFFSET}
+								width={CARD_SIZE}
+								height={CARD_SIZE}
+								r={CARD_BORDER_RADIUS}
+								opacity={0.4}>
+								<RadialGradient
+									c={vec(100, 100)}
+									r={100}
+									colors={['rgb(65, 32, 80)', colors[color]]}
+								/>
+							</RoundedRect>
+						</Canvas>
+					</View>
+				</>
+			)}
 			<Pressable
 				style={styles.pressable}
 				color="transparent"
@@ -107,12 +185,11 @@ const SuggestionCard = ({
 
 const styles = StyleSheet.create({
 	container: {
-		width: 152,
-		height: 152,
-		borderRadius: 16,
+		width: CARD_SIZE,
+		height: CARD_SIZE,
+		borderRadius: CARD_BORDER_RADIUS,
 		paddingHorizontal: 16,
 		paddingBottom: 14,
-		overflow: 'hidden',
 	},
 	pressable: {
 		flex: 1,
@@ -131,10 +208,15 @@ const styles = StyleSheet.create({
 		height: 80,
 		width: 80,
 	},
-	canvas: {
-		width: 160,
-		height: 160,
+	glowWrapper: {
+		width: 200,
+		height: 200,
 		position: 'absolute',
+		top: -GLOW_OFFSET,
+		left: -GLOW_OFFSET,
+	},
+	canvas: {
+		flex: 1,
 	},
 });
 
