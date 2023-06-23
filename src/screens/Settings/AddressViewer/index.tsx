@@ -14,6 +14,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { err, ok, Result } from '@synonymdev/result';
 import Clipboard from '@react-native-clipboard/clipboard';
 import fuzzysort from 'fuzzysort';
+import { ldk } from '@synonymdev/react-native-ldk';
 
 import {
 	TouchableOpacity,
@@ -78,7 +79,7 @@ import {
 	resetActivityStore,
 	updateActivityList,
 } from '../../../store/actions/activity';
-import { restartLdk } from '../../../utils/lightning';
+import { setupLdk } from '../../../utils/lightning';
 import { startWalletServices } from '../../../utils/startup';
 import { updateOnchainFeeEstimates } from '../../../store/actions/fees';
 import { viewControllerIsOpenSelector } from '../../../store/reselect/ui';
@@ -812,6 +813,7 @@ const AddressViewer = ({
 		if (selectedNetwork !== config.selectedNetwork) {
 			// Wipe existing activity
 			resetActivityStore();
+			ldk.stop();
 			// Switch to new network.
 			updateWallet({ selectedNetwork: config.selectedNetwork });
 			// Generate addresses if none exist for the newly selected wallet and network.
@@ -821,7 +823,7 @@ const AddressViewer = ({
 				addressType: config.addressType,
 			});
 			// Switching networks requires us to reset LDK.
-			await restartLdk();
+			await setupLdk({ selectedWallet, selectedNetwork });
 			// Start wallet services with the newly selected network.
 			await startWalletServices({
 				selectedNetwork: config.selectedNetwork,

@@ -1,6 +1,7 @@
 import React, { memo, ReactElement, useMemo, useState, useEffect } from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import { StyleSheet, View, Platform, TouchableOpacity } from 'react-native';
 import { Trans, useTranslation } from 'react-i18next';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 import { View as ThemedView } from '../../../styles/components';
 import { Text01S, Text01M, Text02S } from '../../../styles/text';
@@ -11,6 +12,7 @@ import BlurView from '../../../components/BlurView';
 import { getMnemonicPhrase, getBip39Passphrase } from '../../../utils/wallet';
 import { useBottomSheetBackPress } from '../../../hooks/bottomSheet';
 import { showErrorNotification } from '../../../utils/notifications';
+import { vibrate } from '../../../utils/helpers';
 import type { BackupScreenProps } from '../../../navigation/types';
 
 // Android doesn't have blur so we put a dummy mnemonic
@@ -78,16 +80,24 @@ const ShowMnemonic = ({
 				testID="SeedContaider"
 				accessibilityLabel={seed.join(' ')}>
 				<ThemedView color="gray324" style={styles.seed}>
-					<View style={styles.col}>
-						{seedToShow.slice(0, seedToShow.length / 2).map((w, i) => (
-							<Word key={i} word={w} number={i + 1} />
-						))}
-					</View>
-					<View style={styles.col}>
-						{seedToShow.slice(-seedToShow.length / 2).map((w, i) => (
-							<Word key={i} word={w} number={seedToShow.length / 2 + i + 1} />
-						))}
-					</View>
+					<TouchableOpacity
+						style={styles.seed2}
+						activeOpacity={1}
+						onLongPress={(): void => {
+							Clipboard.setString(seed.join(' '));
+							vibrate();
+						}}>
+						<View style={styles.col}>
+							{seedToShow.slice(0, seedToShow.length / 2).map((w, i) => (
+								<Word key={i} word={w} number={i + 1} />
+							))}
+						</View>
+						<View style={styles.col}>
+							{seedToShow.slice(-seedToShow.length / 2).map((w, i) => (
+								<Word key={i} word={w} number={seedToShow.length / 2 + i + 1} />
+							))}
+						</View>
+					</TouchableOpacity>
 				</ThemedView>
 
 				{!show && (
@@ -149,8 +159,10 @@ const styles = StyleSheet.create({
 		paddingTop: 32,
 		paddingBottom: 24,
 		paddingHorizontal: 16,
-		flexDirection: 'row',
 		borderRadius: 16,
+	},
+	seed2: {
+		flexDirection: 'row',
 	},
 	col: {
 		marginHorizontal: 16,

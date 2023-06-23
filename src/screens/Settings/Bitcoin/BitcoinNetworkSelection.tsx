@@ -1,6 +1,7 @@
 import React, { memo, ReactElement, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { ldk } from '@synonymdev/react-native-ldk';
 
 import { EItemType, IListData } from '../../../components/List';
 import SettingsView from '../SettingsView';
@@ -18,7 +19,7 @@ import { connectToElectrum } from '../../../utils/wallet/electrum';
 import { startWalletServices } from '../../../utils/startup';
 import { EAvailableNetworks } from '../../../utils/networks';
 import { getNetworkData } from '../../../utils/helpers';
-import { restartLdk } from '../../../utils/lightning';
+import { setupLdk } from '../../../utils/lightning';
 import {
 	getCurrentWallet,
 	getSelectedAddressType,
@@ -41,6 +42,7 @@ const BitcoinNetworkSelection = ({
 						type: EItemType.button,
 						onPress: async (): Promise<void> => {
 							navigation.goBack();
+							await ldk.stop();
 							// Wipe existing activity
 							resetActivityStore();
 							// Switch to new network.
@@ -62,7 +64,7 @@ const BitcoinNetworkSelection = ({
 								addressType,
 							});
 							// Switching networks requires us to reset LDK.
-							await restartLdk();
+							await setupLdk({ selectedWallet, selectedNetwork });
 							// Start wallet services with the newly selected network.
 							await startWalletServices({ selectedNetwork: network });
 							await updateOnchainFeeEstimates({

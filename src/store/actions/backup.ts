@@ -16,7 +16,7 @@ import {
 	setAccount,
 	setLdkStoragePath,
 } from '../../utils/lightning';
-import { TAvailableNetworks } from '../../utils/networks';
+import { EAvailableNetworks, TAvailableNetworks } from '../../utils/networks';
 import { getSelectedNetwork } from '../../utils/wallet';
 import { ISettings } from '../types/settings';
 import { updateSettings } from './settings';
@@ -497,11 +497,18 @@ export const performFullRestoreFromLatestBackup = async (
 	slashtag: Slashtag,
 ): Promise<Result<{ backupExists: boolean }>> => {
 	try {
-		const selectedNetwork = getSelectedNetwork();
-		const ldkBackupRes = await performLdkRestore({ slashtag, selectedNetwork });
-		if (ldkBackupRes.isErr()) {
-			return err(ldkBackupRes.error.message);
+		// ldk restore should be perfomed for all networks
+		for (const network of Object.values(EAvailableNetworks)) {
+			const ldkBackupRes = await performLdkRestore({
+				slashtag,
+				selectedNetwork: network,
+			});
+			if (ldkBackupRes.isErr()) {
+				return err(ldkBackupRes.error.message);
+			}
 		}
+
+		const selectedNetwork = getSelectedNetwork();
 
 		const settingsBackupRes = await performSettingsRestore({
 			slashtag,
