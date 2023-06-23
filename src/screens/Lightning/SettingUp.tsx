@@ -1,7 +1,12 @@
-import React, { ReactElement, memo, useEffect } from 'react';
+import React, { ReactElement, memo, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useFocusEffect } from '@react-navigation/native';
+import {
+	activateKeepAwake,
+	deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
 
 import { Display, Text01S } from '../../styles/text';
 import SafeAreaInset from '../../components/SafeAreaInset';
@@ -11,6 +16,8 @@ import HourglassSpinner from '../../components/HourglassSpinner';
 import ProgressSteps from '../../components/ProgressSteps';
 import { lightningSettingUpStepSelector } from '../../store/reselect/user';
 import type { LightningScreenProps } from '../../navigation/types';
+
+const TIMEOUT_DELAY = 2 * 60 * 1000; // 2 minutes
 
 const SettingUp = ({
 	navigation,
@@ -25,19 +32,25 @@ const SettingUp = ({
 		{ title: t('setting_up_step4') },
 	];
 
-	useEffect(() => {
-		let interval = setTimeout(() => {
-			navigation.navigate('Timeout');
-		}, 2 * 60 * 1000);
+	useFocusEffect(
+		useCallback(() => {
+			activateKeepAwake();
 
-		if (lightningSettingUpStep === 3) {
-			interval = setTimeout(() => navigation.navigate('Success'), 1000);
-		}
+			let timeout = setTimeout(() => {
+				navigation.navigate('Timeout');
+			}, TIMEOUT_DELAY);
 
-		return () => {
-			clearTimeout(interval);
-		};
-	}, [lightningSettingUpStep, navigation]);
+			if (lightningSettingUpStep === 3) {
+				clearTimeout(timeout);
+				timeout = setTimeout(() => navigation.navigate('Success'), 1000);
+			}
+
+			return () => {
+				clearTimeout(timeout);
+				deactivateKeepAwake();
+			};
+		}, [lightningSettingUpStep, navigation]),
+	);
 
 	return (
 		<GlowingBackground topLeft="purple">

@@ -2492,6 +2492,11 @@
     redux-thunk "^2.4.2"
     reselect "^4.1.8"
 
+"@sayem314/react-native-keep-awake@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@sayem314/react-native-keep-awake/-/react-native-keep-awake-1.2.0.tgz#72b0bbd6ed23dbef804a4c4ed431a3411e7976a2"
+  integrity sha512-ZqGkxkPWT1p0qnZRS3ZvIpg3Bfv5j6QIcKAzniPZw30dMUbAgsJvPrsJU8ai34071sQm8mlyc7LgHLZh4Rhn6A==
+
 "@shopify/react-native-skia@0.1.182":
   version "0.1.182"
   resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.182.tgz#78f14b2ceb9a007f286192444de6f3d436b4a56a"

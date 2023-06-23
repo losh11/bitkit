@@ -48,6 +48,7 @@
     "@react-navigation/native-stack": "^6.9.12",
     "@react-navigation/stack": "^6.3.16",
     "@reduxjs/toolkit": "^1.9.3",
+    "@sayem314/react-native-keep-awake": "^1.2.0",
     "@shopify/react-native-skia": "0.1.182",
     "@synonymdev/blocktank-client": "0.0.50",
     "@synonymdev/react-native-ldk": "0.0.98",
