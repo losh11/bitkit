@@ -76,7 +76,6 @@ const AdvancedSettings = ({
 						replaceStoredTransactions: true,
 						selectedWallet,
 						selectedNetwork,
-						showNotification: false,
 					});
 					setRescanning(false);
 				},

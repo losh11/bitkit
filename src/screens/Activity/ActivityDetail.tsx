@@ -238,7 +238,7 @@ const OnchainActivityDetail = ({
 	);
 
 	const handleBoost = (): void => {
-		showBottomSheet('boostPrompt', { activityItem: item });
+		showBottomSheet('boostPrompt', { onchainActivityItem: item });
 	};
 
 	const handleAddTag = (): void => {

@@ -345,15 +345,13 @@ export const handleLightningPaymentSubscription = async ({
 			timestamp: new Date().getTime(),
 		};
 		addActivityItem(activityItem);
+		showBottomSheet('newTxPrompt', { activityItem });
+		closeBottomSheet('receiveNavigation');
 		addLightningPayment({
 			invoice: invoice.value,
 			selectedWallet,
 			selectedNetwork,
 		});
-		showBottomSheet('newTxPrompt', {
-			txId: invoice.value.payment_hash,
-		});
-		closeBottomSheet('receiveNavigation');
 		await refreshLdk({ selectedWallet, selectedNetwork });
 		updateSlashPayConfig({ sdk, selectedWallet, selectedNetwork });
 	}

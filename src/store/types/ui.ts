@@ -1,4 +1,4 @@
-import { TOnchainActivityItem } from './activity';
+import { IActivityItem, TOnchainActivityItem } from './activity';
 import { SendStackParamList } from '../../navigation/bottom-sheet/SendNavigation';
 
 export type ViewControllerParamList = {
@@ -7,12 +7,12 @@ export type ViewControllerParamList = {
 	appUpdatePrompt: undefined;
 	backupNavigation: undefined;
 	backupPrompt: undefined;
-	boostPrompt: { activityItem: TOnchainActivityItem };
+	boostPrompt: { onchainActivityItem: TOnchainActivityItem };
 	closeChannelSuccess: undefined;
 	forceTransfer: undefined;
 	forgotPIN: undefined;
 	highBalance: undefined;
-	newTxPrompt: { txId: string };
+	newTxPrompt: { activityItem: IActivityItem };
 	PINNavigation: { showLaterButton: boolean };
 	profileAddDataForm: undefined;
 	receiveNavigation: undefined;
@@ -33,7 +33,8 @@ export type TUiViewController = {
 // this type is needed because reselect doesn't offer good parameter typing
 export type IViewControllerData = {
 	isOpen: boolean;
-	activityItem?: TOnchainActivityItem;
+	activityItem?: IActivityItem;
+	onchainActivityItem?: TOnchainActivityItem;
 	id?: string;
 	screen?: keyof SendStackParamList;
 	showLaterButton?: boolean;

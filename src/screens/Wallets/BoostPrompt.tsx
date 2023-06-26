@@ -266,7 +266,7 @@ const BoostForm = ({
 
 const BoostPrompt = (): ReactElement => {
 	const snapPoints = useSnapPoints('small');
-	const { isOpen, activityItem } = useAppSelector((state) =>
+	const { isOpen, onchainActivityItem } = useAppSelector((state) =>
 		viewControllerSelector(state, 'boostPrompt'),
 	);
 
@@ -283,7 +283,9 @@ const BoostPrompt = (): ReactElement => {
 					displayBackButton={false}
 				/>
 
-				{isOpen && activityItem && <BoostForm activityItem={activityItem} />}
+				{isOpen && onchainActivityItem && (
+					<BoostForm activityItem={onchainActivityItem} />
+				)}
 
 				<SafeAreaInset type="bottom" minPadding={16} />
 			</View>

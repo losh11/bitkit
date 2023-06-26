@@ -67,7 +67,6 @@ import {
 import { EFeeId } from '../types/fees';
 import { ETransactionSpeed } from '../types/settings';
 import { IHeader } from '../../utils/types/electrum';
-import { showBottomSheet, closeBottomSheet } from './ui';
 import {
 	GAP_LIMIT,
 	GENERATE_ADDRESS_AMOUNT,
@@ -1072,12 +1071,12 @@ export const injectFakeTransaction = async ({
 			type: actions.UPDATE_TRANSACTIONS,
 			payload,
 		});
-		await addUnconfirmedTransactions({
+		addUnconfirmedTransactions({
 			selectedNetwork,
 			selectedWallet,
 			transactions: fakeTransaction,
 		});
-		await updateActivityList();
+		updateActivityList();
 
 		return ok('Successfully injected fake transactions.');
 	} catch (e) {
@@ -1096,16 +1095,14 @@ export const injectFakeTransaction = async ({
 export const updateTransactions = async ({
 	scanAllAddresses = false,
 	replaceStoredTransactions = false,
-	showNotification = true,
 	selectedWallet,
 	selectedNetwork,
 }: {
 	scanAllAddresses?: boolean;
 	replaceStoredTransactions?: boolean;
-	showNotification?: boolean;
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
-}): Promise<Result<IFormattedTransactions>> => {
+}): Promise<Result<string | undefined>> => {
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
 	}
@@ -1130,7 +1127,7 @@ export const updateTransactions = async ({
 		return err(history.error.message);
 	}
 	if (!history.value.length) {
-		return ok({});
+		return ok(undefined);
 	}
 
 	const getTransactionsResponse = await getTransactions({
@@ -1170,7 +1167,7 @@ export const updateTransactions = async ({
 			},
 		});
 		updateSlashPayConfig({ sdk, selectedWallet, selectedNetwork });
-		return ok(transactions);
+		return ok(undefined);
 	}
 
 	// Handle new or updated transactions.
@@ -1215,27 +1212,21 @@ export const updateTransactions = async ({
 
 	//No new or updated transactions
 	if (!Object.keys(formattedTransactions).length) {
-		return ok(storedTransactions);
+		return ok(undefined);
 	}
 
-	const payload = {
-		transactions: formattedTransactions,
-		selectedNetwork,
-		selectedWallet,
-	};
 	dispatch({
 		type: actions.UPDATE_TRANSACTIONS,
-		payload,
+		payload: {
+			transactions: formattedTransactions,
+			selectedNetwork,
+			selectedWallet,
+		},
 	});
-
-	if (notificationTxid && showNotification) {
-		showBottomSheet('newTxPrompt', { txId: notificationTxid });
-		closeBottomSheet('receiveNavigation');
-	}
 
 	updateSlashPayConfig({ sdk, selectedWallet, selectedNetwork });
 
-	return ok(formattedTransactions);
+	return ok(notificationTxid);
 };
 
 /**
