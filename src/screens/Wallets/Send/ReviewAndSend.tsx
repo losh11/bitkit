@@ -371,6 +371,7 @@ const ReviewAndSend = ({
 		navigation.navigate('PinCheck', {
 			onSuccess: () => {
 				navigation.pop();
+				setIsLoading(true);
 				runCreateTxMethods();
 			},
 		});
@@ -799,6 +800,7 @@ const ReviewAndSend = ({
 			{showBiotmetrics && (
 				<Biometrics
 					onSuccess={(): void => {
+						setIsLoading(true);
 						setShowBiometrics(false);
 						runCreateTxMethods();
 					}}
