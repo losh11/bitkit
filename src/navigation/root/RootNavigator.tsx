@@ -1,4 +1,11 @@
-import React, { ReactElement, memo, useEffect, useRef, useState } from 'react';
+import React, {
+	ReactElement,
+	memo,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { AppState, Linking, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
 import {
@@ -16,9 +23,11 @@ import {
 import { NavigationContainer } from '../../styles/components';
 import { processInputData } from '../../utils/scanner';
 import { checkClipboardData } from '../../utils/clipboard';
+import { useRenderCount } from '../../hooks/helpers';
 import { updateUi } from '../../store/actions/ui';
-import { isAuthenticatedSelector } from '../../store/reselect/ui';
 import { resetSendTransaction } from '../../store/actions/wallet';
+import { isAuthenticatedSelector } from '../../store/reselect/ui';
+import { pinOnIdleSelector, pinSelector } from '../../store/reselect/settings';
 import AuthCheck from '../../components/AuthCheck';
 import Dialog from '../../components/Dialog';
 import WalletNavigator from '../wallet/WalletNavigator';
@@ -83,14 +92,15 @@ export const rootNavigation = {
 	},
 };
 
-export type TInitialRoutes = 'Wallet' | 'RootAuthCheck';
-
 const RootNavigator = (): ReactElement => {
 	const { t } = useTranslation('other');
 	const appState = useRef(AppState.currentState);
-	const isAuthenticated = useSelector(isAuthenticatedSelector);
-
 	const [showDialog, setShowDialog] = useState(false);
+	const [shouldCheckClipboard, setShouldCheckClipboard] = useState(false);
+	const pin = useSelector(pinSelector);
+	const pinOnIdle = useSelector(pinOnIdleSelector);
+	const isAuthenticated = useSelector(isAuthenticatedSelector);
+	const renderCount = useRenderCount();
 
 	const linking: LinkingOptions<{}> = {
 		prefixes: ['slash', 'bitcoin', 'lightning'],
@@ -139,20 +149,43 @@ const RootNavigator = (): ReactElement => {
 		await processInputData({ data: clipboardData, showErrors: false });
 	};
 
+	const onAuthSuccess = useCallback((): void => {
+		if (shouldCheckClipboard) {
+			checkClipboard().then();
+		}
+
+		setShouldCheckClipboard(false);
+		updateUi({ isAuthenticated: true });
+	}, [shouldCheckClipboard]);
+
 	useEffect(() => {
-		if (isAuthenticated) {
+		// a bit hacky, but we want to only call this on launch / after launch AuthCheck
+		if (isAuthenticated && renderCount <= 2) {
 			checkClipboardAndDeeplink().then();
 		}
 
-		// on App to foreground
 		const appStateSubscription = AppState.addEventListener(
 			'change',
-			(nextAppState) => {
+			(nextAppState): void => {
+				// on App to foreground
 				if (appState.current.match(/background/) && nextAppState === 'active') {
-					const currentRoute = navigationRef.getCurrentRoute()?.name;
 					// prevent redirecting while on AuthCheck
-					if (currentRoute !== 'RootAuthCheck') {
+					if (isAuthenticated) {
 						checkClipboard().then();
+					} else {
+						setShouldCheckClipboard(true);
+					}
+				}
+
+				// on App to background
+				if (
+					appState.current.match(/active|inactive/) &&
+					nextAppState === 'background'
+				) {
+					// lock the app on background if pinOnIdle is enabled
+					if (pin && pinOnIdle) {
+						updateUi({ isAuthenticated: false });
+						setShouldCheckClipboard(true);
 					}
 				}
 
@@ -164,9 +197,8 @@ const RootNavigator = (): ReactElement => {
 			appStateSubscription.remove();
 		};
 
-		// onMount
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [isAuthenticated]);
 
 	return (
 		<NavigationContainer ref={navigationRef} linking={linking}>
@@ -214,7 +246,7 @@ const RootNavigator = (): ReactElement => {
 			<BackupSubscriber />
 
 			<Dialog
-				visible={showDialog}
+				visible={showDialog && isAuthenticated}
 				title={t('clipboard_redirect_title')}
 				description={t('clipboard_redirect_msg')}
 				onCancel={(): void => setShowDialog(false)}
@@ -225,10 +257,7 @@ const RootNavigator = (): ReactElement => {
 				<AuthCheck
 					showBackNavigation={false}
 					showLogoOnPIN={true}
-					onSuccess={(): void => {
-						updateUi({ isAuthenticated: true });
-						checkClipboardAndDeeplink().then();
-					}}
+					onSuccess={onAuthSuccess}
 				/>
 			)}
 

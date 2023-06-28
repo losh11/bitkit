@@ -25,6 +25,10 @@ export const balanceUnitSelector = createSelector(
 	[settingsState],
 	(settings) => settings.balanceUnit,
 );
+export const biometricsSelector = createSelector(
+	[settingsState],
+	(settings) => settings.biometrics,
+);
 export const bitcoinUnitSelector = createSelector(
 	[settingsState],
 	(settings) => settings.bitcoinUnit,

@@ -61,9 +61,8 @@ const AppOnboarded = (): ReactElement => {
 			startWalletServices({ selectedNetwork, selectedWallet });
 		}, RECOVERY_DELAY);
 
-		if (pin && pinOnLaunch) {
-			updateUi({ isAuthenticated: false });
-		}
+		const needsAuth = pin && pinOnLaunch;
+		updateUi({ isAuthenticated: !needsAuth });
 
 		return () => {
 			clearTimeout(timerId);
