@@ -1,5 +1,5 @@
 import './shim';
-import './src/utils/ignoreWarnings';
+import './src/utils/ignoreLogs';
 import { AppRegistry, Text, TextInput } from 'react-native';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 
