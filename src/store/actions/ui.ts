@@ -8,7 +8,7 @@ import {
 	TProfileLink,
 	ViewControllerParamList,
 } from '../types/ui';
-import { getDispatch } from '../helpers';
+import { getActivityStore, getDispatch } from '../helpers';
 import actions from './actions';
 
 const releaseUrl =
@@ -37,6 +37,15 @@ export const showBottomSheet = <View extends keyof ViewControllerParamList>(
 	});
 
 	return ok('');
+};
+
+export const showNewTxPrompt = (txId: string): void => {
+	const activityItem = getActivityStore().items.find(({ id }) => id === txId);
+
+	if (activityItem) {
+		showBottomSheet('newTxPrompt', { activityItem });
+		closeBottomSheet('receiveNavigation');
+	}
 };
 
 export const closeBottomSheet = (id: keyof ViewControllerParamList): void => {

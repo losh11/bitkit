@@ -27,7 +27,7 @@ export const defaultViewControllers: IUi['viewControllers'] = {
 
 export const defaultUiShape: IUi = {
 	availableUpdate: null,
-	isAuthenticated: true,
+	isAuthenticated: false,
 	isConnectedToElectrum: true,
 	isOnline: true,
 	language: 'en',

@@ -28,7 +28,6 @@ import type { SendStackParamList } from '../bottom-sheet/SendNavigation';
 export type RootNavigationProp = StackNavigationProp<RootStackParamList>;
 
 export type RootStackParamList = {
-	RootAuthCheck: undefined;
 	Wallet: NavigatorScreenParams<WalletStackParamList> | undefined;
 	Biometrics: undefined;
 	ActivityDetail: { id: IActivityItem['id']; extended?: boolean };

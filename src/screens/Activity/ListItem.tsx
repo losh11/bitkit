@@ -242,14 +242,19 @@ const ActivityListItem = ({
 	);
 
 	return (
-		<TouchableOpacity style={styles.root} onPress={onPress} testID={testID}>
-			{activityType === EActivityType.onchain && (
-				<OnchainListItem item={item} icon={icon} />
-			)}
-			{activityType === EActivityType.lightning && (
-				<LightningListItem item={item} icon={icon} />
-			)}
-		</TouchableOpacity>
+		<View style={styles.root}>
+			<TouchableOpacity
+				style={styles.pressable}
+				onPress={onPress}
+				testID={testID}>
+				{activityType === EActivityType.onchain && (
+					<OnchainListItem item={item} icon={icon} />
+				)}
+				{activityType === EActivityType.lightning && (
+					<LightningListItem item={item} icon={icon} />
+				)}
+			</TouchableOpacity>
+		</View>
 	);
 };
 
@@ -257,10 +262,12 @@ const styles = StyleSheet.create({
 	root: {
 		borderBottomColor: 'rgba(255, 255, 255, 0.1)',
 		borderBottomWidth: 1,
-		paddingBottom: 24,
 		marginBottom: 24,
+	},
+	pressable: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
+		paddingBottom: 24,
 		minHeight: 65,
 	},
 	icon: {

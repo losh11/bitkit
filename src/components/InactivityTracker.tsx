@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 
 import { updateUi } from '../store/actions/ui';
 import { pinOnIdleSelector, pinSelector } from '../store/reselect/settings';
+import { isAuthenticatedSelector } from '../store/reselect/ui';
 
 const INACTIVITY_DELAY = 1000 * 90; // 90 seconds;
 
@@ -21,19 +22,21 @@ const InactivityTracker = ({
 	const timeout = useRef<NodeJS.Timeout>();
 	const pin = useSelector(pinSelector);
 	const pinOnIdle = useSelector(pinOnIdleSelector);
+	const isAuthenticated = useSelector(isAuthenticatedSelector);
 
 	const resetInactivityTimeout = useCallback(() => {
 		clearTimeout(timeout.current);
 
-		if (pin && pinOnIdle) {
+		if (pin && pinOnIdle && isAuthenticated) {
 			timeout.current = setTimeout(() => {
 				Keyboard.dismiss();
 				updateUi({ isAuthenticated: false });
+				resetInactivityTimeout();
 			}, INACTIVITY_DELAY);
 		}
 
 		return false;
-	}, [pin, pinOnIdle]);
+	}, [pin, pinOnIdle, isAuthenticated]);
 
 	useEffect(() => {
 		resetInactivityTimeout();

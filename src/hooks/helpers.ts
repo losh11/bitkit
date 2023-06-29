@@ -9,6 +9,12 @@ export const usePrevious = <T>(value: T): T | undefined => {
 	return ref.current;
 };
 
+export const useRenderCount = (): number => {
+	const renderCount = useRef(0);
+	renderCount.current++;
+	return renderCount.current;
+};
+
 // https://stackoverflow.com/a/61127960/1231070
 export const useDebouncedEffect = (
 	effect: () => void,

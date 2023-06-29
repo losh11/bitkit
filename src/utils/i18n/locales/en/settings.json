@@ -51,7 +51,7 @@
 	},
 	"security": {
 		"clipboard": "Read clipboard for ease of use",
-		"warn_100": "Warning for sending over $100",
+		"warn_100": "Warn when sending over $100",
 		"pin": "PIN Code",
 		"pin_change": "Change PIN Code",
 		"pin_launch": "Require PIN on launch",

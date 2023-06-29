@@ -1,10 +1,10 @@
 import { LogBox } from 'react-native';
-import { __E2E__ } from '../constants/env';
+import { __E2E__, __ENABLE_LDK_LOGS__ } from '../constants/env';
 
 if (__DEV__) {
-	const ignoredLogs = [];
-	const ignoredInfo = [];
-	const ignoredWarnings = [
+	const ignoredLogs: string[] = [];
+	const ignoredInfo: string[] = [];
+	const ignoredWarnings: string[] = [
 		'Require cycle',
 		// TEMP: ignore <Dialog /> warning on iOS
 		'Modal with',
@@ -15,11 +15,15 @@ if (__DEV__) {
 		// https://github.com/computerjazz/react-native-draggable-flatlist/issues/422
 		'VirtualizedLists should never be nested inside plain ScrollViews',
 	];
-	const ignoredErrors = [];
+	const ignoredErrors: string[] = [];
 
 	// disable all logs for E2E tests running in debug mode
 	if (__E2E__) {
 		LogBox.ignoreAllLogs();
+	}
+
+	if (!__ENABLE_LDK_LOGS__) {
+		ignoredLogs.push('LDK:', 'react-native-ldk:', 'DEBUG (JS)', 'ERROR (JS)');
 	}
 
 	const withoutIgnored = (

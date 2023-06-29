@@ -71,7 +71,7 @@ const BitcoinNetworkSelection = ({
 								selectedNetwork: network,
 								forceUpdate: true,
 							});
-							await updateActivityList();
+							updateActivityList();
 						},
 					};
 				}),

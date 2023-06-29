@@ -88,6 +88,7 @@ import {
 import { moveMetaIncTxTags } from '../../store/actions/metadata';
 import { refreshOrdersList } from '../../store/actions/blocktank';
 import { IDefaultLightningShape } from '../../store/types/lightning';
+import { showNewTxPrompt } from '../../store/actions/ui';
 import { objectKeys } from '../objectKeys';
 
 export const refreshWallet = async ({
@@ -119,6 +120,9 @@ export const refreshWallet = async ({
 		if (!selectedNetwork) {
 			selectedNetwork = getSelectedNetwork();
 		}
+
+		let notificationTxid: string | undefined;
+
 		if (onchain) {
 			let addressType: EAddressType | undefined;
 			if (!updateAllAddressTypes) {
@@ -133,29 +137,32 @@ export const refreshWallet = async ({
 				addressType,
 			});
 			if (isConnectedToElectrum) {
-				await Promise.all([
-					subscribeToAddresses({
-						selectedWallet,
-						selectedNetwork,
-					}),
-					updateUtxos({
-						selectedWallet,
-						selectedNetwork,
-						scanAllAddresses,
-					}),
-					updateTransactions({
-						scanAllAddresses,
-						showNotification,
-						selectedWallet,
-						selectedNetwork,
-					}),
-				]);
+				const [_result1, _result2, updateTransactionResult] = await Promise.all(
+					[
+						subscribeToAddresses({
+							selectedWallet,
+							selectedNetwork,
+						}),
+						updateUtxos({
+							selectedWallet,
+							selectedNetwork,
+							scanAllAddresses,
+						}),
+						updateTransactions({
+							scanAllAddresses,
+							selectedWallet,
+							selectedNetwork,
+						}),
+					],
+				);
+
+				if (updateTransactionResult.isOk()) {
+					notificationTxid = updateTransactionResult.value;
+				}
 			}
 
 			updateExchangeRates().then();
-		}
 
-		if (onchain) {
 			await setZeroIndexAddresses({
 				selectedWallet,
 				selectedNetwork,
@@ -168,9 +175,14 @@ export const refreshWallet = async ({
 		}
 
 		if (onchain || lightning) {
-			await updateActivityList();
-			await moveMetaIncTxTags();
+			updateActivityList();
+			moveMetaIncTxTags();
 		}
+
+		if (showNotification && notificationTxid) {
+			showNewTxPrompt(notificationTxid);
+		}
+
 		return ok('');
 	} catch (e) {
 		return err(e);

@@ -832,7 +832,7 @@ const AddressViewer = ({
 				selectedNetwork: config.selectedNetwork,
 				forceUpdate: true,
 			});
-			await updateActivityList();
+			updateActivityList();
 		}
 
 		let _utxos: IUtxo[] = [];

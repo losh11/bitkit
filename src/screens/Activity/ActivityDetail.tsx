@@ -27,7 +27,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { useTranslation } from 'react-i18next';
 
 import { View as ThemedView } from '../../styles/components';
-import { Caption13M, Caption13Up, Text02M, Title } from '../../styles/text';
+import { Caption13Up, Text02M, Title } from '../../styles/text';
 import {
 	CalendarIcon,
 	CheckCircleIcon,
@@ -43,6 +43,7 @@ import {
 	TimerIconAlt,
 	UserMinusIcon,
 	UserPlusIcon,
+	XIcon,
 } from '../../styles/icons';
 import Button from '../../components/Button';
 import Money from '../../components/Money';
@@ -238,7 +239,7 @@ const OnchainActivityDetail = ({
 	);
 
 	const handleBoost = (): void => {
-		showBottomSheet('boostPrompt', { activityItem: item });
+		showBottomSheet('boostPrompt', { onchainActivityItem: item });
 	};
 
 	const handleAddTag = (): void => {
@@ -336,7 +337,7 @@ const OnchainActivityDetail = ({
 	if (activityType === EActivityType.onchain && !exists) {
 		status = (
 			<View style={styles.row}>
-				<CheckCircleIcon style={styles.rowIcon} color="red" />
+				<XIcon style={styles.rowIcon} color="red" height={18} width={16} />
 				<Text02M color="red">{t('activity_removed')}</Text02M>
 			</View>
 		);
@@ -775,9 +776,9 @@ const LightningActivityDetail = ({
 
 					{message ? (
 						<View style={styles.invoiceNote}>
-							<Caption13M style={styles.sText} color="gray1">
+							<Caption13Up style={styles.sText} color="gray1">
 								{t('activity_invoice_note')}
-							</Caption13M>
+							</Caption13Up>
 							<ThemedView color="gray5">
 								<Canvas style={styles.zRoot}>
 									<ZigZag color={colors.background} />

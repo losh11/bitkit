@@ -43,12 +43,8 @@ const NewTxPrompt = (): ReactElement => {
 	const snapPoints = useSnapPoints('large');
 	const animationRef = useRef<Lottie>(null);
 	const appState = useRef(AppState.currentState);
-
-	const { txId } = useAppSelector((state) => {
+	const { activityItem } = useAppSelector((state) => {
 		return viewControllerSelector(state, 'newTxPrompt');
-	});
-	const activityItem = useAppSelector((store) => {
-		return store.activity.items.find(({ id }) => id === txId);
 	});
 
 	useBottomSheetBackPress('newTxPrompt');
@@ -88,10 +84,8 @@ const NewTxPrompt = (): ReactElement => {
 	}, []);
 
 	const handlePress = (): void => {
-		if (activityItem) {
-			closeBottomSheet('newTxPrompt');
-			rootNavigation.navigate('ActivityDetail', { id: activityItem.id });
-		}
+		closeBottomSheet('newTxPrompt');
+		rootNavigation.navigate('ActivityDetail', { id: activityItem!.id });
 	};
 
 	const isOnchainItem = activityItem?.activityType === EActivityType.onchain;
