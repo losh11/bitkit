@@ -1,16 +1,16 @@
 import React, { memo, ReactElement, useCallback } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { __DISABLE_SLASHTAGS__ } from '../../constants/env';
-import { View, TouchableOpacity } from '../../styles/components';
 import { Title } from '../../styles/text';
 import { ProfileIcon, SettingsIcon } from '../../styles/icons';
 import ProfileImage from '../../components/ProfileImage';
 import { truncate } from '../../utils/helpers';
 import { useProfile, useSelectedSlashtag } from '../../hooks/slashtags';
 import { RootNavigationProp } from '../../navigation/types';
+import VerticalShadow from '../../components/VerticalShadow';
 
 const EnabledSlashtagsProfileButton = (): ReactElement => {
 	const { t } = useTranslation('slashtags');
@@ -74,6 +74,9 @@ const Header = (): ReactElement => {
 
 	return (
 		<View style={styles.container}>
+			<View style={styles.shadowContainer}>
+				<VerticalShadow />
+			</View>
 			<ProfileButton />
 			<View style={styles.middleColumn} />
 			<View style={styles.rightColumn}>
@@ -95,13 +98,18 @@ const Header = (): ReactElement => {
 		</View>
 	);
 };
+
+export const HEIGHT = 46;
+
 const styles = StyleSheet.create({
 	container: {
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 		alignItems: 'center',
-		marginTop: 15,
-		marginBottom: 10,
+		height: HEIGHT,
+	},
+	shadowContainer: {
+		...StyleSheet.absoluteFillObject,
 	},
 	cogIcon: {
 		alignItems: 'center',
