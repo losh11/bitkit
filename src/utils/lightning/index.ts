@@ -156,10 +156,12 @@ export const setupLdk = async ({
 	selectedWallet,
 	selectedNetwork,
 	shouldRefreshLdk = true,
+	staleBackupRecoveryMode = false,
 }: {
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
 	shouldRefreshLdk?: boolean;
+	staleBackupRecoveryMode?: boolean;
 } = {}): Promise<Result<string>> => {
 	try {
 		if (!selectedWallet) {
@@ -231,6 +233,10 @@ export const setupLdk = async ({
 			},
 			getTransactionPosition: (params) => {
 				return getTransactionPosition({ ...params, selectedNetwork });
+			},
+			forceCloseOnStartup: {
+				forceClose: staleBackupRecoveryMode,
+				broadcastLatestTx: false,
 			},
 		});
 
@@ -633,7 +639,7 @@ export const getTransactionData = async (
 			selectedNetwork,
 		});
 
-		//Unable to reach Electrumm server.
+		//Unable to reach Electrum server.
 		if (response.isErr()) {
 			return transactionData;
 		}

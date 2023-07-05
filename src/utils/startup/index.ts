@@ -88,12 +88,14 @@ export const startWalletServices = async ({
 	onchain = ENABLE_SERVICES,
 	lightning = ENABLE_SERVICES,
 	restore = false,
+	staleBackupRecoveryMode = false,
 	selectedWallet,
 	selectedNetwork,
 }: {
 	onchain?: boolean;
 	lightning?: boolean;
 	restore?: boolean;
+	staleBackupRecoveryMode?: boolean;
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
 }): Promise<Result<string>> => {
@@ -153,6 +155,7 @@ export const startWalletServices = async ({
 			const setupResponse = await setupLdk({
 				selectedNetwork,
 				shouldRefreshLdk: false,
+				staleBackupRecoveryMode,
 			});
 			if (setupResponse.isOk()) {
 				keepLdkSynced({ selectedNetwork }).then();

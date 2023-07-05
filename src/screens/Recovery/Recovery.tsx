@@ -19,6 +19,8 @@ import Dialog from '../../components/Dialog';
 import { RecoveryStackScreenProps } from '../../navigation/types';
 import { walletExistsSelector } from '../../store/reselect/wallet';
 import { pinSelector } from '../../store/reselect/settings';
+import { ldk } from '@synonymdev/react-native-ldk';
+import { startWalletServices } from '../../utils/startup';
 
 const Recovery = ({
 	navigation,
@@ -27,7 +29,12 @@ const Recovery = ({
 	const pin = useSelector(pinSelector);
 	const walletExists = useSelector(walletExistsSelector);
 	const [locked, setLocked] = useState(true);
-	const [showDialog, setShowDialog] = useState(false);
+	const [showWipeDialog, setShowWipeDialog] = useState(false);
+	const [showLdkRecoveryDialog, setShowLdkRecoveryDialog] = useState(false);
+	const [showLdkRecoverySuccessDialog, setShowLdkRecoverySuccessDialog] =
+		useState(false);
+	const [recoveredSats, setRecoveredSats] = useState(0);
+	const [isRecoveringChannels, setIsRecoveringChannels] = useState(false);
 
 	useEffect(() => {
 		// avoid accidentally pressing a button
@@ -66,6 +73,21 @@ const Recovery = ({
 		}
 	};
 
+	const onShowLdkRecovery = async (): Promise<void> => {
+		if (pin) {
+			navigation.navigate('AuthCheck', {
+				onSuccess: () => {
+					// hack needed for Android
+					setTimeout(() => {
+						setShowLdkRecoveryDialog(true);
+					}, 100);
+				},
+			});
+		} else {
+			setShowLdkRecoveryDialog(true);
+		}
+	};
+
 	const onContactSupport = async (): Promise<void> => {
 		const link = await createSupportLink();
 		await openURL(link);
@@ -77,18 +99,60 @@ const Recovery = ({
 				onSuccess: () => {
 					// hack needed for Android
 					setTimeout(() => {
-						setShowDialog(true);
+						setShowWipeDialog(true);
 					}, 100);
 				},
 			});
 		} else {
-			setShowDialog(true);
+			setShowWipeDialog(true);
 		}
 	};
 
 	const onWipeAppConfirmed = async (): Promise<void> => {
 		await wipeApp();
-		setShowDialog(false);
+		setShowWipeDialog(false);
+	};
+
+	const onShowLdkRecoveryConfirmed = async (): Promise<void> => {
+		setShowLdkRecoveryDialog(false);
+		setIsRecoveringChannels(true);
+
+		const setupRes = await startWalletServices({
+			onchain: false,
+			lightning: true,
+			restore: false,
+			staleBackupRecoveryMode: true,
+		});
+		if (setupRes.isErr()) {
+			showErrorNotification({
+				title: t('lightning_recovery_error'),
+				message: setupRes.error.message,
+			});
+			setIsRecoveringChannels(false);
+			return;
+		}
+
+		const balances = await ldk.claimableBalances(false);
+		if (balances.isErr()) {
+			showErrorNotification({
+				title: t('lightning_recovery_error'),
+				message: balances.error.message,
+			});
+			setIsRecoveringChannels(false);
+			return;
+		}
+
+		await ldk.stop();
+
+		let sats = 0;
+		balances.value.forEach((balance) => {
+			sats += balance.claimable_amount_satoshis;
+		});
+		setRecoveredSats(sats);
+		setShowLdkRecoverySuccessDialog(true);
+		setIsRecoveringChannels(false);
+
+		return;
 	};
 
 	const onCloseApp = (): void => {
@@ -121,6 +185,15 @@ const Recovery = ({
 					/>
 					<Button
 						style={styles.button}
+						text={t('lightning_recovery_title')}
+						loading={isRecoveringChannels}
+						size="large"
+						variant="secondary"
+						disabled={locked || !walletExists}
+						onPress={onShowLdkRecovery}
+					/>
+					<Button
+						style={styles.button}
 						text={t('contact_support')}
 						size="large"
 						variant="secondary"
@@ -148,11 +221,28 @@ const Recovery = ({
 			</View>
 
 			<Dialog
-				visible={showDialog}
+				visible={showWipeDialog}
 				title={t('reset_dialog_title')}
 				description={t('reset_dialog_desc')}
-				onCancel={(): void => setShowDialog(false)}
+				onCancel={(): void => setShowWipeDialog(false)}
 				onConfirm={onWipeAppConfirmed}
+			/>
+
+			<Dialog
+				visible={showLdkRecoveryDialog}
+				title={t('lightning_recovery_title')}
+				description={t('lightning_recovery_desc')}
+				onCancel={(): void => setShowLdkRecoveryDialog(false)}
+				onConfirm={onShowLdkRecoveryConfirmed}
+			/>
+
+			<Dialog
+				visible={showLdkRecoverySuccessDialog}
+				title={t('lightning_recovery_success')}
+				description={t('lightning_recovery_success_message', {
+					sats: recoveredSats,
+				})}
+				onConfirm={onCloseApp}
 			/>
 
 			<SafeAreaInset type="bottom" minPadding={16} />
