@@ -10,6 +10,10 @@ import {
 	__ELECTRUM_REGTEST_PROTO__,
 	__ELECTRUM_REGTEST_SSL_PORT__,
 	__ELECTRUM_REGTEST_TCP_PORT__,
+	__ELECTRUM_SIGNET_HOST__,
+	__ELECTRUM_SIGNET_PROTO__,
+	__ELECTRUM_SIGNET_SSL_PORT__,
+	__ELECTRUM_SIGNET_TCP_PORT__,
 } from '../../constants/env';
 import {
 	ETransactionSpeed,
@@ -64,6 +68,14 @@ export const origCustomElectrumPeers: Record<
 			ssl: __ELECTRUM_REGTEST_SSL_PORT__,
 			tcp: __ELECTRUM_REGTEST_TCP_PORT__,
 			protocol: __ELECTRUM_REGTEST_PROTO__,
+		},
+	],
+	bitcoinSignet: [
+		{
+			host: __ELECTRUM_SIGNET_HOST__,
+			ssl: __ELECTRUM_SIGNET_SSL_PORT__,
+			tcp: __ELECTRUM_SIGNET_TCP_PORT__,
+			protocol: __ELECTRUM_SIGNET_PROTO__,
 		},
 	],
 };
