@@ -95,13 +95,13 @@ const ActivityListShort = (): ReactElement => {
 const styles = StyleSheet.create({
 	content: {
 		paddingTop: 32,
-		marginBottom: 16,
+		marginBottom: 32,
 	},
 	title: {
 		marginBottom: 23,
 	},
 	button: {
-		marginTop: -16,
+		marginTop: -24,
 	},
 });
 
