@@ -10,6 +10,7 @@ import { StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeOut } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useNoTransactions } from '../../hooks/wallet';
 import useColors from '../../hooks/colors';
@@ -25,7 +26,7 @@ import ConnectivityIndicator from '../../components/ConnectivityIndicator';
 import SafeAreaView from '../../components/SafeAreaView';
 import BetaWarning from '../../components/BetaWarning';
 import Assets from '../../components/Assets';
-import Header from './Header';
+import Header, { HEIGHT } from './Header';
 import type { WalletScreenProps } from '../../navigation/types';
 import {
 	hideBalanceSelector,
@@ -48,6 +49,7 @@ const Wallets = ({
 	const hideOnboardingSetting = useSelector(hideOnboardingMessageSelector);
 	const widgets = useSelector(widgetsSelector);
 	const noTransactions = useNoTransactions();
+	const insets = useSafeAreaInsets();
 	const empty = useMemo(() => {
 		return noTransactions && Object.values(widgets).length === 0;
 	}, [noTransactions, widgets]);
@@ -82,7 +84,6 @@ const Wallets = ({
 
 	return (
 		<SafeAreaView>
-			<Header />
 			<DetectSwipe
 				onSwipeLeft={navigateToScanner}
 				onSwipeRight={navigateToProfile}>
@@ -125,6 +126,9 @@ const Wallets = ({
 					)}
 				</ScrollView>
 			</DetectSwipe>
+			<View style={[styles.header, { top: insets.top }]}>
+				<Header />
+			</View>
 		</SafeAreaView>
 	);
 };
@@ -133,8 +137,14 @@ const styles = StyleSheet.create({
 	content: {
 		flexGrow: 1,
 	},
+	header: {
+		position: 'absolute',
+		left: 0,
+		right: 0,
+	},
 	scrollView: {
 		paddingBottom: 130,
+		paddingTop: HEIGHT,
 	},
 	contentPadding: {
 		paddingHorizontal: 16,
