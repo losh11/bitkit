@@ -1,1 +1,52 @@
-{}
+{
+  "backupSeedPhrase": {
+    "title": "Αντίγραφο ασφαλείας",
+    "description": "Φυλάξτε τα χρήματά σας"
+  },
+  "lightning": {
+    "title": "Πληρώστε άμεσα",
+    "description": "Ελάτε στο Lightning"
+  },
+  "lightningSettingUp": {
+    "title": "Ρυθμίσεις",
+    "description0": "Αναμονή Πληρωμής",
+    "description1": "Πληρώθηκε",
+    "description2": "Σε αναμονή",
+    "description3": "Σε αναμονή"
+  },
+  "lightningConnecting": {
+    "title": "Σύνδεση",
+    "description": "Έτοιμο σε ±10 λεπτά"
+  },
+  "lightningReady": {
+    "title": "Έτοιμο",
+    "description": "Συνδέθηκε!"
+  },
+  "transferToSpending": {
+    "title": "Μεταφορά",
+    "description": "Έτοιμο σε ±20 λεπτά"
+  },
+  "transferToSavings": {
+    "title": "Μεταφορά",
+    "description": "Έτοιμο σε ±60 λεπτά"
+  },
+  "transferClosingChannel": {
+    "title": "Έναρξη...",
+    "description": "Κρατήστε την εφαρμογή ανοιχτή"
+  },
+  "pin": {
+    "title": "Καλύτερη ασφάλεια",
+    "description": "Καταχωρήστε κωδικό PIN"
+  },
+  "slashtagsProfile": {
+    "title": "Δημόσιο Προφίλ",
+    "description": "Προσθέστε τα στοιχεία σας"
+  },
+  "buyBitcoin": {
+    "title": "Πάρτε Bitcoin",
+    "description": "Πάρτε λίγα sats"
+  },
+  "lightning_no_funds_title": "Δεν υπάρχουν ακόμη κεφάλαια",
+  "lightning_no_funds_desc": "Για να μπορέσετε να ρυθμίσετε τις πληρωμές σας, πρέπει να στείλετε Bitcoin στο πορτοφόλι σας.",
+  "suggestions": "Προτάσεις"
+}

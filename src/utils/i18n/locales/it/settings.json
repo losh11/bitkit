@@ -51,6 +51,7 @@
   },
   "security": {
     "clipboard": "Leggi gli appunti per facilitare l'uso",
+    "warn_100": "Avvisa quando invii più di $100",
     "pin": "Codice PIN",
     "pin_change": "Cambia codice PIN",
     "pin_launch": "Richiedi PIN all'avvio",
