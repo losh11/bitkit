@@ -84,6 +84,9 @@ const Wallets = ({
 
 	return (
 		<SafeAreaView>
+			<View style={[styles.header, { top: insets.top }]}>
+				<Header />
+			</View>
 			<DetectSwipe
 				onSwipeLeft={navigateToScanner}
 				onSwipeRight={navigateToProfile}>
@@ -126,9 +129,6 @@ const Wallets = ({
 					)}
 				</ScrollView>
 			</DetectSwipe>
-			<View style={[styles.header, { top: insets.top }]}>
-				<Header />
-			</View>
 		</SafeAreaView>
 	);
 };
@@ -136,15 +136,16 @@ const Wallets = ({
 const styles = StyleSheet.create({
 	content: {
 		flexGrow: 1,
+		paddingTop: HEIGHT,
+	},
+	scrollView: {
+		paddingBottom: 130,
 	},
 	header: {
 		position: 'absolute',
 		left: 0,
 		right: 0,
-	},
-	scrollView: {
-		paddingBottom: 130,
-		paddingTop: HEIGHT,
+		zIndex: 1,
 	},
 	contentPadding: {
 		paddingHorizontal: 16,
