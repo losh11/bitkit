@@ -31,7 +31,7 @@ const ActivityTagsPrompt = (): ReactElement => {
 
 	useBottomSheetBackPress('activityTagsPrompt');
 
-	const handleClose = async (): Promise<void> => {
+	const closeSheet = async (): Promise<void> => {
 		setText('');
 		await Keyboard.dismiss();
 		closeBottomSheet('activityTagsPrompt');
@@ -40,9 +40,7 @@ const ActivityTagsPrompt = (): ReactElement => {
 	const handleTagChoose = async (tag: string): Promise<void> => {
 		addMetaTxTag(id!, tag);
 		addTag(tag);
-		setText('');
-		await Keyboard.dismiss();
-		closeBottomSheet('activityTagsPrompt');
+		closeSheet();
 	};
 
 	const handleSubmit = async (): Promise<void> => {
@@ -51,9 +49,7 @@ const ActivityTagsPrompt = (): ReactElement => {
 		}
 		addMetaTxTag(id!, text);
 		addTag(text);
-		setText('');
-		await Keyboard.dismiss();
-		closeBottomSheet('activityTagsPrompt');
+		closeSheet();
 	};
 
 	return (
@@ -61,7 +57,7 @@ const ActivityTagsPrompt = (): ReactElement => {
 			view="activityTagsPrompt"
 			snapPoints={snapPoints}
 			backdrop={true}
-			onClose={handleClose}>
+			onClose={closeSheet}>
 			<View style={styles.root}>
 				<Subtitle style={styles.title}>{t('tags_add')}</Subtitle>
 

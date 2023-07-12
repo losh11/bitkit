@@ -197,9 +197,11 @@ export const EmptyItem = ({
 	);
 
 	return (
-		<TouchableOpacity style={styles.root} onPress={onPress}>
-			<ListItem title={title} description={description} icon={icon} />
-		</TouchableOpacity>
+		<View style={styles.root}>
+			<TouchableOpacity style={styles.pressable} onPress={onPress}>
+				<ListItem title={title} description={description} icon={icon} />
+			</TouchableOpacity>
+		</View>
 	);
 };
 

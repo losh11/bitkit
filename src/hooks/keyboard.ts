@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Keyboard as RNKeyboard, Platform, KeyboardEvent } from 'react-native';
+import { sleep } from '../utils/helpers';
 
 const useKeyboard = (): {
 	keyboardShown: boolean;
@@ -50,8 +51,11 @@ export const Keyboard = ((): {
 	let resolve = (): void => {};
 	let keyboardShown = false;
 
-	RNKeyboard.addListener('keyboardDidHide', () => {
+	RNKeyboard.addListener('keyboardDidHide', async () => {
 		keyboardShown = false;
+		// needed for Android
+		// https://github.com/synonymdev/bitkit/issues/1156
+		await sleep(0);
 		resolve();
 	});
 
