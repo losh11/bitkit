@@ -102,6 +102,10 @@ const listLogsForAccount = async (
 	path: string,
 	limit: number,
 ): Promise<string[]> => {
+	if (!(await exists(path))) {
+		return [];
+	}
+
 	let list = await RNFS.readDir(path);
 
 	// Filter for log files only
