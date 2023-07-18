@@ -56,7 +56,9 @@ export type TGetByteCountInput =
 	| 'P2WPKH'
 	| 'p2wpkh'
 	| 'P2SH'
-	| 'p2sh';
+	| 'p2sh'
+	| 'P2TR'
+	| 'p2tr';
 
 export type TGetByteCountOutput =
 	| 'P2SH'
@@ -65,7 +67,9 @@ export type TGetByteCountOutput =
 	| 'P2WSH'
 	| 'p2wpkh'
 	| 'p2sh'
-	| 'p2pkh';
+	| 'p2pkh'
+	| 'P2TR'
+	| 'p2tr';
 
 export type TGetByteCountInputs = {
 	[key in TGetByteCountInput]?: number;

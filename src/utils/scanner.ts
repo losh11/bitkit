@@ -45,6 +45,7 @@ import { TWalletName } from '../store/types/wallet';
 import { sendNavigation } from '../navigation/bottom-sheet/SendNavigation';
 import { handleLnurlAuth, handleLnurlChannel, handleLnurlPay } from './lnurl';
 import i18n from './i18n';
+import { bech32m } from 'bech32';
 
 const availableNetworksList = availableNetworks();
 
@@ -90,32 +91,63 @@ export const validateAddress = ({
 	network: EAvailableNetworks;
 } => {
 	try {
+		//Validate address for all available networks
+		let isValid = false;
+		let network: EAvailableNetworks = EAvailableNetworks.bitcoin;
+
 		//Validate address for a specific network
 		if (selectedNetwork !== undefined) {
-			bitcoinJSAddress.toOutputScript(address, networks[selectedNetwork]);
-		} else {
-			//Validate address for all available networks
-			let isValid = false;
-			let network: EAvailableNetworks = EAvailableNetworks.bitcoin;
-			for (let i = 0; i < availableNetworksList.length; i++) {
-				if (
-					validateAddress({
-						address,
-						selectedNetwork: availableNetworksList[i],
-					}).isValid
-				) {
-					isValid = true;
-					network = availableNetworksList[i];
-					break;
+			try {
+				bitcoinJSAddress.toOutputScript(address, networks[selectedNetwork]);
+				return { isValid: true, network: selectedNetwork };
+			} catch {
+				// In the event the normal check fails, determine if this is a taproot address.
+				const taprootRes = isValidBech32mEncodedString(address);
+				if (taprootRes.isValid && taprootRes.network === selectedNetwork) {
+					return { isValid: taprootRes.isValid, network: taprootRes.network };
 				}
 			}
-			return { isValid, network };
+			return { isValid: false, network: selectedNetwork };
 		}
 
-		return { isValid: true, network: selectedNetwork };
+		for (let i = 0; i < availableNetworksList.length; i++) {
+			const validateRes = validateAddress({
+				address,
+				selectedNetwork: availableNetworksList[i],
+			});
+			if (validateRes.isValid) {
+				isValid = validateRes.isValid;
+				network = validateRes.network;
+				break;
+			}
+		}
+		return { isValid, network };
 	} catch (e) {
 		return { isValid: false, network: EAvailableNetworks.bitcoin };
 	}
+};
+
+/**
+ * Returns if the provided string is a valid Bech32m encoded string (taproot/p2tr address).
+ * @param {string} address
+ * @returns { isValid: boolean; network: EAvailableNetworks }
+ */
+export const isValidBech32mEncodedString = (
+	address: string,
+): { isValid: boolean; network: EAvailableNetworks } => {
+	try {
+		const decoded = bech32m.decode(address);
+		if (decoded.prefix === 'bc') {
+			return { isValid: true, network: EAvailableNetworks.bitcoin };
+		} else if (decoded.prefix === 'tb') {
+			return { isValid: true, network: EAvailableNetworks.bitcoinTestnet };
+		} else if (decoded.prefix === 'bcrt') {
+			return { isValid: true, network: EAvailableNetworks.bitcoinRegtest };
+		}
+	} catch (error) {
+		return { isValid: false, network: EAvailableNetworks.bitcoin };
+	}
+	return { isValid: false, network: EAvailableNetworks.bitcoin };
 };
 
 export type TProcessedData = {

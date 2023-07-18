@@ -1,6 +1,6 @@
 import * as bip21 from 'bip21';
-import * as bip32 from 'bip32';
-import { BIP32Interface } from 'bip32';
+import ecc from '@bitcoinerlab/secp256k1';
+import { BIP32Factory, BIP32Interface } from 'bip32';
 import * as bip39 from 'bip39';
 import * as bitcoin from 'bitcoinjs-lib';
 import { Psbt } from 'bitcoinjs-lib';
@@ -66,6 +66,9 @@ import { EFeeId, IOnchainFees } from '../../store/types/fees';
 import { defaultFeesShape } from '../../store/shapes/fees';
 import { TRANSACTION_DEFAULTS } from './constants';
 import i18n from '../i18n';
+
+bitcoin.initEccLib(ecc);
+const bip32 = BIP32Factory(ecc);
 
 /*
  * Attempts to parse any given string as an on-chain payment request.
@@ -219,6 +222,8 @@ export const getByteCount = (
 				P2SH: 108 + 64 * 4,
 				p2sh: 108 + 64 * 4 + 1,
 				'P2SH-P2WPKH': 108 + 64 * 4,
+				P2TR: 57.5 * 4,
+				p2tr: 57.5 * 4 + 1,
 			},
 			multiSigInputs: {
 				'MULTISIG-P2SH': 49 * 4,
@@ -233,6 +238,8 @@ export const getByteCount = (
 				p2wpkh: 31 * 4 + 1,
 				p2sh: 32 * 4 + 1,
 				p2pkh: 34 * 4 + 1,
+				P2TR: 43 * 4,
+				p2tr: 43 * 4 + 1,
 			},
 		};
 

@@ -3,7 +3,8 @@ import { getAddressInfo } from 'bitcoin-address-validation';
 import { constants } from '@synonymdev/slashtags-sdk';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
-import * as bip32 from 'bip32';
+import { BIP32Factory } from 'bip32';
+import ecc from '@bitcoinerlab/secp256k1';
 import { err, ok, Result } from '@synonymdev/result';
 
 import { networks, TAvailableNetworks } from '../networks';
@@ -90,6 +91,9 @@ import { refreshOrdersList } from '../../store/actions/blocktank';
 import { IDefaultLightningShape } from '../../store/types/lightning';
 import { showNewTxPrompt } from '../../store/actions/ui';
 import { objectKeys } from '../objectKeys';
+
+bitcoin.initEccLib(ecc);
+const bip32 = BIP32Factory(ecc);
 
 export const refreshWallet = async ({
 	onchain = true,
