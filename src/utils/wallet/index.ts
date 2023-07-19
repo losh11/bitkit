@@ -532,53 +532,6 @@ export const getMnemonicPhrase = async (
 };
 
 /**
- * Generate a mnemonic phrase using a string as entropy.
- * @param {string} str
- * @return {string}
- */
-export const generateMnemonicPhraseFromEntropy = (str: string): string => {
-	// @ts-ignore
-	const hash = getSha256(str);
-	return bip39.entropyToMnemonic(hash);
-};
-
-/**
- * Derive multiple mnemonic phrases by appending a
- * descriptive string to the original mnemonic.
- * @param {string} mnemonic
- */
-export const deriveMnemonicPhrases = async (
-	mnemonic: string,
-): Promise<
-	Result<{
-		onchain: string;
-		lightning: string;
-		tokens: string;
-	}>
-> => {
-	if (!mnemonic) {
-		return err('Please provide a mnemonic phrase.');
-	}
-	const isValid = validateMnemonic(mnemonic);
-	if (!isValid) {
-		return err('Mnemonic provided is not valid.');
-	}
-	const onchain = mnemonic;
-	const lightning = generateMnemonicPhraseFromEntropy(`${mnemonic}lightning`);
-	const tokens = generateMnemonicPhraseFromEntropy(`${mnemonic}tokens`);
-	return ok({ onchain, lightning, tokens });
-};
-
-/**
- * Returns sha256 hash of string.
- * @param {Buffer} buff
- * @return {Buffer}
- */
-export const getSha256 = (buff: Buffer): Buffer => {
-	return bitcoin.crypto.sha256(buff);
-};
-
-/**
  * Generate a mnemonic phrase.
  * @async
  * @param {number} strength
