@@ -10,6 +10,7 @@ import { getSelectedWallet } from '../src/utils/wallet';
 import { TAvailableNetworks } from '../src/utils/networks';
 import { mnemonic, walletState } from './utils/dummy-wallet';
 import { createTransaction } from '../src/utils/wallet/transactions';
+import { isValidBech32mEncodedString } from '../src/utils/scanner';
 
 const selectedNetwork: TAvailableNetworks = 'bitcoinTestnet';
 
@@ -28,6 +29,48 @@ describe('On chain transactions', () => {
 		updateWallet({ wallets: { wallet0: walletState } });
 
 		await setupOnChainTransaction({ selectedNetwork });
+	});
+
+	it('Creates a transaction sending to a taproot address', async () => {
+		const selectedWallet = getSelectedWallet();
+
+		const taprootAddress =
+			'tb1p0v28xrt49aunergvzw63pve3r3u4ylvg0k65860kdj0l26xc9dpqhqel9g';
+		const { isValid, network } = isValidBech32mEncodedString(taprootAddress);
+		expect(isValid).toEqual(true);
+		expect(network).toEqual('bitcoinTestnet');
+
+		updateSendTransaction({
+			selectedNetwork,
+			selectedWallet,
+			transaction: {
+				rbf: true,
+				outputs: [
+					{
+						value: 10001,
+						index: 0,
+						address: taprootAddress,
+					},
+				],
+			},
+		});
+
+		const res = await createTransaction({
+			selectedNetwork,
+			selectedWallet,
+		});
+
+		if (res.isErr()) {
+			throw res.error;
+		}
+
+		expect(res.value.hex).toEqual(
+			'020000000001020c0eab3149ba3ed7abd8f4c98eabe2cbb2b7c3590404b66ca0f01addf61ec67100000000000000000051bd848851cadb71bf34e6e0e46b0c4214c2d06ccc1d5ca0f5baefdcf86269200000000000000000000211270000000000002251207b14730d752f793c8d0c13b510b3311c79527d887db543e9f66c9ff568d82b426ecd010000000000160014669a9323418693b81d44c19da7b1fe7911b2142902473044022034623cf80029f4432bc481762587f3889efaae55b6a24c7448d5dab5223c9187022043bd46754851ac0af772f40b07b3e2b29c3ec7f4fdebc53e4d1766a12db2405201210318cb16a8e659f378002e75abe93f064c4ebcd62576bc15019281b635f96840a80247304402204c4a2f78b5908f75f8d450c0beaaaa9caada0977cdb294591fd4fdc82a2b005d022079fc0dd869ec53552fc4d9e72557c7b1e7cb5ee6f81a2f844c8ef2c6b099cc05012102bb6083f2571ecd26f68edeae341c0700463349a84b2044c271e061e813e0cd0300000000',
+		);
+
+		expect(res.value.id).toEqual(
+			'859fdf43d1c74cf05454dc3376b5e19cc48171a1e049646abc3b0f44343c7a8a',
+		);
 	});
 
 	it('Creates an on chain transaction from the transaction store', async () => {
