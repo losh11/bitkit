@@ -28,14 +28,14 @@ import { RECOVERY_DELAY } from './utils/startup/constants';
 import { themeSelector } from './store/reselect/settings';
 import { walletExistsSelector } from './store/reselect/wallet';
 import { requiresRemoteRestoreSelector } from './store/reselect/user';
-import { availableUpdateSelector } from './store/reselect/ui';
+import { criticalUpdateSelector } from './store/reselect/ui';
 
 const App = (): ReactElement => {
 	const [isListening, setIsListening] = useState(true);
 	const [showRecovery, setShowRecovery] = useState(false);
 	const theme = useSelector(themeSelector);
 	const walletExists = useSelector(walletExistsSelector);
-	const updateInfo = useSelector(availableUpdateSelector);
+	const hasCriticalUpdate = useSelector(criticalUpdateSelector);
 	const requiresRemoteRestore = useSelector(requiresRemoteRestoreSelector);
 
 	// on App start
@@ -64,7 +64,7 @@ const App = (): ReactElement => {
 			return <RecoveryNavigator />;
 		}
 
-		if (updateInfo?.critical) {
+		if (hasCriticalUpdate) {
 			return <AppUpdate />;
 		}
 
@@ -77,7 +77,7 @@ const App = (): ReactElement => {
 		}
 
 		return <OnboardingNavigator />;
-	}, [showRecovery, updateInfo?.critical, walletExists, requiresRemoteRestore]);
+	}, [showRecovery, hasCriticalUpdate, walletExists, requiresRemoteRestore]);
 
 	const currentTheme = useMemo(() => getTheme(theme), [theme]);
 
