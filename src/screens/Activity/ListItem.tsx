@@ -197,7 +197,7 @@ export const EmptyItem = ({
 	);
 
 	return (
-		<View style={styles.root}>
+		<View style={styles.empty}>
 			<TouchableOpacity style={styles.pressable} onPress={onPress}>
 				<ListItem title={title} description={description} icon={icon} />
 			</TouchableOpacity>
@@ -261,6 +261,10 @@ const ActivityListItem = ({
 };
 
 const styles = StyleSheet.create({
+	empty: {
+		borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+		borderBottomWidth: 1,
+	},
 	root: {
 		borderBottomColor: 'rgba(255, 255, 255, 0.1)',
 		borderBottomWidth: 1,
