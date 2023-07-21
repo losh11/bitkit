@@ -41,13 +41,14 @@ import {
 import { TAvailableNetworks } from '../networks';
 import {
 	getBlocktankStore,
+	getDispatch,
 	getFeesStore,
 	getLightningStore,
 	getWalletStore,
 } from '../../store/helpers';
 import { defaultHeader } from '../../store/shapes/wallet';
 import {
-	addLightningPayment,
+	removeLightningInvoice,
 	removePeer,
 	updateClaimableBalance,
 	updateLightningChannels,
@@ -73,6 +74,10 @@ import { TLightningNodeVersion } from '../../store/types/lightning';
 import { getBlocktankInfo, isGeoBlocked } from '../blocktank';
 import { updateOnchainFeeEstimates } from '../../store/actions/fees';
 import { addTodo, removeTodo } from '../../store/actions/todos';
+import actions from '../../store/actions/actions';
+import { getActivityItemById } from '../activity';
+
+const dispatch = getDispatch();
 
 let LDKIsStayingSynced = false;
 
@@ -284,6 +289,7 @@ export const restartLdk = async (): Promise<Result<string>> => {
 
 /**
  * Retrieves any pending/unpaid invoices from the invoices array via payment hash.
+ * TODO replace this function once this is complete https://github.com/synonymdev/react-native-ldk/issues/152
  * @param {string} paymentHash
  * @param {TWalletName} [selectedWallet]
  * @param {TAvailableNetworks} [selectedNetwork]
@@ -337,30 +343,44 @@ export const handleLightningPaymentSubscription = async ({
 		selectedNetwork,
 		selectedWallet,
 	});
+
+	let message = '';
+	let address = '';
+
+	//If we have the invoice add those details to the activity item for instant display
+	//If we don't have the invoice we can still add details and show received animation
 	if (invoice.isOk()) {
-		const activityItem: TLightningActivityItem = {
-			id: invoice.value.payment_hash,
-			activityType: EActivityType.lightning,
-			txType: EPaymentType.received,
-			message: invoice.value.description ?? '',
-			address: invoice.value.to_str,
-			value: payment.amount_sat,
-			// TODO: show fee?
-			// fee: 0,
-			// feeRate: 0,
-			timestamp: new Date().getTime(),
-		};
-		addActivityItem(activityItem);
-		showBottomSheet('newTxPrompt', { activityItem });
-		closeBottomSheet('receiveNavigation');
-		addLightningPayment({
-			invoice: invoice.value,
-			selectedWallet,
+		message = invoice.value.description ?? '';
+		address = invoice.value.to_str;
+
+		removeLightningInvoice({
+			paymentHash: payment.payment_hash,
 			selectedNetwork,
-		});
-		await refreshLdk({ selectedWallet, selectedNetwork });
-		updateSlashPayConfig({ sdk, selectedWallet, selectedNetwork });
+			selectedWallet,
+		}).then();
+	} else {
+		console.error("Couldn't find invoice for payment: ", payment.payment_hash);
 	}
+
+	const activityItem: TLightningActivityItem = {
+		id: payment.payment_hash,
+		activityType: EActivityType.lightning,
+		txType: EPaymentType.received,
+		message,
+		address,
+		value: payment.amount_sat,
+		confirmed: true,
+		// TODO: show fee?
+		// fee: 0,
+		// feeRate: 0,
+		timestamp: new Date().getTime(),
+	};
+	addActivityItem(activityItem);
+	showBottomSheet('newTxPrompt', { activityItem });
+	closeBottomSheet('receiveNavigation');
+
+	await refreshLdk({ selectedWallet, selectedNetwork });
+	updateSlashPayConfig({ sdk, selectedWallet, selectedNetwork });
 };
 
 /**
@@ -482,9 +502,14 @@ export const refreshLdk = async ({
 		if (syncRes.isErr()) {
 			return err(syncRes.error.message);
 		}
-		await addPeers({ selectedNetwork, selectedWallet });
-		await updateLightningChannels({ selectedWallet, selectedNetwork });
-		await updateClaimableBalance({ selectedNetwork, selectedWallet });
+
+		await Promise.all([
+			addPeers({ selectedNetwork, selectedWallet }),
+			updateLightningChannels({ selectedWallet, selectedNetwork }),
+			updateClaimableBalance({ selectedNetwork, selectedWallet }),
+			syncLightningTxsWithActivityList(),
+		]);
+
 		return ok('');
 	} catch (e) {
 		console.log(e);
@@ -1172,12 +1197,7 @@ export const payLightningInvoice = async (
 		if (payResponse.isErr()) {
 			return err(payResponse.error.message);
 		}
-		const addLightningPaymentResponse = addLightningPayment({
-			invoice: decodedInvoice.value,
-		});
-		if (addLightningPaymentResponse.isErr()) {
-			return err(addLightningPaymentResponse.error.message);
-		}
+
 		let value = decodedInvoice.value.amount_satoshis ?? 0;
 		if (sats) {
 			value = sats;
@@ -1189,11 +1209,13 @@ export const payLightningInvoice = async (
 			message: decodedInvoice.value.description ?? '',
 			address: invoice,
 			value: -value,
+			confirmed: true,
 			// TODO: show fee?
 			// fee: payResponse.value.fee_paid_sat,
 			// feeRate: 0,
 			timestamp: new Date().getTime(),
 		};
+		//TODO rather sync with ldk for txs
 		addActivityItem(activityItem);
 		refreshLdk().then();
 		return ok(payResponse.value);
@@ -1499,4 +1521,62 @@ export const getLightningBalance = ({
 	}, 0);
 
 	return { localBalance, remoteBalance };
+};
+
+export const syncLightningTxsWithActivityList = async (): Promise<
+	Result<string>
+> => {
+	let items: TLightningActivityItem[] = [];
+
+	const claimedTxs = await lm.getLdkPaymentsClaimed();
+	claimedTxs.forEach((tx) => {
+		items.push({
+			id: tx.payment_hash,
+			activityType: EActivityType.lightning,
+			txType: EPaymentType.received,
+			message: '',
+			address: '',
+			confirmed: tx.state === 'successful',
+			value: tx.amount_sat,
+			timestamp: tx.unix_timestamp * 1000,
+		});
+	});
+
+	const sentTxs = await lm.getLdkPaymentsSent();
+	sentTxs.forEach((tx) => {
+		const sats = tx.amount_sat;
+		if (!sats) {
+			return;
+		}
+
+		items.push({
+			id: tx.payment_hash,
+			activityType: EActivityType.lightning,
+			txType: EPaymentType.sent,
+			message: '',
+			address: '',
+			confirmed: tx.state === 'successful',
+			value: -sats,
+			timestamp: tx.unix_timestamp * 1000,
+		});
+	});
+
+	//TODO remove temp hack when this is complete and descriptions/bolt11 can be added from stored tx: https://github.com/synonymdev/react-native-ldk/issues/153
+	items.forEach((item) => {
+		const res = getActivityItemById(item.id);
+		if (res.isOk()) {
+			const existingItem = res.value;
+			if (existingItem.activityType === EActivityType.lightning) {
+				item.message = existingItem.message;
+				item.address = existingItem.address;
+			}
+		}
+	});
+
+	dispatch({
+		type: actions.UPDATE_ACTIVITY_ITEMS,
+		payload: items,
+	});
+
+	return ok('Stored lightning transactions synced with activity list.');
 };

@@ -260,6 +260,7 @@ export const removeExpiredLightningInvoices = async ({
 
 /**
  * Removes a lightning invoice from the invoices array via its payment hash.
+ * //TODO remove when this is complete: https://github.com/synonymdev/react-native-ldk/issues/152
  * @param {string} paymentHash
  * @param {TAvailableNetworks} [selectedNetwork]
  * @param {TWalletName} [selectedWallet]
@@ -293,56 +294,6 @@ export const removeLightningInvoice = async ({
 		payload,
 	});
 	return ok('Successfully removed lightning invoice.');
-};
-
-/**
- * Adds a paid lightning invoice to the payments object for future reference.
- * @param {TInvoice} invoice
- * @param {TAvailableNetworks} [selectedNetwork]
- * @param {TWalletName} [selectedWallet]
- * @returns {Result<string>}
- */
-export const addLightningPayment = ({
-	invoice,
-	selectedNetwork,
-	selectedWallet,
-}: {
-	invoice: TInvoice;
-	selectedNetwork?: TAvailableNetworks;
-	selectedWallet?: TWalletName;
-}): Result<string> => {
-	if (!invoice) {
-		return err('No payment invoice provided.');
-	}
-	if (!selectedNetwork) {
-		selectedNetwork = getSelectedNetwork();
-	}
-	if (!selectedWallet) {
-		selectedWallet = getSelectedWallet();
-	}
-	const lightningPayments =
-		getLightningStore().nodes[selectedWallet].payments[selectedNetwork];
-
-	// It's possible ldk.pay returned true for an invoice we already paid.
-	// Run another check here.
-	if (invoice.payment_hash in lightningPayments) {
-		return err('Lightning invoice has already been paid.');
-	}
-	const payload = {
-		invoice,
-		selectedWallet,
-		selectedNetwork,
-	};
-	dispatch({
-		type: actions.ADD_LIGHTNING_PAYMENT,
-		payload,
-	});
-	removeLightningInvoice({
-		paymentHash: invoice.payment_hash,
-		selectedNetwork,
-		selectedWallet,
-	}).then();
-	return ok('Successfully added lightning payment.');
 };
 
 /*

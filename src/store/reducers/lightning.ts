@@ -2,7 +2,6 @@ import { TInvoice } from '@synonymdev/react-native-ldk';
 import actions from '../actions/actions';
 import { ILightning } from '../types/lightning';
 import { defaultLightningStoreShape } from '../shapes/lightning';
-import { EPaymentType } from '../types/wallet';
 
 const lightning = (
 	state: ILightning = defaultLightningStoreShape,
@@ -99,31 +98,6 @@ const lightning = (
 						invoices: {
 							...state.nodes[selectedWallet].invoices,
 							[selectedNetwork]: newInvoices,
-						},
-					},
-				},
-			};
-
-		case actions.ADD_LIGHTNING_PAYMENT:
-			return {
-				...state,
-				nodes: {
-					...state.nodes,
-					[selectedWallet]: {
-						...state.nodes[selectedWallet],
-						payments: {
-							...state.nodes[selectedWallet].payments,
-							[selectedNetwork]: {
-								...state.nodes[selectedWallet].payments[selectedNetwork],
-								[action.payload.invoice.payment_hash]: {
-									invoice: action.payload.invoice,
-									type:
-										action.payload.invoice.payee_pub_key ===
-										state.nodes[selectedWallet].nodeId[selectedNetwork]
-											? EPaymentType.sent
-											: EPaymentType.received,
-								},
-							},
 						},
 					},
 				},

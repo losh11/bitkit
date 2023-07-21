@@ -35,6 +35,7 @@ export type TLightningActivityItem = {
 	txType: EPaymentType;
 	value: number;
 	address: string;
+	confirmed: boolean;
 	message: string;
 	timestamp: number;
 };
