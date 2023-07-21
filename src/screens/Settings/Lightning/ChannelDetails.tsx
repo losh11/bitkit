@@ -42,6 +42,7 @@ import {
 	ArrowCounterClock,
 	Checkmark,
 	ClockIcon,
+	HourglassSimpleIcon,
 	LightningIcon,
 	TimerSpeedIcon,
 	XIcon,
@@ -56,19 +57,19 @@ export const getOrderStatus = (state: number): React.FC<SvgProps> => {
 		case 0:
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
-					<ThemedView color="white1" style={styles.statusIcon}>
-						<ClockIcon color="gray1" width={16} height={16} />
+					<ThemedView color="purple16" style={styles.statusIcon}>
+						<ClockIcon color="purple" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="purple">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		case 100:
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
-					<ThemedView color="white1" style={styles.statusIcon}>
-						<Checkmark color="gray1" width={16} height={16} />
+					<ThemedView color="purple16" style={styles.statusIcon}>
+						<Checkmark color="purple" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="purple">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		case 150:
@@ -77,26 +78,26 @@ export const getOrderStatus = (state: number): React.FC<SvgProps> => {
 					<ThemedView color="white1" style={styles.statusIcon}>
 						<ArrowCounterClock color="gray1" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="gray1">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		case 200:
 		case 300:
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
-					<ThemedView color="yellow16" style={styles.statusIcon}>
-						<ClockIcon color="yellow" width={16} height={16} />
+					<ThemedView color="purple16" style={styles.statusIcon}>
+						<HourglassSimpleIcon color="purple" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="purple">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		case 350:
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
 					<ThemedView color="white1" style={styles.statusIcon}>
-						<ClockIcon color="gray1" width={16} height={16} />
+						<HourglassSimpleIcon color="gray1" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="gray1">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		case 400:
@@ -105,7 +106,7 @@ export const getOrderStatus = (state: number): React.FC<SvgProps> => {
 					<ThemedView color="red16" style={styles.statusIcon}>
 						<XIcon color="red" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="red">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		case 410:
@@ -114,7 +115,7 @@ export const getOrderStatus = (state: number): React.FC<SvgProps> => {
 					<ThemedView color="red16" style={styles.statusIcon}>
 						<TimerSpeedIcon color="red" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="red">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		case 450:
@@ -123,7 +124,7 @@ export const getOrderStatus = (state: number): React.FC<SvgProps> => {
 					<ThemedView color="white1" style={styles.statusIcon}>
 						<LightningIcon color="gray1" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="gray1">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		case 500:
@@ -132,7 +133,7 @@ export const getOrderStatus = (state: number): React.FC<SvgProps> => {
 					<ThemedView color="green16" style={styles.statusIcon}>
 						<LightningIcon color="green" width={16} height={16} />
 					</ThemedView>
-					<Text01M>{getStateMessage(state)}</Text01M>
+					<Text01M color="green">{getStateMessage(state)}</Text01M>
 				</View>
 			);
 		default:
@@ -494,7 +495,7 @@ const ChannelDetails = ({
 						/>
 					)}
 					<Section
-						name={t('node_id')}
+						name={t('channel_node_id')}
 						value={
 							<Caption13M ellipsizeMode="middle" numberOfLines={1}>
 								{channel.counterparty_node_id}
