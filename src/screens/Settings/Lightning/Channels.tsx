@@ -173,7 +173,7 @@ const Channel = memo(
 						ellipsizeMode="middle">
 						{channelName}
 					</Text01M>
-					<ChevronRight color="gray1" height={15} />
+					<ChevronRight color="gray1" height={24} />
 				</View>
 				<LightningChannel channel={channel} status={getChannelStatus()} />
 			</TouchableOpacity>
@@ -407,7 +407,7 @@ const Channels = ({
 							{t('conn_pending')}
 						</Caption13Up>
 						<ChannelList
-							channels={pendingConnections}
+							channels={pendingConnections.reverse()}
 							pending={true}
 							onChannelPress={onChannelPress}
 						/>
@@ -420,7 +420,7 @@ const Channels = ({
 							{t('conn_open')}
 						</Caption13Up>
 						<ChannelList
-							channels={openChannels}
+							channels={openChannels.reverse()}
 							onChannelPress={onChannelPress}
 						/>
 					</>
@@ -434,7 +434,7 @@ const Channels = ({
 									{t('conn_closed')}
 								</Caption13Up>
 								<ChannelList
-									channels={closedChannels}
+									channels={closedChannels.reverse()}
 									closed={true}
 									onChannelPress={onChannelPress}
 								/>
@@ -446,7 +446,7 @@ const Channels = ({
 									{t('conn_failed')}
 								</Caption13Up>
 								<ChannelList
-									channels={failedOrders}
+									channels={failedOrders.reverse()}
 									closed={true}
 									onChannelPress={onChannelPress}
 								/>
