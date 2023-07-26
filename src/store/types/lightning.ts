@@ -22,7 +22,6 @@ export interface IDefaultLightningShape {
 	channels: IWalletItem<{ [key: string]: TChannel }>;
 	openChannelIds: IWalletItem<TOpenChannelIds>;
 	info: IWalletItem<{}>;
-	invoices: IWalletItem<TInvoice[]>;
 	peers: IWalletItem<string[]>;
 	claimableBalance: IWalletItem<number>;
 }

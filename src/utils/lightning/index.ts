@@ -48,7 +48,6 @@ import {
 } from '../../store/helpers';
 import { defaultHeader } from '../../store/shapes/wallet';
 import {
-	removeLightningInvoice,
 	removePeer,
 	updateClaimableBalance,
 	updateLightningChannels,
@@ -294,33 +293,9 @@ export const restartLdk = async (): Promise<Result<string>> => {
  * @param {TWalletName} [selectedWallet]
  * @param {TAvailableNetworks} [selectedNetwork]
  */
-export const getPendingInvoice = ({
-	paymentHash,
-	selectedWallet,
-	selectedNetwork,
-}: {
-	paymentHash: string;
-	selectedWallet?: TWalletName;
-	selectedNetwork?: TAvailableNetworks;
-}): Result<TInvoice> => {
-	try {
-		if (!selectedWallet) {
-			selectedWallet = getSelectedWallet();
-		}
-		if (!selectedNetwork) {
-			selectedNetwork = getSelectedNetwork();
-		}
-		const invoices =
-			getLightningStore().nodes[selectedWallet].invoices[selectedNetwork];
-		const invoice = invoices.filter((inv) => inv.payment_hash === paymentHash);
-		if (invoice.length > 0) {
-			return ok(invoice[0]);
-		}
-		return err('Unable to find any pending invoices.');
-	} catch (e) {
-		return err(e);
-	}
-};
+export const getPendingInvoice = (
+	paymentHash: string,
+): Promise<TInvoice | undefined> => lm.getInvoiceFromPaymentHash(paymentHash);
 
 export const handleLightningPaymentSubscription = async ({
 	payment,
@@ -337,29 +312,22 @@ export const handleLightningPaymentSubscription = async ({
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
 	}
-	console.log('Receiving Lightning Payment...', payment);
-	const invoice = getPendingInvoice({
-		paymentHash: payment.payment_hash,
-		selectedNetwork,
-		selectedWallet,
-	});
+	const invoice = await getPendingInvoice(payment.payment_hash);
 
 	let message = '';
 	let address = '';
 
 	//If we have the invoice add those details to the activity item for instant display
 	//If we don't have the invoice we can still add details and show received animation
-	if (invoice.isOk()) {
-		message = invoice.value.description ?? '';
-		address = invoice.value.to_str;
-
-		removeLightningInvoice({
-			paymentHash: payment.payment_hash,
-			selectedNetwork,
-			selectedWallet,
-		}).then();
+	if (invoice) {
+		message = invoice.description ?? '';
+		address = invoice.to_str;
 	} else {
-		console.error("Couldn't find invoice for payment: ", payment.payment_hash);
+		//Unlikely to happen and not really a problem if it does
+		console.error(
+			"Couldn't find invoice for claimed payment: ",
+			payment.payment_hash,
+		);
 	}
 
 	const activityItem: TLightningActivityItem = {
@@ -1165,7 +1133,7 @@ export const closeAllChannels = async ({
  */
 export const createPaymentRequest = (
 	req: TCreatePaymentReq,
-): Promise<Result<TInvoice>> => ldk.createPaymentRequest(req);
+): Promise<Result<TInvoice>> => lm.createAndStorePaymentRequest(req);
 
 /**
  * Attempts to pay a bolt11 invoice.
@@ -1529,24 +1497,27 @@ export const syncLightningTxsWithActivityList = async (): Promise<
 	let items: TLightningActivityItem[] = [];
 
 	const claimedTxs = await lm.getLdkPaymentsClaimed();
-	claimedTxs.forEach((tx) => {
+	for (const tx of claimedTxs) {
+		//Required to add in bolt11 and description
+		const invoice = await getPendingInvoice(tx.payment_hash);
+
 		items.push({
 			id: tx.payment_hash,
 			activityType: EActivityType.lightning,
 			txType: EPaymentType.received,
-			message: '',
-			address: '',
+			message: invoice?.description ?? '',
+			address: invoice?.to_str ?? '',
 			confirmed: tx.state === 'successful',
 			value: tx.amount_sat,
 			timestamp: tx.unix_timestamp * 1000,
 		});
-	});
+	}
 
 	const sentTxs = await lm.getLdkPaymentsSent();
-	sentTxs.forEach((tx) => {
+	for (const tx of sentTxs) {
 		const sats = tx.amount_sat;
 		if (!sats) {
-			return;
+			continue;
 		}
 
 		items.push({
@@ -1559,9 +1530,9 @@ export const syncLightningTxsWithActivityList = async (): Promise<
 			value: -sats,
 			timestamp: tx.unix_timestamp * 1000,
 		});
-	});
+	}
 
-	//TODO remove temp hack when this is complete and descriptions/bolt11 can be added from stored tx: https://github.com/synonymdev/react-native-ldk/issues/153
+	//TODO remove temp hack when this is complete and descriptions/bolt11 can be added from stored tx: https://github.com/synonymdev/react-native-ldk/issues/156
 	items.forEach((item) => {
 		const res = getActivityItemById(item.id);
 		if (res.isOk()) {
