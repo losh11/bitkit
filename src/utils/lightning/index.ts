@@ -1193,6 +1193,10 @@ export const payLightningInvoice = async (
 	}
 };
 
+export const getClaimedLightningPayments = async (): Promise<
+	TChannelManagerClaim[]
+> => lm.getLdkPaymentsClaimed();
+
 export const decodeLightningInvoice = ({
 	paymentRequest,
 }: TPaymentReq): Promise<Result<TInvoice>> => {
