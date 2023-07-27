@@ -19,7 +19,6 @@ import { connectToElectrum, subscribeToHeader } from '../wallet/electrum';
 import { updateOnchainFeeEstimates } from '../../store/actions/fees';
 import { keepLdkSynced, setupLdk } from '../lightning';
 import { setupBlocktank, watchPendingOrders } from '../blocktank';
-import { removeExpiredLightningInvoices } from '../../store/actions/lightning';
 import { updateSlashPayConfig } from '../slashtags';
 import { sdk } from '../../components/SlashtagsProvider';
 import { Slashtag } from '../../hooks/slashtags';
@@ -180,9 +179,6 @@ export const startWalletServices = async ({
 		if (lightning) {
 			await refreshServiceList();
 			watchPendingOrders();
-			await removeExpiredLightningInvoices({
-				selectedNetwork,
-			});
 		}
 
 		// Refresh slashpay config
