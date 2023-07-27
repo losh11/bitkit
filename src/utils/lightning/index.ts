@@ -41,7 +41,6 @@ import {
 import { TAvailableNetworks } from '../networks';
 import {
 	getBlocktankStore,
-	getDispatch,
 	getFeesStore,
 	getLightningStore,
 	getWalletStore,
@@ -49,6 +48,7 @@ import {
 import { defaultHeader } from '../../store/shapes/wallet';
 import {
 	removePeer,
+	syncLightningTxsWithActivityList,
 	updateClaimableBalance,
 	updateLightningChannels,
 	updateLightningNodeId,
@@ -73,10 +73,6 @@ import { TLightningNodeVersion } from '../../store/types/lightning';
 import { getBlocktankInfo, isGeoBlocked } from '../blocktank';
 import { updateOnchainFeeEstimates } from '../../store/actions/fees';
 import { addTodo, removeTodo } from '../../store/actions/todos';
-import actions from '../../store/actions/actions';
-import { getActivityItemById } from '../activity';
-
-const dispatch = getDispatch();
 
 let LDKIsStayingSynced = false;
 
@@ -1197,6 +1193,10 @@ export const getClaimedLightningPayments = async (): Promise<
 	TChannelManagerClaim[]
 > => lm.getLdkPaymentsClaimed();
 
+export const getSentLightningPayments = async (): Promise<
+	TChannelManagerPaymentSent[]
+> => lm.getLdkPaymentsSent();
+
 export const decodeLightningInvoice = ({
 	paymentRequest,
 }: TPaymentReq): Promise<Result<TInvoice>> => {
@@ -1493,65 +1493,4 @@ export const getLightningBalance = ({
 	}, 0);
 
 	return { localBalance, remoteBalance };
-};
-
-export const syncLightningTxsWithActivityList = async (): Promise<
-	Result<string>
-> => {
-	let items: TLightningActivityItem[] = [];
-
-	const claimedTxs = await lm.getLdkPaymentsClaimed();
-	for (const tx of claimedTxs) {
-		//Required to add in bolt11 and description
-		const invoice = await getPendingInvoice(tx.payment_hash);
-
-		items.push({
-			id: tx.payment_hash,
-			activityType: EActivityType.lightning,
-			txType: EPaymentType.received,
-			message: invoice?.description ?? '',
-			address: invoice?.to_str ?? '',
-			confirmed: tx.state === 'successful',
-			value: tx.amount_sat,
-			timestamp: tx.unix_timestamp * 1000,
-		});
-	}
-
-	const sentTxs = await lm.getLdkPaymentsSent();
-	for (const tx of sentTxs) {
-		const sats = tx.amount_sat;
-		if (!sats) {
-			continue;
-		}
-
-		items.push({
-			id: tx.payment_hash,
-			activityType: EActivityType.lightning,
-			txType: EPaymentType.sent,
-			message: '',
-			address: '',
-			confirmed: tx.state === 'successful',
-			value: -sats,
-			timestamp: tx.unix_timestamp * 1000,
-		});
-	}
-
-	//TODO remove temp hack when this is complete and descriptions/bolt11 can be added from stored tx: https://github.com/synonymdev/react-native-ldk/issues/156
-	items.forEach((item) => {
-		const res = getActivityItemById(item.id);
-		if (res.isOk()) {
-			const existingItem = res.value;
-			if (existingItem.activityType === EActivityType.lightning) {
-				item.message = existingItem.message;
-				item.address = existingItem.address;
-			}
-		}
-	});
-
-	dispatch({
-		type: actions.UPDATE_ACTIVITY_ITEMS,
-		payload: items,
-	});
-
-	return ok('Stored lightning transactions synced with activity list.');
 };

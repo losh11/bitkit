@@ -9,10 +9,13 @@ import {
 	addPeers,
 	createPaymentRequest,
 	getClaimableBalance,
+	getClaimedLightningPayments,
 	getCustomLightningPeers,
 	getLightningChannels,
 	getNodeIdFromStorage,
 	getNodeVersion,
+	getPendingInvoice,
+	getSentLightningPayments,
 	hasOpenLightningChannels,
 	parseUri,
 } from '../../utils/lightning';
@@ -21,7 +24,9 @@ import {
 	TCreateLightningInvoice,
 	TLightningNodeVersion,
 } from '../types/lightning';
-import { TWalletName } from '../types/wallet';
+import { EPaymentType, TWalletName } from '../types/wallet';
+import { EActivityType, TLightningActivityItem } from '../types/activity';
+import { getActivityItemById } from '../../utils/activity';
 
 const dispatch = getDispatch();
 
@@ -346,4 +351,65 @@ export const updateClaimableBalance = async ({
 		payload,
 	});
 	return ok('Successfully Updated Claimable Balance.');
+};
+
+export const syncLightningTxsWithActivityList = async (): Promise<
+	Result<string>
+> => {
+	let items: TLightningActivityItem[] = [];
+
+	const claimedTxs = await getClaimedLightningPayments();
+	for (const tx of claimedTxs) {
+		//Required to add in bolt11 and description
+		const invoice = await getPendingInvoice(tx.payment_hash);
+
+		items.push({
+			id: tx.payment_hash,
+			activityType: EActivityType.lightning,
+			txType: EPaymentType.received,
+			message: invoice?.description ?? '',
+			address: invoice?.to_str ?? '',
+			confirmed: tx.state === 'successful',
+			value: tx.amount_sat,
+			timestamp: tx.unix_timestamp * 1000,
+		});
+	}
+
+	const sentTxs = await getSentLightningPayments();
+	for (const tx of sentTxs) {
+		const sats = tx.amount_sat;
+		if (!sats) {
+			continue;
+		}
+
+		items.push({
+			id: tx.payment_hash,
+			activityType: EActivityType.lightning,
+			txType: EPaymentType.sent,
+			message: '',
+			address: '',
+			confirmed: tx.state === 'successful',
+			value: -sats,
+			timestamp: tx.unix_timestamp * 1000,
+		});
+	}
+
+	//TODO remove temp hack when this is complete and descriptions/bolt11 can be added from stored tx: https://github.com/synonymdev/react-native-ldk/issues/156
+	items.forEach((item) => {
+		const res = getActivityItemById(item.id);
+		if (res.isOk()) {
+			const existingItem = res.value;
+			if (existingItem.activityType === EActivityType.lightning) {
+				item.message = existingItem.message;
+				item.address = existingItem.address;
+			}
+		}
+	});
+
+	dispatch({
+		type: actions.UPDATE_ACTIVITY_ITEMS,
+		payload: items,
+	});
+
+	return ok('Stored lightning transactions synced with activity list.');
 };
