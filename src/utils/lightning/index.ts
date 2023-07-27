@@ -470,9 +470,9 @@ export const refreshLdk = async ({
 		await Promise.all([
 			addPeers({ selectedNetwork, selectedWallet }),
 			updateLightningChannels({ selectedWallet, selectedNetwork }),
-			updateClaimableBalance({ selectedNetwork, selectedWallet }),
-			syncLightningTxsWithActivityList(),
 		]);
+		await updateClaimableBalance({ selectedNetwork, selectedWallet });
+		await syncLightningTxsWithActivityList();
 
 		return ok('');
 	} catch (e) {
