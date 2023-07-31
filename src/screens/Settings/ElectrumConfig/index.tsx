@@ -143,8 +143,10 @@ const ElectrumConfig = ({
 				selectedNetwork,
 				customPeers: [connectData],
 			});
+
+			addElectrumPeer({ selectedNetwork, peer: connectData });
+
 			if (connectResponse.isOk()) {
-				addElectrumPeer({ selectedNetwork, peer: connectData });
 				updateUi({ isConnectedToElectrum: true });
 				showToast({
 					type: 'success',

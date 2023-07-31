@@ -118,7 +118,10 @@ export const startWalletServices = async ({
 
 		// Before we do anything we should connect to an Electrum server
 		if (onchain || lightning) {
-			const electrumResponse = await connectToElectrum({ selectedNetwork });
+			const electrumResponse = await connectToElectrum({
+				showNotification: !restore,
+				selectedNetwork,
+			});
 			if (electrumResponse.isOk()) {
 				isConnectedToElectrum = true;
 				// Ensure the on-chain wallet & LDK syncs when a new block is detected.
