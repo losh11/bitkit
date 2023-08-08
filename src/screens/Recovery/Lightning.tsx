@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import lm, { ldk, TLdkData } from '@synonymdev/react-native-ldk';
 import { View as ThemedView } from '../../styles/components';
 import List, { EItemType, IListData, ItemData } from '../../components/List';
+import { Text01S } from '../../styles/text';
 
 import NavigationHeader from '../../components/NavigationHeader';
 import SafeAreaInset from '../../components/SafeAreaInset';
