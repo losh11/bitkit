@@ -240,7 +240,13 @@ const LightningWithSlashtags = ({
 				{isRecoveringChannels ? (
 					<ActivityIndicator color="white" />
 				) : (
-					<List data={[history]} />
+					<>
+						{history.data.length === 0 ? (
+							<Text01S>No backups found.</Text01S>
+						) : (
+							<List data={[history]} />
+						)}
+					</>
 				)}
 				<View style={styles.buttonContainer}>
 					<Button
