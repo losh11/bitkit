@@ -67,7 +67,7 @@ const LightningWithSlashtags = ({
 			const res = await listBackups(
 				slashtag.slashtag,
 				EBackupCategories.ldkComplete,
-				EAvailableNetworks.bitcoin,
+				__DEV__ ? selectedNetwork : EAvailableNetworks.bitcoin,
 			);
 
 			if (res.isErr()) {
