@@ -891,8 +891,8 @@ const LightningActivityDetail = ({
 							/>
 							<Button
 								style={styles.button}
-								text={t('activity_connection')}
-								icon={<LightningIcon color="purple" />}
+								text={t('activity_explore')}
+								icon={<GitBranchIcon color="purple" />}
 								testID="ActivityTxDetails"
 								onPress={handleExplore}
 							/>
