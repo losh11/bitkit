@@ -389,7 +389,8 @@ export const syncLightningTxsWithActivityList = async (): Promise<
 			message: '',
 			address: '',
 			confirmed: tx.state === 'successful',
-			value: -sats,
+			value: sats,
+			fee: tx.fee_paid_sat ?? 0,
 			timestamp: tx.unix_timestamp * 1000,
 		});
 	}

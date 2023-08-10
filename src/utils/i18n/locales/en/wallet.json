@@ -114,7 +114,6 @@
 	"activity_boost": "Boost",
 	"activity_boosted": "Already Boosted",
 	"activity_explore": "Explore",
-	"activity_connection": "Connection",
 	"activity_tx_id": "Transaction ID",
 	"activity_payment_hash": "Payment hash",
 	"activity_address": "Address",
