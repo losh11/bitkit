@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import {
-	checkProfileAndContanctsBackup,
+	checkProfileAndContactsBackup,
 	performRemoteBackup,
 	performRemoteLdkBackup,
 } from '../../store/actions/backup';
@@ -236,7 +236,7 @@ const EnabledSlashtag = (): ReactElement => {
 		}
 
 		const timer = setInterval(() => {
-			checkProfileAndContanctsBackup(slashtag);
+			checkProfileAndContactsBackup(slashtag);
 		}, BACKUP_CHECK_INTERVAL);
 
 		return (): void => {

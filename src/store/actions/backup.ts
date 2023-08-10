@@ -575,7 +575,7 @@ export const setRemoteBackupsEnabled = (
 	});
 };
 
-export const checkProfileAndContanctsBackup = async (
+export const checkProfileAndContactsBackup = async (
 	slashtag: Slashtag,
 ): Promise<void> => {
 	dispatch({ type: actions.BACKUP_SEEDER_CHECK_START });
