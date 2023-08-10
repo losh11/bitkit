@@ -727,14 +727,13 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog1')}
 					confirmText={t('send_yes')}
-					onCancel={async (): Promise<void> => {
+					visibleTestID="SendDialog1"
+					onHide={(): void => confirmPayment(dialogWarnings)}
+					onConfirm={(): void => setShowDialog1(false)}
+					onCancel={(): void => {
 						setShowDialog1(false);
 						setIsLoading(false);
 						setTimeout(() => navigation.goBack(), 300);
-					}}
-					onConfirm={(): void => {
-						setShowDialog1(false);
-						confirmPayment(dialogWarnings);
 					}}
 				/>
 				<Dialog
@@ -742,30 +741,27 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog2')}
 					confirmText={t('send_yes')}
-					onCancel={async (): Promise<void> => {
+					visibleTestID="SendDialog2"
+					onHide={(): void => confirmPayment(dialogWarnings)}
+					onConfirm={(): void => setShowDialog2(false)}
+					onCancel={(): void => {
 						setShowDialog2(false);
 						setIsLoading(false);
 						setTimeout(() => navigation.goBack(), 300);
 					}}
-					onConfirm={(): void => {
-						setShowDialog2(false);
-						confirmPayment(dialogWarnings);
-					}}
-					visibleTestID="DialogSend50"
 				/>
 				<Dialog
 					visible={showDialog3}
 					title={t('are_you_sure')}
 					description={t('send_dialog3')}
 					confirmText={t('send_yes')}
-					onCancel={async (): Promise<void> => {
+					visibleTestID="SendDialog3"
+					onHide={(): void => confirmPayment(dialogWarnings)}
+					onConfirm={(): void => setShowDialog3(false)}
+					onCancel={(): void => {
 						setShowDialog3(false);
 						setIsLoading(false);
 						setTimeout(() => navigation.goBack(), 300);
-					}}
-					onConfirm={(): void => {
-						setShowDialog3(false);
-						confirmPayment(dialogWarnings);
 					}}
 				/>
 				<Dialog
@@ -773,14 +769,13 @@ const ReviewAndSend = ({
 					title={t('are_you_sure')}
 					description={t('send_dialog4')}
 					confirmText={t('send_yes')}
-					onCancel={async (): Promise<void> => {
+					visibleTestID="SendDialog4"
+					onHide={(): void => confirmPayment(dialogWarnings)}
+					onConfirm={(): void => setShowDialog4(false)}
+					onCancel={(): void => {
 						setShowDialog4(false);
 						setIsLoading(false);
 						setTimeout(() => navigation.goBack(), 300);
-					}}
-					onConfirm={(): void => {
-						setShowDialog4(false);
-						confirmPayment(dialogWarnings);
 					}}
 				/>
 				<Dialog
@@ -790,14 +785,13 @@ const ReviewAndSend = ({
 						minimumFee: feeEstimates.minimum,
 					})}
 					confirmText={t('continue')}
+					visibleTestID="SendDialog5"
+					onHide={(): void => confirmPayment(dialogWarnings)}
+					onConfirm={(): void => setShowDialog5(false)}
 					onCancel={(): void => {
 						setShowDialog5(false);
 						setIsLoading(false);
 						setTimeout(() => navigation.goBack(), 300);
-					}}
-					onConfirm={async (): Promise<void> => {
-						setShowDialog5(false);
-						confirmPayment(dialogWarnings);
 					}}
 				/>
 				<SafeAreaInset type="bottom" minPadding={16} />
