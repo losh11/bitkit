@@ -4,6 +4,7 @@ import React, {
 	ReactNode,
 	useCallback,
 	useMemo,
+	useState,
 } from 'react';
 import { View, StyleSheet, Image, ImageSourcePropType } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -27,7 +28,6 @@ import type {
 	RootStackScreenProps,
 } from '../../navigation/types';
 import { useScreenSize } from '../../hooks/screen';
-import { enableOfflinePaymentsSelector } from '../../store/reselect/settings';
 import {
 	selectedNetworkSelector,
 	selectedWalletSelector,
@@ -68,15 +68,16 @@ export const OfflinePayments = ({
 	navigation,
 }: RootStackScreenProps<'Profile'>): ReactElement => {
 	const { t } = useTranslation('slashtags');
-	const enableOfflinePayments = useSelector(enableOfflinePaymentsSelector);
 	const selectedWallet = useSelector(selectedWalletSelector);
 	const selectedNetwork = useSelector(selectedNetworkSelector);
+	const [enableOfflinePayments, setOfflinePayments] = useState(true);
 
 	const sdk = useSlashtagsSDK();
 
-	const savePaymentConfig = useCallback(async (): Promise<void> => {
+	const savePaymentConfig = useCallback((): void => {
+		updateSettings({ enableOfflinePayments });
 		updateSlashPayConfig({ sdk, selectedWallet, selectedNetwork });
-	}, [sdk, selectedNetwork, selectedWallet]);
+	}, [enableOfflinePayments, sdk, selectedNetwork, selectedWallet]);
 
 	return (
 		<Layout
@@ -90,9 +91,7 @@ export const OfflinePayments = ({
 				<Trans
 					t={t}
 					i18nKey="onboarding_profile2_header"
-					components={{
-						brand: <Display color="brand" />,
-					}}
+					components={{ brand: <Display color="brand" /> }}
 				/>
 			</Display>
 			<Text01S color="gray1" style={styles.introText}>
@@ -103,9 +102,7 @@ export const OfflinePayments = ({
 				<SwitchRow
 					isEnabled={enableOfflinePayments}
 					showDivider={false}
-					onPress={(): void => {
-						updateSettings({ enableOfflinePayments: !enableOfflinePayments });
-					}}>
+					onPress={(): void => setOfflinePayments(!enableOfflinePayments)}>
 					<Text01S>{t('offline_enable')}</Text01S>
 				</SwitchRow>
 				<Text02S color="gray1">{t('offline_enable_explain')}</Text02S>

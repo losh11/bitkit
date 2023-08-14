@@ -201,7 +201,8 @@ export const updateSlashPayConfig = debounce(
 		let payConfig: SlashPayConfig = [];
 		try {
 			const buffer = await drive.get('/slashpay.json');
-			payConfig = decodeJSON(buffer) as SlashPayConfig;
+			const json = decodeJSON(buffer) as SlashPayConfig | undefined;
+			payConfig = json ?? [];
 		} catch (err) {
 			console.log(err);
 		}
@@ -215,14 +216,8 @@ export const updateSlashPayConfig = debounce(
 			}
 
 			// if offline payments are disabled and payment config is not empty then delete it
-			const newPayConfig: SlashPayConfig = [];
-			console.debug('Pushing new slashpay.json:', newPayConfig);
-			await drive
-				.put('/slashpay.json', encodeJSON(newPayConfig))
-				.then(() => {
-					console.debug('Updated slashpay.json:', newPayConfig);
-				})
-				.catch(noop);
+			await drive.put('/slashpay.json', encodeJSON([]));
+			console.debug('Deleted slashpay.json');
 			return;
 		}
 
