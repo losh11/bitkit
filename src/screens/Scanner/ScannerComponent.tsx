@@ -43,7 +43,7 @@ const ScannerComponent = ({
 	const [error, setError] = useState('');
 
 	const backgroundStyles = useMemo(() => {
-		if (bottomSheet) {
+		if (!bottomSheet) {
 			return {
 				...styles.background,
 				backgroundColor: 'rgba(0, 0, 0, 0.64)',
@@ -104,8 +104,8 @@ const ScannerComponent = ({
 		}
 	};
 
-	const TopBackground = bottomSheet ? BlurView : GradientView;
-	const Background = bottomSheet ? BlurView : View;
+	const TopBackground = bottomSheet ? GradientView : BlurView;
+	const Background = bottomSheet ? View : BlurView;
 
 	return (
 		<Camera

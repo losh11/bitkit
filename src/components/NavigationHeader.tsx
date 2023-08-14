@@ -124,15 +124,18 @@ const NavigationHeader = ({
 			</View>
 			<View style={actionColumn}>
 				{onActionPress && (
-					<ActionButton onPress={onActionPress} testID="NavigationAction">
+					<ActionButton
+						style={styles.actionRight}
+						testID="NavigationAction"
+						onPress={onActionPress}>
 						{actionIcon}
 					</ActionButton>
 				)}
 				{onClosePress && (
 					<ActionButton
-						style={styles.closeButton}
-						onPress={onClosePress}
-						testID="NavigationClose">
+						style={styles.actionRight}
+						testID="NavigationClose"
+						onPress={onClosePress}>
 						<XIcon width={24} height={24} />
 					</ActionButton>
 				)}
@@ -175,7 +178,7 @@ const styles = StyleSheet.create({
 	backButton: {
 		paddingLeft: 11,
 	},
-	closeButton: {
+	actionRight: {
 		paddingRight: 11,
 	},
 });
