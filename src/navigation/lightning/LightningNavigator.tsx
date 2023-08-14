@@ -42,7 +42,7 @@ export type LightningStackParamList = {
 const Stack = createNativeStackNavigator<LightningStackParamList>();
 const screenOptions: NativeStackNavigationOptions = {
 	headerShown: false,
-	...(__E2E__ ? { animationDuration: 0 } : {}),
+	...(__E2E__ ? { animation: 'none', animationDuration: 0 } : {}),
 };
 
 const LightningStack = (): ReactElement => {

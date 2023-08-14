@@ -28,7 +28,7 @@ const Stack = createNativeStackNavigator<ReceiveStackParamList>();
 
 const navOptions: NativeStackNavigationOptions = {
 	headerShown: false,
-	...(__E2E__ ? { animationDuration: 0 } : {}),
+	...(__E2E__ ? { animation: 'none', animationDuration: 0 } : {}),
 };
 
 const ReceiveNavigation = (): ReactElement => {
