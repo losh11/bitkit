@@ -127,19 +127,9 @@ const LightningWithSlashtags = ({
 			return;
 		}
 
-		const bytesToStringRes = bytesToString(res.value.content);
-		if (bytesToStringRes.isErr()) {
-			console.log(bytesToStringRes.error);
-			setIsFetchingBackup(false);
-			showToast({
-				type: 'error',
-				title: t('lightning_recovery_error'),
-				description: bytesToStringRes.error.message,
-			});
-			return;
-		}
+		const jsonString = bytesToString(res.value.content);
 
-		setBackup(JSON.parse(bytesToStringRes.value));
+		setBackup(JSON.parse(jsonString));
 		setIsFetchingBackup(false);
 		setShowConfirmRecoveryDialog(true);
 	};
