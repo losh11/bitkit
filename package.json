@@ -139,6 +139,7 @@
     "secp256k1": "^4.0.3",
     "stream-browserify": "^3.0.0",
     "styled-components": "^5.3.11",
+    "text-encoding": "^0.7.0",
     "url-parse": "^1.5.10",
     "uuid": "^8.3.2",
     "vm-browserify": "^1.1.2"
@@ -169,6 +170,7 @@
     "@types/redux-logger": "^3.0.9",
     "@types/styled-components": "^5.1.26",
     "@types/styled-components-react-native": "^5.2.1",
+    "@types/text-encoding": "^0.0.36",
     "@types/url-parse": "^1.4.8",
     "@types/uuid": "^9.0.1",
     "babel-jest": "^29.5.0",

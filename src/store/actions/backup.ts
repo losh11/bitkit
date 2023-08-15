@@ -150,9 +150,12 @@ export const performRemoteBackup = async <T>({
 		selectedNetwork = getSelectedNetwork();
 	}
 
+	const backupJson = JSON.stringify(backup);
+	const bytes = stringToBytes(backupJson);
+
 	const res = await uploadBackup(
 		slashtag,
-		stringToBytes(JSON.stringify(backup)),
+		bytes,
 		backupCategory,
 		selectedNetwork,
 	);
@@ -212,11 +215,8 @@ export const performLdkRestore = async ({
 		return err(storageRes.error);
 	}
 
-	const bytesToStringRes = bytesToString(fetchRes.value.content);
-	if (bytesToStringRes.isErr()) {
-		return err(bytesToStringRes.error);
-	}
-	const backup: TAccountBackup<TLdkData> = JSON.parse(bytesToStringRes.value);
+	const jsonString = bytesToString(fetchRes.value.content);
+	const backup: TAccountBackup<TLdkData> = JSON.parse(jsonString);
 
 	//TODO add "sweepChannelsOnStartup: true" when lib has been updated
 	const importRes = await lm.importAccount({
@@ -270,11 +270,17 @@ export const getBackup = async <T>({
 		return err(fetchRes.error);
 	}
 
-	const bytesToStringRes = bytesToString(fetchRes.value.content);
-	if (bytesToStringRes.isErr()) {
-		return err(bytesToStringRes.error);
+	let jsonString = bytesToString(fetchRes.value.content);
+
+	if (
+		backupCategory === EBackupCategories.ldkActivity ||
+		backupCategory === EBackupCategories.metadata
+	) {
+		// Remove previously incorrectly encoded emojis from the backup
+		jsonString = jsonString.replace(/([\u0000-\u001F])/g, '');
 	}
-	const backup: T = JSON.parse(bytesToStringRes.value);
+
+	const backup: T = JSON.parse(jsonString);
 
 	// Restore success
 	return ok(backup);
@@ -487,7 +493,7 @@ export const performBlocktankRestore = async ({
 	}
 
 	updateBlocktank(backup);
-	updateBackup({ remoteLdkActivityBackupSynced: true });
+	updateBackup({ remoteBlocktankBackupSynced: true });
 
 	// Restore success
 	return ok({ backupExists: true });
