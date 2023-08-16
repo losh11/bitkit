@@ -108,7 +108,7 @@ export const defaultSettingsShape: Readonly<ISettings> = {
 	coinSelectAuto: true,
 	coinSelectPreference: 'small',
 	receivePreference: defaultReceivePreference,
-	enableOfflinePayments: true,
+	enableOfflinePayments: false,
 	showSuggestions: true,
 	transactionSpeed: ETransactionSpeed.normal,
 	customFeeRate: 0,

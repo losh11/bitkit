@@ -146,6 +146,10 @@ export const electrumConnection = ((): ElectrumConnectionPubSub => {
 	let latestState: boolean | null = null;
 
 	setInterval(async () => {
+		if (subscribers.size === 0) {
+			return;
+		}
+
 		try {
 			const { error } = await electrum.pingServer();
 

@@ -30,7 +30,7 @@
 	"camera_ask_title": "Permission to use camera",
 	"camera_ask_msg": "Bitkit needs permission to use your camera",
 	"camera_no_title": "Permission",
-	"camera_no_text": "<bold>It appears Bitkit does not have permission to access your camera.</bold>\n\nTo utilize this feature in the future you will need to enable camera permissions for this app from your phones settings.",
+	"camera_no_text": "<bold>It appears Bitkit does not have permission to access your camera.</bold>\n\nTo utilize this feature in the future you will need to enable camera permissions for this app from your phone's settings.",
 	"clipboard_redirect_title": "Clipboard Data Detected",
 	"clipboard_redirect_msg": "Do you want to be redirected to the relevant screen?",
 	"swipe": "Swipe To Confirm",

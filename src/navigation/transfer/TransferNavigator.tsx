@@ -29,7 +29,7 @@ export type TransferStackParamList = {
 const Stack = createNativeStackNavigator<TransferStackParamList>();
 const screenOptions: NativeStackNavigationOptions = {
 	headerShown: false,
-	...(__E2E__ ? { animationDuration: 0 } : {}),
+	...(__E2E__ ? { animation: 'none', animationDuration: 0 } : {}),
 };
 
 const TransferStack = (): ReactElement => {
