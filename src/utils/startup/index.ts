@@ -11,10 +11,7 @@ import {
 } from '../wallet';
 import { createWallet, updateExchangeRates } from '../../store/actions/wallet';
 import { getWalletStore } from '../../store/helpers';
-import {
-	refreshBlocktankInfo,
-	refreshServiceList,
-} from '../../store/actions/blocktank';
+import { refreshBlocktankInfo } from '../../store/actions/blocktank';
 import { connectToElectrum, subscribeToHeader } from '../wallet/electrum';
 import { updateOnchainFeeEstimates } from '../../store/actions/fees';
 import { keepLdkSynced, setupLdk } from '../lightning';
@@ -180,7 +177,6 @@ export const startWalletServices = async ({
 		}
 
 		if (lightning) {
-			await refreshServiceList();
 			watchPendingOrders();
 		}
 

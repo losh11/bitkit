@@ -1,6 +1,7 @@
 import actions from '../actions/actions';
 import { defaultBlocktankShape } from '../shapes/blocktank';
 import { IBlocktank } from '../types/blocktank';
+import { IBtOrder } from '@synonymdev/blocktank-lsp-http-client';
 
 const blocktank = (
 	state: IBlocktank = defaultBlocktankShape,
@@ -13,22 +14,15 @@ const blocktank = (
 				info: action.payload,
 			};
 
-		case actions.UPDATE_BLOCKTANK_SERVICE_LIST:
-			return {
-				...state,
-				serviceList: action.payload,
-				serviceListLastUpdated: new Date().getTime(),
-			};
-
 		case actions.UPDATE_BLOCKTANK_ORDER: {
 			// Find existing order and update it if it exists, else append to list
 			const existingOrder = state.orders.find(
-				(order) => order._id === action.payload._id,
+				(order) => order.id === action.payload.id,
 			);
 
 			if (existingOrder) {
-				const updatedOrders = state.orders.map((order) => {
-					if (order._id === action.payload._id) {
+				const updatedOrders: IBtOrder[] = state.orders.map((order) => {
+					if (order.id === action.payload.id) {
 						return action.payload;
 					}
 

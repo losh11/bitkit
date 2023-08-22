@@ -1,16 +1,20 @@
 import { err, ok, Result } from '@synonymdev/result';
-import {
-	IBuyChannelRequest,
-	IBuyChannelResponse,
-	IGetOrderResponse,
-} from '@synonymdev/blocktank-client';
 
 import actions from './actions';
 import { resetSendTransaction, updateSendTransaction } from './wallet';
 import { setLightningSettingUpStep } from './user';
-import { addTodo, removeTodo } from './todos';
-import { getBlocktankStore, getDispatch, getFeesStore } from '../helpers';
+import { removeTodo } from './todos';
+import { getBlocktankStore, getDispatch } from '../helpers';
 import * as blocktank from '../../utils/blocktank';
+import {
+	createOrder,
+	getBlocktankInfo,
+	getMin0ConfTxFee,
+	getOrder,
+	isGeoBlocked,
+	openChannel,
+	watchOrder,
+} from '../../utils/blocktank';
 import {
 	getBalance,
 	getSelectedNetwork,
@@ -23,43 +27,21 @@ import {
 	createTransaction,
 	updateFee,
 } from '../../utils/wallet/transactions';
-import {
-	finalizeChannel,
-	getBlocktankInfo,
-	getOrder,
-	isGeoBlocked,
-	watchOrder,
-} from '../../utils/blocktank';
 import { showToast } from '../../utils/notifications';
 import { getDisplayValues } from '../../utils/displayValues';
 import i18n from '../../utils/i18n';
 import { restartLdk } from '../../utils/lightning';
 import { TWalletName } from '../types/wallet';
 import { IBlocktank } from '../types/blocktank';
+import {
+	BtBolt11PaymentState,
+	BtOpenChannelState,
+	BtOrderState,
+	BtPaymentState,
+	IBtOrder,
+} from '@synonymdev/blocktank-lsp-http-client';
 
 const dispatch = getDispatch();
-
-/**
- * Refreshes available services from BLocktank.
- * @returns {Promise<Result<string>>}
- */
-export const refreshServiceList = async (): Promise<Result<string>> => {
-	try {
-		const services = await blocktank.getAvailableServices();
-		if (services.isErr()) {
-			return err(services.error.message);
-		}
-
-		dispatch({
-			type: actions.UPDATE_BLOCKTANK_SERVICE_LIST,
-			payload: services.value,
-		});
-
-		return ok('Product list updated');
-	} catch (e) {
-		return err(e);
-	}
-};
 
 /**
  * Retrieves & updates the status of stored orders that may have changed.
@@ -67,9 +49,8 @@ export const refreshServiceList = async (): Promise<Result<string>> => {
  */
 export const refreshOrdersList = async (): Promise<Result<string>> => {
 	const unsettledOrders = blocktank.getPendingOrders();
-
 	try {
-		const promises = unsettledOrders.map((order) => refreshOrder(order._id));
+		const promises = unsettledOrders.map((order) => refreshOrder(order.id));
 		await Promise.all(promises);
 		return ok('Orders list updated');
 	} catch (e) {
@@ -80,14 +61,14 @@ export const refreshOrdersList = async (): Promise<Result<string>> => {
 /**
  * Retrieves, updates and attempts to finalize any pending channel open for a given orderId.
  * @param {string} orderId
- * @returns {Promise<Result<IGetOrderResponse>>}
+ * @returns {Promise<Result<IBtOrder>>}
  */
 export const refreshOrder = async (
 	orderId: string,
-): Promise<Result<IGetOrderResponse>> => {
+): Promise<Result<IBtOrder>> => {
 	try {
 		const currentOrders = getBlocktankStore().orders;
-		const currentOrder = currentOrders.find((o) => o._id === orderId);
+		const currentOrder = currentOrders.find((o) => o.id === orderId);
 		const paidOrders = getBlocktankStore().paidOrders;
 		const isPaidOrder = Object.keys(paidOrders).includes(orderId);
 
@@ -98,9 +79,9 @@ export const refreshOrder = async (
 		let order = getOrderResult.value;
 
 		// Attempt to finalize the channel open.
-		if (order.state === 100) {
+		if (order.payment.state === BtPaymentState.PAID) {
 			setLightningSettingUpStep(1);
-			const finalizeRes = await finalizeChannel(orderId);
+			const finalizeRes = await openChannel(orderId);
 			if (finalizeRes.isOk()) {
 				removeTodo('lightning');
 				const getUpdatedOrderResult = await blocktank.getOrder(orderId);
@@ -143,7 +124,7 @@ export const refreshBlocktankInfo = async (): Promise<Result<string>> => {
 		return ok('No need to update Blocktank info.');
 	}
 	const infoResponse = await getBlocktankInfo();
-	if (infoResponse.node_info) {
+	if (infoResponse.nodes) {
 		dispatch({
 			type: actions.UPDATE_BLOCKTANK_INFO,
 			payload: infoResponse,
@@ -151,33 +132,6 @@ export const refreshBlocktankInfo = async (): Promise<Result<string>> => {
 		return ok('Blocktank info updated.');
 	}
 	return err('Unable to update Blocktank info.');
-};
-
-/**
- * Attempts to buy a channel from BLocktank and updates the saved order id information.
- * @param {IBuyChannelRequest} req
- * @returns {Promise<Result<IBuyChannelResponse>>}
- */
-export const buyChannel = async (
-	req: IBuyChannelRequest,
-): Promise<Result<IBuyChannelResponse>> => {
-	try {
-		const res = await blocktank.buyChannel(req);
-		if (res.isErr()) {
-			return err(res.error.message);
-		}
-
-		if (res.value.order_id) {
-			//Fetches and updates the user's order list
-			await refreshOrder(res.value.order_id);
-		} else {
-			return err('Unable to find order id.');
-		}
-
-		return ok(res.value);
-	} catch (error) {
-		return err(error);
-	}
 };
 
 /**
@@ -191,23 +145,20 @@ export const buyChannel = async (
  * @returns {Promise<Result<string>>}
  */
 export const startChannelPurchase = async ({
-	productId,
 	remoteBalance,
 	localBalance,
 	channelExpiry = 6,
+	lspNodeId,
 	selectedWallet,
 	selectedNetwork,
 }: {
-	productId: string;
 	remoteBalance: number;
 	localBalance: number;
 	channelExpiry?: number;
+	lspNodeId?: string;
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
 }): Promise<Result<{ orderId: string; channelOpenCost: number }>> => {
-	if (!productId) {
-		return err('Unable to retrieve Blocktank product id.');
-	}
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
 	}
@@ -215,18 +166,20 @@ export const startChannelPurchase = async ({
 		selectedWallet = getSelectedWallet();
 	}
 
-	const buyChannelResponse = await buyChannel({
-		product_id: productId,
-		remote_balance: remoteBalance,
-		local_balance: localBalance,
-		channel_expiry: channelExpiry,
+	const buyChannelResponse = await createOrder({
+		lspBalanceSat: localBalance,
+		channelExpiryWeeks: channelExpiry,
+		options: {
+			clientBalanceSat: remoteBalance,
+			lspNodeId,
+		},
 	});
 	if (buyChannelResponse.isErr()) {
 		return err(buyChannelResponse.error.message);
 	}
 	const buyChannelData = buyChannelResponse.value;
 
-	const orderData = await getOrder(buyChannelData.order_id);
+	const orderData = await getOrder(buyChannelData.id);
 	if (orderData.isErr()) {
 		showToast({
 			type: 'error',
@@ -236,27 +189,23 @@ export const startChannelPurchase = async ({
 		return err(orderData.error.message);
 	}
 
-	const feeEstimates = getFeesStore().onchain;
-	const satsPerByte = orderData.value.zero_conf_satvbyte ?? feeEstimates.fast;
-	const updateFeeRes = updateFee({
-		satsPerByte: satsPerByte,
-		selectedNetwork,
-		selectedWallet,
-	});
-	if (updateFeeRes.isErr()) {
-		return err(i18n.t('other:bt_channel_purchase_fee_error'));
-	}
-
-	const transactionFee = updateFeeRes.value.fee;
+	const transactionFee = buyChannelData.feeSat;
 	const { onchainBalance } = getBalance({ selectedNetwork, selectedWallet });
-	const channelOpenCost = buyChannelData.price + transactionFee;
+	const min0ConfTxFee = await getMin0ConfTxFee(orderData.value.id);
+	if (min0ConfTxFee.isErr()) {
+		return err(min0ConfTxFee.error.message);
+	}
+	/*const txFeeInSats = getTotalFee({
+		satsPerByte: min0ConfTxFee.value.satPerVByte + 1,
+		selectedWallet,
+		selectedNetwork,
+	});*/
+	const channelOpenCost = buyChannelData.clientBalanceSat + transactionFee;
 
 	// Ensure we have enough funds to pay for both the channel and the fee to broadcast the transaction.
-	if (buyChannelData.total_amount + transactionFee > onchainBalance) {
+	if (channelOpenCost > onchainBalance) {
 		// TODO: Attempt to re-calculate a lower fee channel-open that's not instant if unable to pay.
-		const delta = Math.abs(
-			buyChannelData.total_amount + transactionFee - onchainBalance,
-		);
+		const delta = Math.abs(channelOpenCost - onchainBalance);
 		const cost = getDisplayValues({ satoshis: delta });
 		return err(
 			i18n.t('other:bt_channel_purchase_cost_error', {
@@ -265,19 +214,25 @@ export const startChannelPurchase = async ({
 		);
 	}
 
-	updateSendTransaction({
+	await updateSendTransaction({
 		transaction: {
 			outputs: [
 				{
-					address: buyChannelData.btc_address,
-					value: buyChannelData.total_amount,
+					address: buyChannelData.payment.onchain.address,
+					value: buyChannelData.feeSat,
 					index: 0,
 				},
 			],
 		},
 	});
 
-	return ok({ orderId: buyChannelData.order_id, channelOpenCost });
+	await updateFee({
+		satsPerByte: min0ConfTxFee.value.satPerVByte + 1,
+		selectedWallet,
+		selectedNetwork,
+	});
+
+	return ok({ orderId: buyChannelData.id, channelOpenCost });
 };
 
 /**
@@ -367,30 +322,31 @@ export const addPaidBlocktankOrder = ({
 
 /**
  * Dispatches various UI actions based on the state change of a given order.
- * @param {IGetOrderResponse} order
+ * @param {IBtOrder} order
  */
-const handleOrderStateChange = (order: IGetOrderResponse): void => {
+const handleOrderStateChange = (order: IBtOrder): void => {
 	// Order states: https://github.com/synonymdev/blocktank-client/blob/f8a20c35a4953435cecf8f718ee555e311e1db9b/src/services/client.ts#L15
-	const currentOrders = getBlocktankStore().orders;
-	const otherOrders = currentOrders.filter((o) => o._id !== order._id);
-	const otherOrderStates = otherOrders.map((o) => o.state);
-
-	const oneOtherOrderHasState = (states: number[]): boolean => {
-		return otherOrderStates.some((state) => states.includes(state));
-	};
+	//TODO: Not sure what to do with this
+	// const currentOrders = getBlocktankStore().orders;
+	// const otherOrders = currentOrders.filter((o) => o.id !== order.id);
+	// const otherOrderStates = otherOrders.map((o) => o.state);
+	//
+	// const oneOtherOrderHasState = (states: number[]): boolean => {.
+	// 	return otherOrderStates.some((state) => states.includes(state));
+	// };
 
 	// queued for opening
-	if (order.state === 200) {
+	if (!order.channel?.state) {
 		setLightningSettingUpStep(2);
 	}
 
 	// opening connection
-	if (order.state === 300) {
+	if (order.channel?.state === BtOpenChannelState.OPENING) {
 		setLightningSettingUpStep(3);
 	}
 
 	// given up
-	if (order.state === 400) {
+	if (order.payment.bolt11Invoice.state === BtBolt11PaymentState.FAILED) {
 		removeTodo('lightningSettingUp');
 		showToast({
 			type: 'error',
@@ -400,7 +356,7 @@ const handleOrderStateChange = (order: IGetOrderResponse): void => {
 	}
 
 	// order expired
-	if (order.state === 410) {
+	if (order.state === BtOrderState.EXPIRED) {
 		removeTodo('lightningSettingUp');
 		showToast({
 			type: 'error',
@@ -410,29 +366,34 @@ const handleOrderStateChange = (order: IGetOrderResponse): void => {
 	}
 
 	// channel closed
-	if (order.state === 450) {
-		if (!oneOtherOrderHasState([500])) {
-			removeTodo('transferToSpending');
-			removeTodo('transferClosingChannel');
-		}
+	if (order.channel?.state === BtOpenChannelState.CLOSED) {
+		// TODO: Not sure what to do with this.
+		// if (!oneOtherOrderHasState([500])) {
+		// 	removeTodo('transferToSpending');
+		// 	removeTodo('transferClosingChannel');
+		// }
+		removeTodo('transferToSpending');
+		removeTodo('transferClosingChannel');
 	}
 
 	// new channel open
-	if (order.state === 500) {
+	if (order.state === BtOrderState.OPEN) {
 		removeTodo('lightningConnecting');
 
-		if (!oneOtherOrderHasState([500])) {
-			// first channel
-			addTodo('lightningReady');
-			showToast({
-				type: 'success',
-				title: i18n.t('lightning:channel_opened_title'),
-				description: i18n.t('lightning:channel_opened_msg'),
-			});
-		} else {
-			// subsequent channels
-			removeTodo('transferToSpending');
-		}
+		// TODO: Not sure what to do with this.
+		// if (!oneOtherOrderHasState([500])) {
+		// 	// first channel
+		// 	addTodo('lightningReady');
+		// 	showToast({
+		// 		type: 'success',
+		// 		title: i18n.t('lightning:channel_opened_title'),
+		// 		description: i18n.t('lightning:channel_opened_msg'),
+		// 	});
+		// } else {
+		// 	// subsequent channels
+		// 	removeTodo('transferToSpending');
+		// }
+		removeTodo('transferToSpending');
 
 		// restart LDK after channel open
 		restartLdk();

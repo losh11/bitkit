@@ -38,7 +38,7 @@ import {
 	selectedNetworkSelector,
 	selectedWalletSelector,
 } from '../../store/reselect/wallet';
-import { blocktankServiceSelector } from '../../store/reselect/blocktank';
+import { blocktankInfoSelector } from '../../store/reselect/blocktank';
 import { primaryUnitSelector } from '../../store/reselect/settings';
 import NumberPadTextField from '../../components/NumberPadTextField';
 import { getNumberPadText } from '../../utils/numberpad';
@@ -52,7 +52,7 @@ const QuickSetup = ({
 	const unit = useSelector(primaryUnitSelector);
 	const selectedWallet = useSelector(selectedWalletSelector);
 	const selectedNetwork = useSelector(selectedNetworkSelector);
-	const blocktankService = useSelector(blocktankServiceSelector);
+	const blocktankInfo = useSelector(blocktankInfoSelector);
 
 	const [loading, setLoading] = useState(false);
 	const [showNumberPad, setShowNumberPad] = useState(false);
@@ -79,7 +79,7 @@ const QuickSetup = ({
 	}, [textFieldValue, unit]);
 
 	const diff = 0.01;
-	const btSpendingLimit = blocktankService.max_chan_spending;
+	const btSpendingLimit = blocktankInfo.options.maxChannelSizeSat;
 	const btSpendingLimitBalanced = Math.round(
 		btSpendingLimit / 2 - btSpendingLimit * diff,
 	);
@@ -132,15 +132,15 @@ const QuickSetup = ({
 		// Ensure local balance is bigger than remote balance
 		const localBalance = Math.max(
 			Math.round(spendingAmount + spendingAmount * diff),
-			blocktankService.min_channel_size,
+			blocktankInfo.options.minChannelSizeSat,
 		);
 		const purchaseResponse = await startChannelPurchase({
 			selectedNetwork,
 			selectedWallet,
-			productId: blocktankService.product_id,
 			remoteBalance: spendingAmount,
 			localBalance,
 			channelExpiry: 12,
+			lspNodeId: blocktankInfo.nodes[0].pubkey,
 		});
 
 		setLoading(false);
@@ -158,8 +158,8 @@ const QuickSetup = ({
 			});
 		}
 	}, [
+		blocktankInfo,
 		spendingAmount,
-		blocktankService,
 		selectedNetwork,
 		selectedWallet,
 		navigation,

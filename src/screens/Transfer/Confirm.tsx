@@ -47,10 +47,12 @@ const Confirm = ({
 	const selectedNetwork = useSelector(selectedNetworkSelector);
 	const orders = useSelector(blocktankOrdersSelector);
 	const order = useMemo(() => {
-		return orders.find((o) => o._id === orderId);
+		return orders.find((o) => o.id === orderId);
 	}, [orderId, orders]);
 
-	const blocktankPurchaseFee = useDisplayValues(order?.price ?? 0);
+	const feeSat = order?.feeSat ?? 0;
+	const clientBalanceSat = order?.clientBalanceSat ?? 0;
+	const blocktankPurchaseFee = useDisplayValues(feeSat + clientBalanceSat);
 	const transactionFee = useSelector(transactionFeeSelector);
 	const fiatTransactionFee = useDisplayValues(transactionFee);
 	const channelOpenCost = useMemo(() => {

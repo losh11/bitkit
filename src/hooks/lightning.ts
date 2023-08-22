@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { TChannel } from '@synonymdev/react-native-ldk';
-import { IGetOrderResponse } from '@synonymdev/blocktank-client';
 
 import { ellipsis } from '../utils/helpers';
 import Store from '../store/types';
@@ -16,6 +15,7 @@ import {
 	openChannelIdsSelector,
 } from '../store/reselect/lightning';
 import { usePaidBlocktankOrders } from './blocktank';
+import { IBtOrder } from '@synonymdev/blocktank-lsp-http-client';
 
 /**
  * Returns the lightning balance of all known open channels.
@@ -111,18 +111,18 @@ export const useLightningChannelBalance = (
 /**
  * Returns the name of a channel.
  * @param {TChannel} channel
- * @param {IGetOrderResponse} blocktankOrder
+ * @param {IBtOrder} blocktankOrder
  * @returns {string}
  */
 export const useLightningChannelName = (
 	channel: TChannel,
-	blocktankOrder?: IGetOrderResponse,
+	blocktankOrder?: IBtOrder,
 ): string => {
 	const paidBlocktankOrders = usePaidBlocktankOrders();
 
 	if (blocktankOrder) {
 		const index = paidBlocktankOrders.findIndex(
-			(order) => order._id === blocktankOrder._id,
+			(order) => order.id === blocktankOrder.id,
 		);
 		return `Connection ${index + 1}`;
 	} else {

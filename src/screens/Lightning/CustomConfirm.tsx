@@ -29,10 +29,7 @@ import {
 	selectedWalletSelector,
 	transactionFeeSelector,
 } from '../../store/reselect/wallet';
-import {
-	blocktankOrderSelector,
-	blocktankServiceSelector,
-} from '../../store/reselect/blocktank';
+import { blocktankOrderSelector } from '../../store/reselect/blocktank';
 
 export const DEFAULT_CHANNEL_DURATION = 6;
 
@@ -48,22 +45,18 @@ const CustomConfirm = ({
 	const [showNumberPad, setShowNumberPad] = useState(false);
 	const selectedWallet = useSelector(selectedWalletSelector);
 	const selectedNetwork = useSelector(selectedNetworkSelector);
-	const blocktankService = useSelector(blocktankServiceSelector);
 	const order = useSelector((state: Store) => {
 		return blocktankOrderSelector(state, orderId);
 	});
 
-	const blocktankPurchaseFee = useDisplayValues(order?.price ?? 0);
+	const blocktankPurchaseFee = useDisplayValues(order?.feeSat ?? 0);
 	const transactionFee = useSelector(transactionFeeSelector);
 	const fiatTransactionFee = useDisplayValues(transactionFee);
-
 	const channelOpenCost = useMemo(() => {
-		const fee = blocktankPurchaseFee.fiatValue + fiatTransactionFee.fiatValue;
-		return fee.toFixed(2);
-
-		// avoid flashing different price after confirmation
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [orderId]);
+		return (
+			blocktankPurchaseFee.fiatValue + fiatTransactionFee.fiatValue
+		).toFixed(2);
+	}, [fiatTransactionFee.fiatValue, blocktankPurchaseFee.fiatValue]);
 
 	const handleConfirm = async (): Promise<void> => {
 		setLoading(true);
@@ -80,9 +73,8 @@ const CustomConfirm = ({
 
 	const updateOrderExpiration = async (): Promise<void> => {
 		const purchaseResponse = await startChannelPurchase({
-			productId: blocktankService.product_id,
-			remoteBalance: order.remote_balance,
-			localBalance: order.local_balance,
+			remoteBalance: order.clientBalanceSat,
+			localBalance: order.lspBalanceSat,
 			channelExpiry: Math.max(weeks, 1),
 			selectedWallet,
 			selectedNetwork,
@@ -202,7 +194,7 @@ const CustomConfirm = ({
 						weeks={weeks}
 						onChange={setWeeks}
 						onDone={(): void => {
-							if (order.channel_expiry !== weeks) {
+							if (order.channelExpiryWeeks !== weeks) {
 								updateOrderExpiration().then();
 							}
 							setShowNumberPad(false);

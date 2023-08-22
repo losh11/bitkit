@@ -3,10 +3,10 @@ import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 import Share from 'react-native-share';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { IGetOrderResponse } from '@synonymdev/blocktank-client';
 import { TChannel } from '@synonymdev/react-native-ldk';
 import { useTranslation } from 'react-i18next';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { IBtOrder, BtOrderState } from '@synonymdev/blocktank-lsp-http-client';
 
 import {
 	AnimatedView,
@@ -77,11 +77,12 @@ const AnimatedRefreshControl = Animated.createAnimatedComponent(RefreshControl);
 
 /**
  * Convert pending (non-channel) blocktank orders to (fake) channels.
- * @param {IGetOrderResponse[]} orders
+ * @param {IBtOrder[]} orders
+ * @param {TPaidBlocktankOrders} paidOrders
  * @param {string} nodeKey
  */
 const getPendingBlocktankChannels = (
-	orders: IGetOrderResponse[],
+	orders: IBtOrder[],
 	paidOrders: TPaidBlocktankOrders,
 	nodeKey: string,
 ): {
@@ -92,32 +93,35 @@ const getPendingBlocktankChannels = (
 	const failedOrders: TChannel[] = [];
 
 	Object.keys(paidOrders).forEach((orderId) => {
-		const order = orders.find((o) => o._id === orderId)!;
+		const order = orders.find((o) => o.id === orderId)!;
 
 		const fakeChannel: TChannel = {
-			channel_id: order._id,
+			channel_id: order.id,
 			is_public: false,
 			is_usable: false,
 			is_channel_ready: false,
 			is_outbound: false,
-			balance_sat: order.local_balance,
+			balance_sat: order.lspBalanceSat,
 			counterparty_node_id: nodeKey,
-			funding_txid: order.channel_open_tx?.transaction_id,
+			funding_txid: order.channel?.fundingTx.id,
 			// channel_type: string,
 			user_channel_id: '0',
 			// short_channel_id: number,
-			inbound_capacity_sat: order.local_balance,
-			outbound_capacity_sat: order.remote_balance,
-			channel_value_satoshis: order.local_balance + order.remote_balance,
-			short_channel_id: order._id,
+			inbound_capacity_sat: order.lspBalanceSat,
+			outbound_capacity_sat: order.clientBalanceSat,
+			channel_value_satoshis: order.lspBalanceSat + order.clientBalanceSat,
+			short_channel_id: order.id,
 			config_forwarding_fee_base_msat: 0,
 			config_forwarding_fee_proportional_millionths: 0,
 		};
 
-		if ([0, 100, 150, 200].includes(order.state)) {
+		if (order.state === BtOrderState.CREATED) {
 			pendingOrders.push(fakeChannel);
 		}
-		if ([400, 410].includes(order.state)) {
+		if (
+			order.state === BtOrderState.EXPIRED ||
+			order.state === BtOrderState.CLOSED
+		) {
 			failedOrders.push(fakeChannel);
 		}
 	});
@@ -141,11 +145,11 @@ const Channel = memo(
 		const blocktankOrder = Object.values(paidBlocktankOrders).find((order) => {
 			// real channel
 			if (channel.funding_txid) {
-				return order.channel_open_tx?.transaction_id === channel.funding_txid;
+				return order.channel?.fundingTx.id === channel.funding_txid;
 			}
 
 			// fake channel
-			return order._id === channel.channel_id;
+			return order.id === channel.channel_id;
 		});
 
 		const channelName = useLightningChannelName(channel, blocktankOrder);
@@ -240,7 +244,7 @@ const Channels = ({
 		return closedChannelsSelector(state, selectedWallet, selectedNetwork);
 	});
 	const blocktankNodeKey = useSelector((state: Store) => {
-		return state.blocktank.info.node_info.public_key;
+		return state.blocktank.info.nodes[0].pubkey;
 	});
 
 	const { pendingOrders, failedOrders } = getPendingBlocktankChannels(
