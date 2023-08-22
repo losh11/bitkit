@@ -153,7 +153,7 @@ export const openChannel = async (
 		const finalizeChannelResponse = await bt.openChannel(
 			orderId,
 			nodeId.value,
-			true,
+			false,
 		);
 		console.log('finalizeChannelResponse', finalizeChannelResponse);
 		if (finalizeChannelResponse) {
