@@ -220,9 +220,9 @@ export const setupLdk = async ({
 			account: account.value,
 			getFees: () =>
 				Promise.resolve({
-					highPriority: fees.fast,
-					normal: fees.normal,
-					background: fees.slow,
+					highPriority: selectedNetwork === 'bitcoinRegtest' ? 4 : fees.fast,
+					normal: selectedNetwork === 'bitcoinRegtest' ? 2 : fees.normal,
+					background: selectedNetwork === 'bitcoinRegtest' ? 1 : fees.slow,
 				}),
 			network,
 			getBestBlock,
