@@ -25,6 +25,7 @@ import { TAvailableNetworks } from '../../utils/networks';
 import {
 	broadcastTransaction,
 	createTransaction,
+	getTotalFee,
 	updateFee,
 } from '../../utils/wallet/transactions';
 import { showToast } from '../../utils/notifications';
@@ -189,18 +190,17 @@ export const startChannelPurchase = async ({
 		return err(orderData.error.message);
 	}
 
-	const transactionFee = buyChannelData.feeSat;
 	const { onchainBalance } = getBalance({ selectedNetwork, selectedWallet });
 	const min0ConfTxFee = await getMin0ConfTxFee(orderData.value.id);
 	if (min0ConfTxFee.isErr()) {
 		return err(min0ConfTxFee.error.message);
 	}
-	/*const txFeeInSats = getTotalFee({
+	const txFeeInSats = getTotalFee({
 		satsPerByte: min0ConfTxFee.value.satPerVByte + 1,
 		selectedWallet,
 		selectedNetwork,
-	});*/
-	const channelOpenCost = buyChannelData.clientBalanceSat + transactionFee;
+	});
+	const channelOpenCost = buyChannelData.clientBalanceSat + txFeeInSats;
 
 	// Ensure we have enough funds to pay for both the channel and the fee to broadcast the transaction.
 	if (channelOpenCost > onchainBalance) {
