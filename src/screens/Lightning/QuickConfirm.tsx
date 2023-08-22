@@ -41,7 +41,7 @@ const QuickConfirm = ({
 	const [loading, setLoading] = useState(false);
 
 	const order = useMemo(() => {
-		return orders.find((o) => o._id === orderId);
+		return orders.find((o) => o.id === orderId);
 	}, [orderId, orders]);
 	const purchaseFee = useMemo(() => {
 		return !order ? 0 : order?.feeSat ?? 0;
