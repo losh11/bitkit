@@ -58,8 +58,46 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 	const orderState: BtOrderState = order.state;
 	const paymentState: BtPaymentState = order.payment.state;
 	const channelState: BtOpenChannelState | undefined = order.channel?.state;
-	// possible order states
-	// https://github.com/synonymdev/blocktank-server/blob/master/src/Orders/Order.js
+
+	console.log({ orderState });
+	console.log({ paymentState });
+	console.log({ channelState });
+
+	if (channelState) {
+		switch (channelState) {
+			case BtOpenChannelState.OPENING:
+				return (): ReactElement => (
+					<View style={styles.statusRow}>
+						<ThemedView color="purple16" style={styles.statusIcon}>
+							<HourglassSimpleIcon color="purple" width={16} height={16} />
+						</ThemedView>
+						<Text01M color="purple">{getStateMessage(order)}</Text01M>
+					</View>
+				);
+		}
+	}
+
+	switch (paymentState) {
+		case BtPaymentState.PAID:
+			return (): ReactElement => (
+				<View style={styles.statusRow}>
+					<ThemedView color="purple16" style={styles.statusIcon}>
+						<Checkmark color="purple" width={16} height={16} />
+					</ThemedView>
+					<Text01M color="purple">{getStateMessage(order)}</Text01M>
+				</View>
+			);
+		case BtPaymentState.REFUNDED:
+			return (): ReactElement => (
+				<View style={styles.statusRow}>
+					<ThemedView color="white1" style={styles.statusIcon}>
+						<ArrowCounterClock color="gray1" width={16} height={16} />
+					</ThemedView>
+					<Text01M color="gray1">{getStateMessage(order)}</Text01M>
+				</View>
+			);
+	}
+
 	switch (orderState) {
 		case BtOrderState.CREATED:
 			return (): ReactElement => (
@@ -86,38 +124,6 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 						<LightningIcon color="green" width={16} height={16} />
 					</ThemedView>
 					<Text01M color="green">{getStateMessage(order)}</Text01M>
-				</View>
-			);
-	}
-	switch (paymentState) {
-		case BtPaymentState.PAID:
-			return (): ReactElement => (
-				<View style={styles.statusRow}>
-					<ThemedView color="purple16" style={styles.statusIcon}>
-						<Checkmark color="purple" width={16} height={16} />
-					</ThemedView>
-					<Text01M color="purple">{getStateMessage(order)}</Text01M>
-				</View>
-			);
-		case BtPaymentState.REFUNDED:
-			return (): ReactElement => (
-				<View style={styles.statusRow}>
-					<ThemedView color="white1" style={styles.statusIcon}>
-						<ArrowCounterClock color="gray1" width={16} height={16} />
-					</ThemedView>
-					<Text01M color="gray1">{getStateMessage(order)}</Text01M>
-				</View>
-			);
-	}
-
-	switch (channelState) {
-		case BtOpenChannelState.OPENING:
-			return (): ReactElement => (
-				<View style={styles.statusRow}>
-					<ThemedView color="purple16" style={styles.statusIcon}>
-						<HourglassSimpleIcon color="purple" width={16} height={16} />
-					</ThemedView>
-					<Text01M color="purple">{getStateMessage(order)}</Text01M>
 				</View>
 			);
 	}
@@ -319,7 +325,11 @@ const ChannelDetails = ({
 						</View>
 						<Section
 							name={t('order')}
-							value={<Caption13M>{blocktankOrder.id}</Caption13M>}
+							value={
+								<Caption13M ellipsizeMode="middle" numberOfLines={1}>
+									{blocktankOrder.id}
+								</Caption13M>
+							}
 							onPress={(): void => Clipboard.setString(blocktankOrder.id)}
 						/>
 						<Section
@@ -365,7 +375,7 @@ const ChannelDetails = ({
 							name={t('order_fee')}
 							value={
 								<Money
-									sats={blocktankOrder.feeSat + blocktankOrder.clientBalanceSat}
+									sats={blocktankOrder.feeSat - blocktankOrder.clientBalanceSat}
 									size="caption13M"
 									symbol={true}
 									color="white"

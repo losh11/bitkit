@@ -49,9 +49,10 @@ const QuickConfirm = ({
 	const blocktankPurchaseFee = useDisplayValues(purchaseFee);
 	const fiatTransactionFee = useDisplayValues(transactionFee);
 	const clientBalance = useDisplayValues(order?.clientBalanceSat ?? 0);
+
 	const channelOpenCost = useMemo(() => {
 		return (
-			blocktankPurchaseFee.fiatValue +
+			blocktankPurchaseFee.fiatValue -
 			clientBalance.fiatValue +
 			fiatTransactionFee.fiatValue
 		).toFixed(2);

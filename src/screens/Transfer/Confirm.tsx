@@ -55,11 +55,19 @@ const Confirm = ({
 	const blocktankPurchaseFee = useDisplayValues(feeSat + clientBalanceSat);
 	const transactionFee = useSelector(transactionFeeSelector);
 	const fiatTransactionFee = useDisplayValues(transactionFee);
+	const clientBalance = useDisplayValues(order?.clientBalanceSat ?? 0);
+
 	const channelOpenCost = useMemo(() => {
 		return (
-			blocktankPurchaseFee.fiatValue + fiatTransactionFee.fiatValue
+			blocktankPurchaseFee.fiatValue -
+			clientBalance.fiatValue +
+			fiatTransactionFee.fiatValue
 		).toFixed(2);
-	}, [blocktankPurchaseFee, fiatTransactionFee.fiatValue]);
+	}, [
+		blocktankPurchaseFee.fiatValue,
+		clientBalance.fiatValue,
+		fiatTransactionFee.fiatValue,
+	]);
 
 	const handleConfirm = async (): Promise<void> => {
 		setLoading(true);

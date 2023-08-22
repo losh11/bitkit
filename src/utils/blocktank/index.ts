@@ -231,15 +231,11 @@ export const getStateMessage = (order: IBtOrder): string => {
 	const paymentState: BtPaymentState = order.payment.state;
 	const channelState: BtOpenChannelState | undefined = order.channel?.state;
 
-	switch (orderState) {
-		case BtOrderState.EXPIRED:
-			return i18n.t('lightning:order_state.expired');
-		case BtOrderState.CLOSED:
-			return i18n.t('lightning:order_state.closed');
-		case BtOrderState.OPEN:
-			return i18n.t('lightning:order_state.open');
-		case BtOrderState.CREATED:
-			return i18n.t('lightning:order_state.awaiting_payment');
+	if (channelState) {
+		switch (channelState) {
+			case BtOpenChannelState.OPENING:
+				return i18n.t('lightning:order_state.opening');
+		}
 	}
 
 	switch (paymentState) {
@@ -251,14 +247,16 @@ export const getStateMessage = (order: IBtOrder): string => {
 			return i18n.t('lightning:order_state.refunded');
 	}
 
-	if (channelState) {
-		switch (channelState) {
-			case BtOpenChannelState.OPENING:
-				return i18n.t('lightning:order_state.opening');
-		}
+	switch (orderState) {
+		case BtOrderState.EXPIRED:
+			return i18n.t('lightning:order_state.expired');
+		case BtOrderState.CLOSED:
+			return i18n.t('lightning:order_state.closed');
+		case BtOrderState.OPEN:
+			return i18n.t('lightning:order_state.open');
+		case BtOrderState.CREATED:
+			return i18n.t('lightning:order_state.awaiting_payment');
 	}
-
-	return 'Unknown state';
 };
 
 /**
