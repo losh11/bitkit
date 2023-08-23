@@ -95,8 +95,8 @@ export const refreshOrder = async (
 
 		// Order state has not changed
 		if (
-			currentOrder?.state === order.state ||
-			currentOrder?.payment.state === order.payment.state ||
+			currentOrder?.state === order.state &&
+			currentOrder?.payment.state === order.payment.state &&
 			currentOrder?.channel?.state === order.channel?.state
 		) {
 			return ok(order);
