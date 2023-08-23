@@ -80,7 +80,10 @@ export const refreshOrder = async (
 		let order = getOrderResult.value;
 
 		// Attempt to finalize the channel open.
-		if (order.payment.state === BtPaymentState.PAID) {
+		if (
+			order.payment.state === BtPaymentState.PAID &&
+			order.state !== BtOrderState.OPEN
+		) {
 			setLightningSettingUpStep(1);
 			const finalizeRes = await openChannel(orderId);
 			if (finalizeRes.isOk()) {
@@ -109,7 +112,12 @@ export const refreshOrder = async (
 		});
 
 		// Handle order state changes for paid orders
-		if (currentOrder && currentOrder.state !== order.state && isPaidOrder) {
+		if (
+			currentOrder &&
+			isPaidOrder &&
+			(currentOrder.state !== order.state ||
+				currentOrder.payment.state !== order.payment.state)
+		) {
 			handleOrderStateChange(order);
 		}
 

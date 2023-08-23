@@ -65,7 +65,7 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 
 	if (channelState) {
 		switch (channelState) {
-			case BtOpenChannelState.OPENING:
+			case 'opening':
 				return (): ReactElement => (
 					<View style={styles.statusRow}>
 						<ThemedView color="purple16" style={styles.statusIcon}>
@@ -78,7 +78,7 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 	}
 
 	switch (paymentState) {
-		case BtPaymentState.PAID:
+		case 'paid':
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
 					<ThemedView color="purple16" style={styles.statusIcon}>
@@ -87,7 +87,7 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 					<Text01M color="purple">{getStateMessage(order)}</Text01M>
 				</View>
 			);
-		case BtPaymentState.REFUNDED:
+		case 'refunded':
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
 					<ThemedView color="white1" style={styles.statusIcon}>
@@ -99,7 +99,7 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 	}
 
 	switch (orderState) {
-		case BtOrderState.CREATED:
+		case 'created':
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
 					<ThemedView color="purple16" style={styles.statusIcon}>
@@ -108,7 +108,7 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 					<Text01M color="purple">{getStateMessage(order)}</Text01M>
 				</View>
 			);
-		case BtOrderState.EXPIRED:
+		case 'expired':
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
 					<ThemedView color="red16" style={styles.statusIcon}>
@@ -117,7 +117,7 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 					<Text01M color="red">{getStateMessage(order)}</Text01M>
 				</View>
 			);
-		case BtOrderState.OPEN:
+		case 'open':
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
 					<ThemedView color="green16" style={styles.statusIcon}>

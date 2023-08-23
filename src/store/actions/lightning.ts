@@ -28,6 +28,7 @@ import {
 } from '../types/lightning';
 import { EPaymentType, TWalletName } from '../types/wallet';
 import { EActivityType, TLightningActivityItem } from '../types/activity';
+import { removeTodo } from './todos';
 
 const dispatch = getDispatch();
 
@@ -122,13 +123,21 @@ export const updateLightningChannels = async ({
 
 	const channels: { [channelId: string]: TChannel } = {};
 	const openChannelIds: string[] = [];
+	const pendingChannels: string[] = [];
 
 	lightningChannels.value.forEach((channel) => {
 		channels[channel.channel_id] = channel;
+		if (!channel.is_channel_ready) {
+			pendingChannels.push(channel.channel_id);
+		}
 		if (!openChannelIds.includes(channel.channel_id)) {
 			openChannelIds.push(channel.channel_id);
 		}
 	});
+
+	if (!pendingChannels.length) {
+		removeTodo('lightningConnecting');
+	}
 
 	const payload = {
 		channels,

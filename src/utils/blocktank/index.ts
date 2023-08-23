@@ -211,6 +211,7 @@ export const watchOrder = async (
 			break;
 		}
 		if (res.value.state === BtOrderState.EXPIRED) {
+			error = 'Order expired.';
 			break;
 		}
 		if (res.value.state === BtOrderState.OPEN) {
@@ -233,30 +234,32 @@ export const getStateMessage = (order: IBtOrder): string => {
 
 	if (channelState) {
 		switch (channelState) {
-			case BtOpenChannelState.OPENING:
+			case 'opening':
 				return i18n.t('lightning:order_state.opening');
 		}
 	}
 
 	switch (paymentState) {
-		case BtPaymentState.CREATED:
+		case 'created':
 			return i18n.t('lightning:order_state.awaiting_payment');
-		case BtPaymentState.PAID:
+		case 'paid':
 			return i18n.t('lightning:order_state.paid');
-		case BtPaymentState.REFUNDED:
+		case 'refunded':
 			return i18n.t('lightning:order_state.refunded');
 	}
 
 	switch (orderState) {
-		case BtOrderState.EXPIRED:
+		case 'expired':
 			return i18n.t('lightning:order_state.expired');
-		case BtOrderState.CLOSED:
+		case 'closed':
 			return i18n.t('lightning:order_state.closed');
-		case BtOrderState.OPEN:
+		case 'open':
 			return i18n.t('lightning:order_state.open');
-		case BtOrderState.CREATED:
+		case 'created':
 			return i18n.t('lightning:order_state.awaiting_payment');
 	}
+
+	return 'Unknown state';
 };
 
 /**

@@ -360,6 +360,7 @@ export const subscribeToLightningPayments = ({
 	selectedNetwork?: TAvailableNetworks;
 }): void => {
 	if (!paymentSubscription) {
+		// @ts-ignore
 		paymentSubscription = ldk.onEvent(
 			EEventTypes.channel_manager_payment_claimed,
 			(res: TChannelManagerClaim) => {
@@ -379,6 +380,7 @@ export const subscribeToLightningPayments = ({
 		);
 	}
 	if (!onChannelSubscription) {
+		// @ts-ignore
 		onChannelSubscription = ldk.onEvent(
 			EEventTypes.new_channel,
 			(_res: TChannelUpdate) => {
@@ -405,6 +407,7 @@ export const subscribeToLightningPayments = ({
 		);
 	}
 	if (!onSpendableOutputsSubscription) {
+		// @ts-ignore
 		onSpendableOutputsSubscription = ldk.onEvent(
 			EEventTypes.channel_manager_spendable_outputs,
 			() => {
@@ -872,7 +875,7 @@ export const addPeers = async ({
 		if (!geoBlocked) {
 			// Set Blocktank node uri array if able.
 			blocktankNodeUris =
-				getBlocktankStore()?.info?.nodes[0]?.connectionStrings;
+				getBlocktankStore()?.info?.nodes[0]?.connectionStrings ?? [];
 			if (!blocktankNodeUris.length) {
 				// Fall back to hardcoded Blocktank peer if the blocktankNodeUris array is empty.
 				blocktankNodeUris = FALLBACK_BLOCKTANK_PEERS[selectedNetwork];
