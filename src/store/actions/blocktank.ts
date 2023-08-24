@@ -84,10 +84,11 @@ export const refreshOrder = async (
 			order.payment.state === BtPaymentState.PAID &&
 			order.state !== BtOrderState.OPEN
 		) {
-			setLightningSettingUpStep(1);
+			setLightningSettingUpStep(2);
 			const finalizeRes = await openChannel(orderId);
 			if (finalizeRes.isOk()) {
 				removeTodo('lightning');
+				setLightningSettingUpStep(3);
 				const getUpdatedOrderResult = await blocktank.getOrder(orderId);
 				if (getUpdatedOrderResult.isErr()) {
 					return err(getUpdatedOrderResult.error.message);
@@ -299,6 +300,7 @@ export const confirmChannelPurchase = async ({
 	resetSendTransaction({ selectedWallet, selectedNetwork });
 
 	watchOrder(orderId).then();
+	setLightningSettingUpStep(0);
 	removeTodo('lightning');
 	refreshWallet({
 		onchain: true,

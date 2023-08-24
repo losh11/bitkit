@@ -75,7 +75,7 @@ const QuickConfirm = ({
 			setLoading(false);
 			return;
 		}
-		setLightningSettingUpStep(0);
+		setLightningSettingUpStep(1);
 		addTodo('lightningSettingUp');
 		navigation.navigate('SettingUp');
 	};

@@ -93,8 +93,15 @@ const getPendingBlocktankChannels = (
 	const failedOrders: TChannel[] = [];
 
 	Object.keys(paidOrders).forEach((orderId) => {
-		const order = orders.find((o) => o.id === orderId)!;
-
+		let order = orders.find((o) => o.id === orderId)!;
+		if (!order) {
+			// In the event it was paid for using the old api.
+			// @ts-ignore
+			order = orders.find((o) => o?._id === orderId)!;
+			if (!order) {
+				return;
+			}
+		}
 		const fakeChannel: TChannel = {
 			channel_id: order.id,
 			confirmations: 0,
