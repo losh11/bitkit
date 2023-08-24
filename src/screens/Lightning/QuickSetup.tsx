@@ -222,7 +222,7 @@ const QuickSetup = ({
 							</AnimatedView>
 						)}
 
-						{spendingAmount === spendableBalance && (
+						{spendingAmount >= spendableBalance && (
 							<AnimatedView
 								style={styles.note}
 								entering={FadeIn}
