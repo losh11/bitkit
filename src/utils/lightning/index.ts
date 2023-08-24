@@ -944,7 +944,8 @@ export const getLightningNodePeers = async ({
 		// No need to add Blocktank peer if geo-blocked.
 		if (!geoBlocked) {
 			// Set Blocktank node uri array if able.
-			blocktankNodeUris = getBlocktankStore()?.info?.node_info?.uris ?? [];
+			blocktankNodeUris =
+				getBlocktankStore()?.info?.nodes[0].connectionStrings ?? [];
 			if (!blocktankNodeUris.length) {
 				// Fall back to hardcoded Blocktank peer if the blocktankNodeUris array is empty.
 				blocktankNodeUris = FALLBACK_BLOCKTANK_PEERS[selectedNetwork];
