@@ -6,6 +6,7 @@ import { err, ok, Result } from '@synonymdev/result';
 import lm, {
 	ldk,
 	DefaultTransactionDataShape,
+	defaultUserConfig,
 	EEventTypes,
 	ENetworks,
 	TAccount,
@@ -216,13 +217,17 @@ export const setupLdk = async ({
 			return err(storageRes.error);
 		}
 		const fees = getFeesStore().onchain;
+		const peers = await getLightningNodePeers({
+			selectedWallet,
+			selectedNetwork,
+		});
 		const lmStart = await lm.start({
 			account: account.value,
 			getFees: () =>
 				Promise.resolve({
-					highPriority: fees.fast,
-					normal: fees.normal,
-					background: fees.slow,
+					highPriority: selectedNetwork === 'bitcoinRegtest' ? 4 : fees.fast,
+					normal: selectedNetwork === 'bitcoinRegtest' ? 2 : fees.normal,
+					background: selectedNetwork === 'bitcoinRegtest' ? 1 : fees.slow,
 				}),
 			network,
 			getBestBlock,
@@ -239,6 +244,15 @@ export const setupLdk = async ({
 				forceClose: staleBackupRecoveryMode,
 				broadcastLatestTx: false,
 			},
+			userConfig: {
+				...defaultUserConfig,
+				channel_handshake_config: {
+					...defaultUserConfig.channel_handshake_config,
+					negotiate_anchors_zero_fee_htlc_tx: true,
+				},
+				manually_accept_inbound_channels: true,
+			},
+			trustedZeroConfPeers: peers,
 		});
 
 		if (lmStart.isErr()) {
@@ -287,8 +301,6 @@ export const restartLdk = async (): Promise<Result<string>> => {
  * Retrieves any pending/unpaid invoices from the invoices array via payment hash.
  * TODO replace this function once this is complete https://github.com/synonymdev/react-native-ldk/issues/152
  * @param {string} paymentHash
- * @param {TWalletName} [selectedWallet]
- * @param {TAvailableNetworks} [selectedNetwork]
  */
 export const getPendingInvoice = (
 	paymentHash: string,
@@ -360,6 +372,7 @@ export const subscribeToLightningPayments = ({
 	selectedNetwork?: TAvailableNetworks;
 }): void => {
 	if (!paymentSubscription) {
+		// @ts-ignore
 		paymentSubscription = ldk.onEvent(
 			EEventTypes.channel_manager_payment_claimed,
 			(res: TChannelManagerClaim) => {
@@ -379,6 +392,7 @@ export const subscribeToLightningPayments = ({
 		);
 	}
 	if (!onChannelSubscription) {
+		// @ts-ignore
 		onChannelSubscription = ldk.onEvent(
 			EEventTypes.new_channel,
 			(_res: TChannelUpdate) => {
@@ -405,6 +419,7 @@ export const subscribeToLightningPayments = ({
 		);
 	}
 	if (!onSpendableOutputsSubscription) {
+		// @ts-ignore
 		onSpendableOutputsSubscription = ldk.onEvent(
 			EEventTypes.channel_manager_spendable_outputs,
 			() => {
@@ -908,6 +923,49 @@ export const addPeers = async ({
 	}
 };
 
+export const getLightningNodePeers = async ({
+	selectedWallet,
+	selectedNetwork,
+}: {
+	selectedWallet?: TWalletName;
+	selectedNetwork?: TAvailableNetworks;
+} = {}): Promise<string[]> => {
+	try {
+		if (!selectedWallet) {
+			selectedWallet = getSelectedWallet();
+		}
+		if (!selectedNetwork) {
+			selectedNetwork = getSelectedNetwork();
+		}
+		const geoBlocked = await isGeoBlocked(true);
+
+		let blocktankNodeUris: string[] = [];
+		// No need to add Blocktank peer if geo-blocked.
+		if (!geoBlocked) {
+			// Set Blocktank node uri array if able.
+			blocktankNodeUris = getBlocktankStore()?.info?.node_info?.uris ?? [];
+			if (!blocktankNodeUris.length) {
+				// Fall back to hardcoded Blocktank peer if the blocktankNodeUris array is empty.
+				blocktankNodeUris = FALLBACK_BLOCKTANK_PEERS[selectedNetwork];
+			}
+		}
+		const blocktankLightningPeers = blocktankNodeUris;
+		const defaultLightningPeers = DEFAULT_LIGHTNING_PEERS[selectedNetwork];
+		const customLightningPeers = getCustomLightningPeers({
+			selectedNetwork,
+			selectedWallet,
+		});
+		return [
+			...defaultLightningPeers,
+			...blocktankLightningPeers,
+			...customLightningPeers,
+		];
+	} catch (e) {
+		console.log(e);
+		return [];
+	}
+};
+
 /**
  * Returns an array of pending and open channels
  * @returns Promise<Result<TChannel[]>>
@@ -1341,7 +1399,7 @@ export const getClaimableBalance = async ({
 	}
 	const claimableBalance = reduceValue({
 		arr: claimableBalanceRes.value,
-		value: 'claimable_amount_satoshis',
+		value: 'amount_satoshis',
 	});
 	if (claimableBalance.isErr()) {
 		return 0;

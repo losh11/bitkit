@@ -78,6 +78,7 @@ const AnimatedRefreshControl = Animated.createAnimatedComponent(RefreshControl);
 /**
  * Convert pending (non-channel) blocktank orders to (fake) channels.
  * @param {IGetOrderResponse[]} orders
+ * @param paidOrders
  * @param {string} nodeKey
  */
 const getPendingBlocktankChannels = (
@@ -95,6 +96,7 @@ const getPendingBlocktankChannels = (
 		const order = orders.find((o) => o._id === orderId)!;
 
 		const fakeChannel: TChannel = {
+			confirmations: 0,
 			channel_id: order._id,
 			is_public: false,
 			is_usable: false,
