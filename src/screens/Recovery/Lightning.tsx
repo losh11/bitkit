@@ -211,7 +211,7 @@ const LightningWithSlashtags = ({
 
 		let sats = 0;
 		balances.value.forEach((balance) => {
-			sats += balance.claimable_amount_satoshis;
+			sats += balance.amount_satoshis;
 		});
 
 		setRecoveredSats(sats);

@@ -97,6 +97,7 @@ const getPendingBlocktankChannels = (
 
 		const fakeChannel: TChannel = {
 			channel_id: order.id,
+			confirmations: 0,
 			is_public: false,
 			is_usable: false,
 			is_channel_ready: false,
