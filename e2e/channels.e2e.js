@@ -12,7 +12,7 @@ import {
 	bitcoinURL,
 } from './helpers';
 
-d = checkComplete('channels-1') ? describe.skip : describe;
+const d = checkComplete('channels-1') ? describe.skip : describe;
 
 d('LN Channel Onboarding', () => {
 	let waitForElectrum;
@@ -93,6 +93,7 @@ d('LN Channel Onboarding', () => {
 
 			// should show 80% limit note
 			await element(by.id('SliderHandle')).swipe('right', 'slow', NaN, 0.8);
+			await sleep(2000); // wait for weird slider behavior
 			await expect(element(by.id('QuickSetupReserveNote'))).toBeVisible();
 			await element(by.id('QuickSetupCustomAmount')).tap();
 			await element(by.id('NumberPadButtonsMax')).tap();
