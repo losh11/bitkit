@@ -41,8 +41,10 @@ export const defaultOrderResponse: IBtOrder = {
 	clientBalanceSat: 0,
 	zeroConf: false,
 	channelExpiryWeeks: 0,
-	channelExpiresAt: new Date(),
-	orderExpiresAt: new Date(),
+	// @ts-ignore
+	channelExpiresAt: new Date().getTime(),
+	// @ts-ignore
+	orderExpiresAt: new Date().getTime(),
 	channel: undefined,
 	lspNode: {
 		alias: '',
@@ -56,8 +58,10 @@ export const defaultOrderResponse: IBtOrder = {
 			request: '',
 			// @ts-ignore
 			state: null,
-			expiresAt: new Date(),
-			updatedAt: new Date(),
+			// @ts-ignore
+			expiresAt: new Date().getTime(),
+			// @ts-ignore
+			updatedAt: new Date().getTime(),
 		},
 		onchain: {
 			address: '',
@@ -67,6 +71,8 @@ export const defaultOrderResponse: IBtOrder = {
 	},
 	couponCode: '',
 	discountPercent: 0,
-	updatedAt: new Date(),
-	createdAt: new Date(),
+	// @ts-ignore
+	updatedAt: new Date().getTime(),
+	// @ts-ignore
+	createdAt: new Date().getTime(),
 };
