@@ -1,10 +1,10 @@
 import React, {
-	ReactElement,
 	memo,
+	ReactElement,
+	useCallback,
+	useEffect,
 	useMemo,
 	useState,
-	useEffect,
-	useCallback,
 } from 'react';
 import { ImageSourcePropType, StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -26,10 +26,17 @@ import {
 	resetSendTransaction,
 	setupOnChainTransaction,
 } from '../../store/actions/wallet';
-import { convertCurrency, convertToSats } from '../../utils/conversion';
+import {
+	convertCurrency,
+	convertToSats,
+	fiatToBitcoinUnit,
+} from '../../utils/conversion';
 import { getFiatDisplayValues } from '../../utils/displayValues';
 import { showToast } from '../../utils/notifications';
-import { startChannelPurchase } from '../../store/actions/blocktank';
+import {
+	refreshBlocktankInfo,
+	startChannelPurchase,
+} from '../../store/actions/blocktank';
 import { EUnit } from '../../store/types/wallet';
 import {
 	primaryUnitSelector,
@@ -44,7 +51,6 @@ import NumberPadTextField from '../../components/NumberPadTextField';
 import { getNumberPadText } from '../../utils/numberpad';
 import { DEFAULT_CHANNEL_DURATION } from './CustomConfirm';
 import { SPENDING_LIMIT_RATIO } from '../../utils/wallet/constants';
-import { refreshBlocktankInfo } from '../../store/actions/blocktank';
 import useDisplayValues from '../../hooks/displayValues';
 
 export type TPackage = {
@@ -111,6 +117,17 @@ const CustomSetup = ({
 	const [loading, setLoading] = useState(false);
 	const [spendingPackages, setSpendingPackages] = useState<TPackage[]>([]); // Packages the user can afford.
 	const [receivingPackages, setReceivingPackages] = useState<TPackage[]>([]);
+
+	const minChannelSizeSat = useMemo(() => {
+		if (blocktankInfo.options.minChannelSizeSat > 0) {
+			return blocktankInfo.options.minChannelSizeSat;
+		}
+		return fiatToBitcoinUnit({
+			fiatValue: 980, // 989 instead of 999 to allow for exchange rate variances.
+			currency: 'USD',
+			unit: EUnit.satoshi,
+		});
+	}, [blocktankInfo.options.minChannelSizeSat]);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -247,8 +264,8 @@ const CustomSetup = ({
 					? medium.satoshis
 					: balanceMultiplied > small.satoshis
 					? small.satoshis
-					: balanceMultiplied > blocktankInfo.options.minChannelSizeSat
-					? blocktankInfo.options.minChannelSizeSat
+					: balanceMultiplied > minChannelSizeSat
+					? minChannelSizeSat
 					: 0;
 
 			const result = getNumberPadText(amount, unit);
@@ -257,7 +274,7 @@ const CustomSetup = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		blocktankInfo.options.maxChannelSizeSat,
-		blocktankInfo.options.minChannelSizeSat,
+		minChannelSizeSat,
 		onchainBalance,
 		receivingPackages,
 		spending,

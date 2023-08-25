@@ -30,7 +30,7 @@ import {
 	startChannelPurchase,
 } from '../../store/actions/blocktank';
 import { showToast } from '../../utils/notifications';
-import { convertToSats } from '../../utils/conversion';
+import { convertToSats, fiatToBitcoinUnit } from '../../utils/conversion';
 import { getFiatDisplayValues } from '../../utils/displayValues';
 import { SPENDING_LIMIT_RATIO } from '../../utils/wallet/constants';
 import type { LightningScreenProps } from '../../navigation/types';
@@ -42,6 +42,7 @@ import { blocktankInfoSelector } from '../../store/reselect/blocktank';
 import { primaryUnitSelector } from '../../store/reselect/settings';
 import NumberPadTextField from '../../components/NumberPadTextField';
 import { getNumberPadText } from '../../utils/numberpad';
+import { EUnit } from '../../store/types/wallet';
 
 const QuickSetup = ({
 	navigation,
@@ -126,14 +127,31 @@ const QuickSetup = ({
 		setShowNumberPad(false);
 	}, []);
 
+	const minChannelSizeSat = useMemo(() => {
+		if (blocktankInfo.options.minChannelSizeSat > 0) {
+			return blocktankInfo.options.minChannelSizeSat;
+		}
+		return fiatToBitcoinUnit({
+			fiatValue: 989, // 989 instead of 999 to allow for exchange rate variances.
+			currency: 'USD',
+			unit: EUnit.satoshi,
+		});
+	}, [blocktankInfo.options.minChannelSizeSat]);
+
 	const onContinue = useCallback(async (): Promise<void> => {
 		setLoading(true);
 
 		// Ensure local balance is bigger than remote balance
-		const localBalance = Math.max(
+		let localBalance = Math.max(
 			Math.round(spendingAmount + spendingAmount * diff),
-			blocktankInfo.options.minChannelSizeSat,
+			minChannelSizeSat,
 		);
+		if (
+			minChannelSizeSat > 0 &&
+			spendableBalance + localBalance > minChannelSizeSat
+		) {
+			localBalance = minChannelSizeSat - spendableBalance;
+		}
 		const purchaseResponse = await startChannelPurchase({
 			selectedNetwork,
 			selectedWallet,
@@ -158,10 +176,12 @@ const QuickSetup = ({
 			});
 		}
 	}, [
-		blocktankInfo,
 		spendingAmount,
+		minChannelSizeSat,
+		spendableBalance,
 		selectedNetwork,
 		selectedWallet,
+		blocktankInfo.nodes,
 		navigation,
 		t,
 	]);
