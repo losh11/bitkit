@@ -161,7 +161,9 @@ const CustomSetup = ({
 
 		const availReceivingPackages: TPackage[] = PACKAGES_RECEIVING.map((p) => {
 			const maxChannelSizeFiat = getFiatDisplayValues({
-				satoshis: blocktankInfo.options.maxChannelSizeSat,
+				// Ensure the total channel size (sending & receiving) remains below the maxChannelSizeSat.
+				satoshis:
+					blocktankInfo.options.maxChannelSizeSat - (spendingAmount ?? 0),
 			});
 			if (p.fiatAmount < maxChannelSizeFiat.fiatValue) {
 				const convertedAmount = convertCurrency({
