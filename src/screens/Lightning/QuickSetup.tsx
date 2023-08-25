@@ -79,8 +79,20 @@ const QuickSetup = ({
 		return convertToSats(textFieldValue, unit);
 	}, [textFieldValue, unit]);
 
+	const maxChannelSizeSat = useMemo(() => {
+		if (blocktankInfo.options.maxChannelSizeSat > 0) {
+			return blocktankInfo.options.maxChannelSizeSat - (spendingAmount ?? 0);
+		}
+		return (
+			fiatToBitcoinUnit({
+				fiatValue: 989, // 989 instead of 999 to allow for exchange rate variances.
+				currency: 'USD',
+				unit: EUnit.satoshi,
+			}) - (spendingAmount ?? 0)
+		);
+	}, [blocktankInfo.options.maxChannelSizeSat, spendingAmount]);
+	const btSpendingLimit = maxChannelSizeSat;
 	const diff = 0.01;
-	const btSpendingLimit = blocktankInfo.options.maxChannelSizeSat;
 	const btSpendingLimitBalanced = Math.round(
 		btSpendingLimit / 2 - btSpendingLimit * diff,
 	);
@@ -127,31 +139,14 @@ const QuickSetup = ({
 		setShowNumberPad(false);
 	}, []);
 
-	const minChannelSizeSat = useMemo(() => {
-		if (blocktankInfo.options.minChannelSizeSat > 0) {
-			return blocktankInfo.options.minChannelSizeSat;
-		}
-		return fiatToBitcoinUnit({
-			fiatValue: 989, // 989 instead of 999 to allow for exchange rate variances.
-			currency: 'USD',
-			unit: EUnit.satoshi,
-		});
-	}, [blocktankInfo.options.minChannelSizeSat]);
-
 	const onContinue = useCallback(async (): Promise<void> => {
 		setLoading(true);
 
 		// Ensure local balance is bigger than remote balance
-		let localBalance = Math.max(
+		const localBalance = Math.max(
 			Math.round(spendingAmount + spendingAmount * diff),
-			minChannelSizeSat,
+			blocktankInfo.options.minChannelSizeSat,
 		);
-		if (
-			minChannelSizeSat > 0 &&
-			spendableBalance + localBalance > minChannelSizeSat
-		) {
-			localBalance = minChannelSizeSat - spendableBalance;
-		}
 		const purchaseResponse = await startChannelPurchase({
 			selectedNetwork,
 			selectedWallet,
@@ -176,12 +171,10 @@ const QuickSetup = ({
 			});
 		}
 	}, [
+		blocktankInfo,
 		spendingAmount,
-		minChannelSizeSat,
-		spendableBalance,
 		selectedNetwork,
 		selectedWallet,
-		blocktankInfo.nodes,
 		navigation,
 		t,
 	]);

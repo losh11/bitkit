@@ -1,10 +1,10 @@
 import React, {
-	memo,
 	ReactElement,
-	useCallback,
-	useEffect,
+	memo,
 	useMemo,
 	useState,
+	useEffect,
+	useCallback,
 } from 'react';
 import { ImageSourcePropType, StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -33,10 +33,7 @@ import {
 } from '../../utils/conversion';
 import { getFiatDisplayValues } from '../../utils/displayValues';
 import { showToast } from '../../utils/notifications';
-import {
-	refreshBlocktankInfo,
-	startChannelPurchase,
-} from '../../store/actions/blocktank';
+import { startChannelPurchase } from '../../store/actions/blocktank';
 import { EUnit } from '../../store/types/wallet';
 import {
 	primaryUnitSelector,
@@ -51,6 +48,7 @@ import NumberPadTextField from '../../components/NumberPadTextField';
 import { getNumberPadText } from '../../utils/numberpad';
 import { DEFAULT_CHANNEL_DURATION } from './CustomConfirm';
 import { SPENDING_LIMIT_RATIO } from '../../utils/wallet/constants';
+import { refreshBlocktankInfo } from '../../store/actions/blocktank';
 import useDisplayValues from '../../hooks/displayValues';
 
 export type TPackage = {
@@ -118,16 +116,18 @@ const CustomSetup = ({
 	const [spendingPackages, setSpendingPackages] = useState<TPackage[]>([]); // Packages the user can afford.
 	const [receivingPackages, setReceivingPackages] = useState<TPackage[]>([]);
 
-	const minChannelSizeSat = useMemo(() => {
-		if (blocktankInfo.options.minChannelSizeSat > 0) {
-			return blocktankInfo.options.minChannelSizeSat;
+	const maxChannelSizeSat = useMemo(() => {
+		if (blocktankInfo.options.maxChannelSizeSat > 0) {
+			return blocktankInfo.options.maxChannelSizeSat - (spendingAmount ?? 0);
 		}
-		return fiatToBitcoinUnit({
-			fiatValue: 980, // 989 instead of 999 to allow for exchange rate variances.
-			currency: 'USD',
-			unit: EUnit.satoshi,
-		});
-	}, [blocktankInfo.options.minChannelSizeSat]);
+		return (
+			fiatToBitcoinUnit({
+				fiatValue: 989, // 989 instead of 999 to allow for exchange rate variances.
+				currency: 'USD',
+				unit: EUnit.satoshi,
+			}) - (spendingAmount ?? 0)
+		);
+	}, [blocktankInfo.options.maxChannelSizeSat, spendingAmount]);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -179,8 +179,7 @@ const CustomSetup = ({
 		const availReceivingPackages: TPackage[] = PACKAGES_RECEIVING.map((p) => {
 			const maxChannelSizeFiat = getFiatDisplayValues({
 				// Ensure the total channel size (sending & receiving) remains below the maxChannelSizeSat.
-				satoshis:
-					blocktankInfo.options.maxChannelSizeSat - (spendingAmount ?? 0),
+				satoshis: maxChannelSizeSat,
 			});
 			if (p.fiatAmount < maxChannelSizeFiat.fiatValue) {
 				const convertedAmount = convertCurrency({
@@ -190,10 +189,7 @@ const CustomSetup = ({
 				});
 				const satoshis = convertToSats(convertedAmount.fiatValue, EUnit.fiat);
 				// Ensure the conversion still puts us below the max_chan_receiving
-				const satoshisCapped = Math.min(
-					satoshis,
-					blocktankInfo.options.maxChannelSizeSat,
-				);
+				const satoshisCapped = Math.min(satoshis, maxChannelSizeSat);
 
 				return {
 					...p,
@@ -221,10 +217,7 @@ const CustomSetup = ({
 				let satoshisCapped = Math.min(amountSatoshis, receiveLimit);
 
 				// Ensure the amount is below max_chan_receiving
-				satoshisCapped = Math.min(
-					satoshisCapped,
-					blocktankInfo.options.maxChannelSizeSat,
-				);
+				satoshisCapped = Math.min(satoshisCapped, maxChannelSizeSat);
 
 				return {
 					...p,
@@ -234,12 +227,7 @@ const CustomSetup = ({
 			}
 		});
 		setReceivingPackages(availReceivingPackages);
-	}, [
-		onchainFiatBalance,
-		blocktankInfo.options.maxChannelSizeSat,
-		selectedCurrency,
-		spendingAmount,
-	]);
+	}, [onchainFiatBalance, maxChannelSizeSat, selectedCurrency, spendingAmount]);
 
 	// set initial spending/receiving amount
 	useEffect(() => {
@@ -264,8 +252,8 @@ const CustomSetup = ({
 					? medium.satoshis
 					: balanceMultiplied > small.satoshis
 					? small.satoshis
-					: balanceMultiplied > minChannelSizeSat
-					? minChannelSizeSat
+					: balanceMultiplied > blocktankInfo.options.minChannelSizeSat
+					? blocktankInfo.options.minChannelSizeSat
 					: 0;
 
 			const result = getNumberPadText(amount, unit);
@@ -273,8 +261,8 @@ const CustomSetup = ({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
-		blocktankInfo.options.maxChannelSizeSat,
-		minChannelSizeSat,
+		maxChannelSizeSat,
+		blocktankInfo.options.minChannelSizeSat,
 		onchainBalance,
 		receivingPackages,
 		spending,
@@ -285,8 +273,8 @@ const CustomSetup = ({
 	}, [textFieldValue, unit]);
 
 	const maxAmount = useMemo((): number => {
-		return spending ? onchainBalance : blocktankInfo.options.maxChannelSizeSat;
-	}, [spending, onchainBalance, blocktankInfo.options.maxChannelSizeSat]);
+		return spending ? onchainBalance : maxChannelSizeSat;
+	}, [spending, onchainBalance, maxChannelSizeSat]);
 
 	// fetch approximate channel open cost on ReceiveAmount screen
 	useEffect(() => {
@@ -417,7 +405,7 @@ const CustomSetup = ({
 			let msg = purchaseResponse.error.message;
 			if (msg.includes('Local channel balance is too small')) {
 				t('error_channel_receiving', {
-					usdValue: blocktankInfo.options.maxChannelSizeSat,
+					usdValue: maxChannelSizeSat,
 				});
 			}
 			showToast({
@@ -434,14 +422,14 @@ const CustomSetup = ({
 			});
 		}
 	}, [
-		blocktankInfo,
-		navigation,
-		selectedNetwork,
-		selectedWallet,
+		spending,
 		spendingAmount,
 		amount,
-		spending,
+		selectedWallet,
+		selectedNetwork,
+		navigation,
 		t,
+		maxChannelSizeSat,
 	]);
 
 	return (
