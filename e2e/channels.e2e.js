@@ -83,14 +83,12 @@ d('LN Channel Onboarding', () => {
 			await element(by.id('QuickSetupButton')).tap();
 			// set spending balance to zero
 			await element(by.id('SliderHandle')).swipe('left');
-			// await sleep(2000); // wait for weird slider behavior
 			const button = element(by.id('QuickSetupContinue'));
 			const buttonEnabled = await isButtonEnabled(button);
 			jestExpect(buttonEnabled).toBe(false);
 
 			// should show 80% limit note
 			await element(by.id('SliderHandle')).swipe('right', 'slow', NaN, 0.8);
-			// await sleep(2000); // wait for weird slider behavior
 			await expect(element(by.id('QuickSetupBlocktankNote'))).toBeVisible();
 			await element(by.id('QuickSetupCustomAmount')).tap();
 			await element(by.id('NumberPadButtonsMax')).tap();
