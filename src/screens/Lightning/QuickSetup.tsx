@@ -30,7 +30,7 @@ import {
 	startChannelPurchase,
 } from '../../store/actions/blocktank';
 import { showToast } from '../../utils/notifications';
-import { convertToSats, fiatToBitcoinUnit } from '../../utils/conversion';
+import { convertToSats } from '../../utils/conversion';
 import { getFiatDisplayValues } from '../../utils/displayValues';
 import { SPENDING_LIMIT_RATIO } from '../../utils/wallet/constants';
 import type { LightningScreenProps } from '../../navigation/types';
@@ -42,7 +42,6 @@ import { blocktankInfoSelector } from '../../store/reselect/blocktank';
 import { primaryUnitSelector } from '../../store/reselect/settings';
 import NumberPadTextField from '../../components/NumberPadTextField';
 import { getNumberPadText } from '../../utils/numberpad';
-import { EUnit } from '../../store/types/wallet';
 
 const QuickSetup = ({
 	navigation,
@@ -79,19 +78,9 @@ const QuickSetup = ({
 		return convertToSats(textFieldValue, unit);
 	}, [textFieldValue, unit]);
 
-	const maxChannelSizeSat = useMemo(() => {
-		if (blocktankInfo.options.maxChannelSizeSat > 0) {
-			return blocktankInfo.options.maxChannelSizeSat - (spendingAmount ?? 0);
-		}
-		return (
-			fiatToBitcoinUnit({
-				fiatValue: 989, // 989 instead of 999 to allow for exchange rate variances.
-				currency: 'USD',
-				unit: EUnit.satoshi,
-			}) - (spendingAmount ?? 0)
-		);
-	}, [blocktankInfo.options.maxChannelSizeSat, spendingAmount]);
-	const btSpendingLimit = maxChannelSizeSat;
+	const btSpendingLimit = useMemo(() => {
+		return blocktankInfo.options.maxChannelSizeSat;
+	}, [blocktankInfo.options.maxChannelSizeSat]);
 	const diff = 0.01;
 	const btSpendingLimitBalanced = Math.round(
 		btSpendingLimit / 2 - btSpendingLimit * diff,
