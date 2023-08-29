@@ -23,7 +23,6 @@ import {
 } from '../../store/actions/blocktank';
 import { showToast } from '../../utils/notifications';
 import { addTodo } from '../../store/actions/todos';
-import { setLightningSettingUpStep } from '../../store/actions/user';
 import {
 	selectedNetworkSelector,
 	selectedWalletSelector,
@@ -74,7 +73,7 @@ const CustomConfirm = ({
 			setLoading(false);
 			return;
 		}
-		setLightningSettingUpStep(1);
+		//setLightningSettingUpStep(1);
 		addTodo('lightningSettingUp');
 		navigation.navigate('SettingUp');
 	};

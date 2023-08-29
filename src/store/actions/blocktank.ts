@@ -35,8 +35,6 @@ import { restartLdk } from '../../utils/lightning';
 import { TWalletName } from '../types/wallet';
 import { IBlocktank } from '../types/blocktank';
 import {
-	BtBolt11PaymentState,
-	BtOpenChannelState,
 	BtOrderState,
 	BtPaymentState,
 	IBtOrder,
@@ -355,12 +353,12 @@ const handleOrderStateChange = (order: IBtOrder): void => {
 	}
 
 	// opening connection
-	if (order.channel?.state === BtOpenChannelState.OPENING) {
+	if (order.channel?.state === 'opening') {
 		setLightningSettingUpStep(3);
 	}
 
 	// given up
-	if (order.payment.bolt11Invoice.state === BtBolt11PaymentState.FAILED) {
+	if (order.payment.bolt11Invoice.state === 'failed') {
 		removeTodo('lightningSettingUp');
 		showToast({
 			type: 'error',
@@ -380,7 +378,7 @@ const handleOrderStateChange = (order: IBtOrder): void => {
 	}
 
 	// channel closed
-	if (order.channel?.state === BtOpenChannelState.CLOSED) {
+	if (order.channel?.state === 'closed') {
 		// TODO: Not sure what to do with this.
 		// if (!oneOtherOrderHasState([500])) {
 		// 	removeTodo('transferToSpending');
