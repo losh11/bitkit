@@ -403,11 +403,6 @@ const handleOrderStateChange = (order: IBtOrder): void => {
 
 	// channel closed
 	if (order.channel?.state === 'closed') {
-		// TODO: Not sure what to do with this.
-		// if (!oneOtherOrderHasState([500])) {
-		// 	removeTodo('transferToSpending');
-		// 	removeTodo('transferClosingChannel');
-		// }
 		removeTodo('transferToSpending');
 		removeTodo('transferClosingChannel');
 	}

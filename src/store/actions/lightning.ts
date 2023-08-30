@@ -4,7 +4,12 @@ import { TChannel, TInvoice } from '@synonymdev/react-native-ldk';
 import { getLNURLParams, lnurlChannel } from '@synonymdev/react-native-lnurl';
 
 import actions from './actions';
-import { getDispatch, getLightningStore, getMetaDataStore } from '../helpers';
+import {
+	getDispatch,
+	getLightningStore,
+	getMetaDataStore,
+	getStore,
+} from '../helpers';
 import { TAvailableNetworks } from '../../utils/networks';
 import { getActivityItemById } from '../../utils/activity';
 import { getSelectedNetwork, getSelectedWallet } from '../../utils/wallet';
@@ -29,6 +34,8 @@ import {
 import { EPaymentType, TWalletName } from '../types/wallet';
 import { EActivityType, TLightningActivityItem } from '../types/activity';
 import { addTodo, removeTodo } from './todos';
+import i18n from 'i18next';
+import { showToast } from '../../utils/notifications';
 
 const dispatch = getDispatch();
 
@@ -140,9 +147,19 @@ export const updateLightningChannels = async ({
 			openChannelIds.push(channel.channel_id);
 		}
 	});
-
 	if (!pendingChannels.length && shouldRemoveTodo) {
-		removeTodo('lightningConnecting');
+		const lightningConnectingTodoExists = getStore().todos.find(
+			(t) => t === 'lightningConnecting',
+		);
+		if (lightningConnectingTodoExists) {
+			showToast({
+				type: 'success',
+				title: i18n.t('lightning:channel_opened_title'),
+				description: i18n.t('lightning:channel_opened_msg'),
+			});
+			removeTodo('lightningConnecting');
+			addTodo('lightningReady');
+		}
 	}
 
 	const payload = {
