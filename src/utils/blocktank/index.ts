@@ -10,7 +10,7 @@ import { err, ok, Result } from '@synonymdev/result';
 
 import { EAvailableNetworks, TAvailableNetworks } from '../networks';
 import { addPeers, getNodeId, refreshLdk } from '../lightning';
-import { refreshOrder } from '../../store/actions/blocktank';
+import { refreshOrder, refreshOrdersList } from '../../store/actions/blocktank';
 import i18n from '../../utils/i18n';
 import { sleep } from '../helpers';
 import { getBlocktankStore, getUserStore } from '../../store/helpers';
@@ -216,6 +216,7 @@ export const watchOrder = async (
 		}
 		if (res.value.state === BtOrderState.OPEN) {
 			settled = true;
+			await refreshOrdersList();
 			break;
 		}
 		await sleep(frequency);
@@ -232,11 +233,34 @@ export const getStateMessage = (order: IBtOrder): string => {
 	const paymentState: BtPaymentState = order.payment.state;
 	const channelState: BtOpenChannelState | undefined = order.channel?.state;
 
+	switch (orderState) {
+		case 'expired':
+			return i18n.t('lightning:order_state.expired');
+	}
+
+	switch (paymentState) {
+		case 'refunded':
+			return i18n.t('lightning:order_state.refunded');
+	}
+
 	if (channelState) {
 		switch (channelState) {
 			case 'opening':
 				return i18n.t('lightning:order_state.opening');
+			case 'open':
+				return i18n.t('lightning:order_state.open');
+			case 'closed':
+				return i18n.t('lightning:order_state.closed');
 		}
+	}
+
+	switch (orderState) {
+		case 'closed':
+			return i18n.t('lightning:order_state.closed');
+		case 'open':
+			return i18n.t('lightning:order_state.open');
+		case 'created':
+			return i18n.t('lightning:order_state.awaiting_payment');
 	}
 
 	switch (paymentState) {
@@ -244,13 +268,9 @@ export const getStateMessage = (order: IBtOrder): string => {
 			return i18n.t('lightning:order_state.awaiting_payment');
 		case 'paid':
 			return i18n.t('lightning:order_state.paid');
-		case 'refunded':
-			return i18n.t('lightning:order_state.refunded');
 	}
 
 	switch (orderState) {
-		case 'expired':
-			return i18n.t('lightning:order_state.expired');
 		case 'closed':
 			return i18n.t('lightning:order_state.closed');
 		case 'open':

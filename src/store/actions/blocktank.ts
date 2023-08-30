@@ -82,9 +82,10 @@ export const refreshOrder = async (
 			order.payment.state === BtPaymentState.PAID &&
 			order.state !== BtOrderState.OPEN
 		) {
-			setLightningSettingUpStep(2);
+			setLightningSettingUpStep(1);
 			const finalizeRes = await openChannel(orderId);
 			if (finalizeRes.isOk()) {
+				//setLightningSettingUpStep(2);
 				removeTodo('lightning');
 				setLightningSettingUpStep(3);
 				const getUpdatedOrderResult = await blocktank.getOrder(orderId);
@@ -124,6 +125,29 @@ export const refreshOrder = async (
 	} catch (error) {
 		return err(error);
 	}
+};
+
+/**
+ * Retrieves and updates a given blocktank order by id.
+ * @param {string} orderId
+ * @returns {Promise<Result<IBtOrder>>}
+ */
+export const updateOrder = async (
+	orderId: string,
+): Promise<Result<IBtOrder>> => {
+	if (!orderId) {
+		return err('No orderId provided.');
+	}
+	const orderRes = await blocktank.getOrder(orderId);
+	if (orderRes.isErr()) {
+		return err(orderRes.error.message);
+	}
+	const order = orderRes.value;
+	dispatch({
+		type: actions.UPDATE_BLOCKTANK_ORDER,
+		payload: order,
+	});
+	return ok(order);
 };
 
 /**
@@ -390,8 +414,6 @@ const handleOrderStateChange = (order: IBtOrder): void => {
 
 	// new channel open
 	if (order.state === BtOrderState.OPEN) {
-		removeTodo('lightningConnecting');
-
 		// TODO: Not sure what to do with this.
 		// if (!oneOtherOrderHasState([500])) {
 		// 	// first channel

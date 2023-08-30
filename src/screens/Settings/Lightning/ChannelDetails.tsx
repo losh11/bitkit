@@ -46,15 +46,19 @@ import {
 	TimerSpeedIcon,
 } from '../../../styles/icons';
 import type { SettingsScreenProps } from '../../../navigation/types';
-import { i18nTime } from '../../../utils/i18n';
+import i18n, { i18nTime } from '../../../utils/i18n';
 import {
 	BtOrderState,
 	BtPaymentState,
 	IBtOrder,
 } from '@synonymdev/blocktank-lsp-http-client';
 import { BtOpenChannelState } from '@synonymdev/blocktank-lsp-http-client/dist/shared/BtOpenChannelState';
+import { updateOrder } from '../../../store/actions/blocktank';
 
-export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
+export const getOrderStatus = (
+	order: IBtOrder,
+	channelIsOpen: boolean = true,
+): React.FC<SvgProps> => {
 	const orderState: BtOrderState = order.state;
 	const paymentState: BtPaymentState = order.payment.state;
 	const channelState: BtOpenChannelState | undefined = order.channel?.state;
@@ -62,6 +66,30 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 	console.log({ orderState });
 	console.log({ paymentState });
 	console.log({ channelState });
+
+	switch (orderState) {
+		case 'expired':
+			return (): ReactElement => (
+				<View style={styles.statusRow}>
+					<ThemedView color="red16" style={styles.statusIcon}>
+						<TimerSpeedIcon color="red" width={16} height={16} />
+					</ThemedView>
+					<Text01M color="red">{getStateMessage(order)}</Text01M>
+				</View>
+			);
+	}
+
+	switch (paymentState) {
+		case 'refunded':
+			return (): ReactElement => (
+				<View style={styles.statusRow}>
+					<ThemedView color="white1" style={styles.statusIcon}>
+						<ArrowCounterClock color="gray1" width={16} height={16} />
+					</ThemedView>
+					<Text01M color="gray1">{getStateMessage(order)}</Text01M>
+				</View>
+			);
+	}
 
 	if (channelState) {
 		switch (channelState) {
@@ -74,28 +102,39 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 						<Text01M color="purple">{getStateMessage(order)}</Text01M>
 					</View>
 				);
+			case 'open':
+				// Seems Blocktank will not register the channel as closed until the closing transaction is confirmed.
+				// This condition is here to show the channel as closed due to this.
+				if (!channelIsOpen) {
+					return (): ReactElement => (
+						<View style={styles.statusRow}>
+							<ThemedView color="white1" style={styles.statusIcon}>
+								<LightningIcon color="gray1" width={16} height={16} />
+							</ThemedView>
+							<Text01M color="gray1">
+								{i18n.t('lightning:order_state.closed')}
+							</Text01M>
+						</View>
+					);
+				}
+				return (): ReactElement => (
+					<View style={styles.statusRow}>
+						<ThemedView color="green16" style={styles.statusIcon}>
+							<LightningIcon color="green" width={16} height={16} />
+						</ThemedView>
+						<Text01M color="green">{getStateMessage(order)}</Text01M>
+					</View>
+				);
+			case 'closed':
+				return (): ReactElement => (
+					<View style={styles.statusRow}>
+						<ThemedView color="white1" style={styles.statusIcon}>
+							<LightningIcon color="gray1" width={16} height={16} />
+						</ThemedView>
+						<Text01M color="gray1">{getStateMessage(order)}</Text01M>
+					</View>
+				);
 		}
-	}
-
-	switch (paymentState) {
-		case 'paid':
-			return (): ReactElement => (
-				<View style={styles.statusRow}>
-					<ThemedView color="purple16" style={styles.statusIcon}>
-						<Checkmark color="purple" width={16} height={16} />
-					</ThemedView>
-					<Text01M color="purple">{getStateMessage(order)}</Text01M>
-				</View>
-			);
-		case 'refunded':
-			return (): ReactElement => (
-				<View style={styles.statusRow}>
-					<ThemedView color="white1" style={styles.statusIcon}>
-						<ArrowCounterClock color="gray1" width={16} height={16} />
-					</ThemedView>
-					<Text01M color="gray1">{getStateMessage(order)}</Text01M>
-				</View>
-			);
 	}
 
 	switch (orderState) {
@@ -108,15 +147,6 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 					<Text01M color="purple">{getStateMessage(order)}</Text01M>
 				</View>
 			);
-		case 'expired':
-			return (): ReactElement => (
-				<View style={styles.statusRow}>
-					<ThemedView color="red16" style={styles.statusIcon}>
-						<TimerSpeedIcon color="red" width={16} height={16} />
-					</ThemedView>
-					<Text01M color="red">{getStateMessage(order)}</Text01M>
-				</View>
-			);
 		case 'open':
 			return (): ReactElement => (
 				<View style={styles.statusRow}>
@@ -124,6 +154,18 @@ export const getOrderStatus = (order: IBtOrder): React.FC<SvgProps> => {
 						<LightningIcon color="green" width={16} height={16} />
 					</ThemedView>
 					<Text01M color="green">{getStateMessage(order)}</Text01M>
+				</View>
+			);
+	}
+
+	switch (paymentState) {
+		case 'paid':
+			return (): ReactElement => (
+				<View style={styles.statusRow}>
+					<ThemedView color="purple16" style={styles.statusIcon}>
+						<Checkmark color="purple" width={16} height={16} />
+					</ThemedView>
+					<Text01M color="purple">{getStateMessage(order)}</Text01M>
 				</View>
 			);
 	}
@@ -197,6 +239,13 @@ const ChannelDetails = ({
 		return openChannelIdsSelector(state, selectedWallet, selectedNetwork);
 	});
 
+	useEffect(() => {
+		if (blocktankOrder) {
+			updateOrder(blocktankOrder.id).then();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	const channelIsOpen = useAppSelector((state) => {
 		return channelIsOpenSelector(
 			state,
@@ -209,11 +258,11 @@ const ChannelDetails = ({
 	// TODO: show status for non-blocktank channels
 	const Status = useMemo(() => {
 		if (blocktankOrder) {
-			return getOrderStatus(blocktankOrder);
+			return getOrderStatus(blocktankOrder, channelIsOpen);
 		}
 
 		return null;
-	}, [blocktankOrder]);
+	}, [blocktankOrder, channelIsOpen]);
 
 	useEffect(() => {
 		if (!channel.funding_txid) {

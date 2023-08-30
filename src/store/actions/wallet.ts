@@ -1365,6 +1365,7 @@ export const resetWalletStore = async (): Promise<Result<string>> => {
  * @param {string[]} [inputTxHashes]
  * @param {IUtxo[]} [utxos]
  * @param {boolean} [rbf]
+ * @param satsPerByte
  * @returns {Promise<Result<Partial<ISendTransaction>>>}
  */
 export const setupOnChainTransaction = async ({
@@ -1374,6 +1375,7 @@ export const setupOnChainTransaction = async ({
 	inputTxHashes,
 	utxos,
 	rbf = false,
+	satsPerByte = 1,
 }: {
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
@@ -1381,6 +1383,7 @@ export const setupOnChainTransaction = async ({
 	inputTxHashes?: string[]; // Used to pre-specify inputs to use by tx_hash
 	utxos?: IUtxo[]; // Used to pre-specify utxos to use
 	rbf?: boolean; // Enable or disable rbf.
+	satsPerByte?: number; // Set the sats per byte for the transaction.
 } = {}): Promise<Result<Partial<ISendTransaction>>> => {
 	try {
 		if (!selectedNetwork) {
@@ -1465,7 +1468,7 @@ export const setupOnChainTransaction = async ({
 
 		// Set the minimum fee.
 		const fee = getTotalFee({
-			satsPerByte: 1,
+			satsPerByte,
 			message: '',
 		});
 
@@ -1490,6 +1493,7 @@ export const setupOnChainTransaction = async ({
 			fee,
 			outputs,
 			rbf,
+			satsPerByte,
 		};
 
 		dispatch({
