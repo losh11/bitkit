@@ -34,7 +34,8 @@ import {
 import { EPaymentType, TWalletName } from '../types/wallet';
 import { EActivityType, TLightningActivityItem } from '../types/activity';
 import { addTodo, removeTodo } from './todos';
-import i18n from 'i18next';
+import i18n from '../../utils/i18n';
+
 import { showToast } from '../../utils/notifications';
 
 const dispatch = getDispatch();
@@ -140,7 +141,6 @@ export const updateLightningChannels = async ({
 			const confirmations_required = channel?.confirmations_required ?? 1;
 			if (channel.confirmations < confirmations_required) {
 				shouldRemoveTodo = false;
-				addTodo('lightningConnecting');
 			}
 		}
 		if (!openChannelIds.includes(channel.channel_id)) {
@@ -160,6 +160,10 @@ export const updateLightningChannels = async ({
 			removeTodo('lightningConnecting');
 			addTodo('lightningReady');
 		}
+	}
+
+	if (!shouldRemoveTodo && !openChannelIds.length) {
+		addTodo('lightningConnecting');
 	}
 
 	const payload = {
