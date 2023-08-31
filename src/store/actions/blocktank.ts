@@ -409,21 +409,7 @@ const handleOrderStateChange = (order: IBtOrder): void => {
 
 	// new channel open
 	if (order.state === BtOrderState.OPEN) {
-		// TODO: Not sure what to do with this.
-		// if (!oneOtherOrderHasState([500])) {
-		// 	// first channel
-		// 	addTodo('lightningReady');
-		// 	showToast({
-		// 		type: 'success',
-		// 		title: i18n.t('lightning:channel_opened_title'),
-		// 		description: i18n.t('lightning:channel_opened_msg'),
-		// 	});
-		// } else {
-		// 	// subsequent channels
-		// 	removeTodo('transferToSpending');
-		// }
 		removeTodo('transferToSpending');
-
 		// refresh LDK after channel open
 		refreshLdk({});
 	}
