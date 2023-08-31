@@ -72,7 +72,7 @@ const PACKAGES_SPENDING: Omit<TPackage, 'satoshis'>[] = [
 	{
 		id: 'big',
 		img: require('../../assets/illustrations/coin-stack-3.png'),
-		fiatAmount: 500,
+		fiatAmount: 480,
 	},
 ];
 
@@ -90,7 +90,7 @@ const PACKAGES_RECEIVING: Omit<TPackage, 'satoshis'>[] = [
 	{
 		id: 'big',
 		img: require('../../assets/illustrations/coin-stack-3.png'),
-		fiatAmount: 999,
+		fiatAmount: 989,
 	},
 ];
 
@@ -176,58 +176,38 @@ const CustomSetup = ({
 		});
 		setSpendingPackages(availSpendingPackages);
 
-		const availReceivingPackages: TPackage[] = PACKAGES_RECEIVING.map((p) => {
+		let maxReceiving = maxChannelSizeSat;
+		let minReceiving = spendingAmount! ?? 0;
+		let availReceivingPackages: TPackage[] = [];
+		PACKAGES_RECEIVING.reverse().forEach((p) => {
 			const maxChannelSizeFiat = getFiatDisplayValues({
 				// Ensure the total channel size (sending & receiving) remains below the maxChannelSizeSat.
-				satoshis: maxChannelSizeSat,
+				satoshis: maxReceiving,
 			});
-			if (p.fiatAmount < maxChannelSizeFiat.fiatValue) {
-				const convertedAmount = convertCurrency({
-					amount: p.fiatAmount,
-					from: 'USD',
-					to: selectedCurrency,
-				});
-				const satoshis = convertToSats(convertedAmount.fiatValue, EUnit.fiat);
-				// Ensure the conversion still puts us below the max_chan_receiving
-				const satoshisCapped = Math.min(satoshis, maxChannelSizeSat);
-
-				return {
-					...p,
-					fiatAmount: convertedAmount.fiatValue,
-					satoshis: satoshisCapped,
-				};
-			} else {
-				const amount = convertCurrency({
-					amount: maxChannelSizeFiat.fiatValue,
-					from: 'USD',
-					to: selectedCurrency,
-				});
-				const amountSatoshis = convertToSats(amount.fiatValue, EUnit.fiat);
-				// subtract a buffer to ensure we don't land right on the max channel size
-				// also avoids exchange rate deltas with Blocktank
-				const buffer = convertCurrency({
-					amount: 10,
-					from: 'USD',
-					to: selectedCurrency,
-				});
-				const bufferSatoshis = convertToSats(buffer.fiatValue, EUnit.fiat);
-
-				// Ensure the amount is below the max channel size
-				const receiveLimit = amountSatoshis - spendingAmount! - bufferSatoshis;
-				let satoshisCapped = Math.min(amountSatoshis, receiveLimit);
-
-				// Ensure the amount is below max_chan_receiving
-				satoshisCapped = Math.min(satoshisCapped, maxChannelSizeSat);
-
-				return {
-					...p,
-					fiatAmount: amount.fiatValue,
-					satoshis: satoshisCapped,
-				};
+			const delta = Math.abs(maxReceiving - minReceiving);
+			const convertedAmount = convertCurrency({
+				amount:
+					p.fiatAmount < maxChannelSizeFiat.fiatValue!
+						? maxChannelSizeFiat.fiatValue!
+						: p.fiatAmount,
+				from: 'USD',
+				to: selectedCurrency,
+			});
+			const satoshis = convertToSats(convertedAmount.fiatValue, EUnit.fiat);
+			// Ensure the conversion still puts us below the max_chan_receiving
+			const satoshisCapped = Math.min(satoshis, maxReceiving);
+			maxReceiving = Number((maxReceiving - delta / 2).toFixed(0));
+			if (maxReceiving < minReceiving) {
+				maxReceiving = Number((minReceiving + delta).toFixed(0));
 			}
+			availReceivingPackages.push({
+				...p,
+				fiatAmount: convertedAmount.fiatValue,
+				satoshis: satoshisCapped,
+			});
 		});
-		setReceivingPackages(availReceivingPackages);
-	}, [onchainFiatBalance, maxChannelSizeSat, selectedCurrency, spendingAmount]);
+		setReceivingPackages(availReceivingPackages.reverse());
+	}, [maxChannelSizeSat, onchainFiatBalance, selectedCurrency, spendingAmount]);
 
 	// set initial spending/receiving amount
 	useEffect(() => {

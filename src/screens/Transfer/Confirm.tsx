@@ -51,8 +51,7 @@ const Confirm = ({
 	}, [orderId, orders]);
 
 	const feeSat = order?.feeSat ?? 0;
-	const clientBalanceSat = order?.clientBalanceSat ?? 0;
-	const blocktankPurchaseFee = useDisplayValues(feeSat + clientBalanceSat);
+	const blocktankPurchaseFee = useDisplayValues(feeSat);
 	const transactionFee = useSelector(transactionFeeSelector);
 	const fiatTransactionFee = useDisplayValues(transactionFee);
 	const clientBalance = useDisplayValues(order?.clientBalanceSat ?? 0);
