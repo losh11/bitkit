@@ -162,7 +162,11 @@ export const updateLightningChannels = async ({
 		}
 	}
 
-	if (!shouldRemoveTodo && !openChannelIds.length) {
+	if (
+		!shouldRemoveTodo &&
+		openChannelIds.length === 1 &&
+		pendingChannels.length === 1
+	) {
 		addTodo('lightningConnecting');
 	}
 
