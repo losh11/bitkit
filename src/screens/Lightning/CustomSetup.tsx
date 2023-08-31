@@ -72,7 +72,7 @@ const PACKAGES_SPENDING: Omit<TPackage, 'satoshis'>[] = [
 	{
 		id: 'big',
 		img: require('../../assets/illustrations/coin-stack-3.png'),
-		fiatAmount: 480,
+		fiatAmount: 450,
 	},
 ];
 
@@ -90,7 +90,7 @@ const PACKAGES_RECEIVING: Omit<TPackage, 'satoshis'>[] = [
 	{
 		id: 'big',
 		img: require('../../assets/illustrations/coin-stack-3.png'),
-		fiatAmount: 989,
+		fiatAmount: 999,
 	},
 ];
 
@@ -179,34 +179,39 @@ const CustomSetup = ({
 		let maxReceiving = maxChannelSizeSat;
 		let minReceiving = spendingAmount! ?? 0;
 		let availReceivingPackages: TPackage[] = [];
-		PACKAGES_RECEIVING.reverse().forEach((p) => {
+		PACKAGES_RECEIVING.forEach((p) => {
 			const maxChannelSizeFiat = getFiatDisplayValues({
-				// Ensure the total channel size (sending & receiving) remains below the maxChannelSizeSat.
 				satoshis: maxReceiving,
 			});
+
 			const delta = Math.abs(maxReceiving - minReceiving);
+			let packageFiatAmount = p.fiatAmount;
+
+			// Ensure the fiatAmount is within the range of minReceiving and maxChannelSizeFiat.fiatValue
+			if (packageFiatAmount >= maxChannelSizeFiat.fiatValue) {
+				packageFiatAmount = maxChannelSizeFiat.fiatValue;
+			} else if (packageFiatAmount < minReceiving) {
+				packageFiatAmount = minReceiving;
+			}
+
 			const convertedAmount = convertCurrency({
-				amount:
-					p.fiatAmount < maxChannelSizeFiat.fiatValue!
-						? maxChannelSizeFiat.fiatValue!
-						: p.fiatAmount,
+				amount: packageFiatAmount,
 				from: 'USD',
 				to: selectedCurrency,
 			});
+
 			const satoshis = convertToSats(convertedAmount.fiatValue, EUnit.fiat);
-			// Ensure the conversion still puts us below the max_chan_receiving
 			const satoshisCapped = Math.min(satoshis, maxReceiving);
+
 			maxReceiving = Number((maxReceiving - delta / 2).toFixed(0));
-			if (maxReceiving < minReceiving) {
-				maxReceiving = Number((minReceiving + delta).toFixed(0));
-			}
 			availReceivingPackages.push({
 				...p,
 				fiatAmount: convertedAmount.fiatValue,
 				satoshis: satoshisCapped,
 			});
 		});
-		setReceivingPackages(availReceivingPackages.reverse());
+		availReceivingPackages.sort((a, b) => a.satoshis - b.satoshis);
+		setReceivingPackages(availReceivingPackages);
 	}, [maxChannelSizeSat, onchainFiatBalance, selectedCurrency, spendingAmount]);
 
 	// set initial spending/receiving amount
