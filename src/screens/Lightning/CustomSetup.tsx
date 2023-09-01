@@ -200,7 +200,7 @@ const CustomSetup = ({
 			const satoshis = convertToSats(packageFiatAmount, EUnit.fiat);
 			const satoshisCapped = Math.min(satoshis, maxReceiving);
 
-			maxReceiving = Number((maxReceiving - delta / 2).toFixed(0));
+			maxReceiving = Number((maxReceiving - delta / 3).toFixed(0));
 			availReceivingPackages.push({
 				...p,
 				fiatAmount: packageFiatAmount,
@@ -272,7 +272,9 @@ const CustomSetup = ({
 				});
 				if (response.isOk()) {
 					const { fiatSymbol, fiatValue } = getFiatDisplayValues({
-						satoshis: response.value.channelOpenFee,
+						satoshis:
+							response.value.channelOpenFee +
+							response.value.transactionFeeEstimate,
 					});
 					setChannelOpenFee(`${fiatSymbol} ${fiatValue.toFixed(2)}`);
 				}
@@ -400,7 +402,7 @@ const CustomSetup = ({
 			navigation.navigate('CustomConfirm', {
 				spendingAmount: spendingAmount!,
 				receivingAmount: amount,
-				orderId: purchaseResponse.value.orderId,
+				orderId: purchaseResponse.value.order.id,
 			});
 		}
 	}, [

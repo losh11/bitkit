@@ -152,7 +152,7 @@ const QuickSetup = ({
 		if (purchaseResponse.isOk()) {
 			navigation.push('QuickConfirm', {
 				spendingAmount: spendingAmount,
-				orderId: purchaseResponse.value.orderId,
+				orderId: purchaseResponse.value.order.id,
 			});
 		}
 	}, [

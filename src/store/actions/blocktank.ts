@@ -195,7 +195,12 @@ export const startChannelPurchase = async ({
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
 }): Promise<
-	Result<{ orderId: string; channelOpenCost: number; channelOpenFee: number }>
+	Result<{
+		order: IBtOrder;
+		channelOpenCost: number;
+		channelOpenFee: number;
+		transactionFeeEstimate: number;
+	}>
 > => {
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
@@ -232,12 +237,12 @@ export const startChannelPurchase = async ({
 	if (min0ConfTxFee.isErr()) {
 		return err(min0ConfTxFee.error.message);
 	}
-	const txFeeInSats = getTotalFee({
+	let txFeeInSats = getTotalFee({
 		satsPerByte: min0ConfTxFee.value.satPerVByte + 1,
 		selectedWallet,
 		selectedNetwork,
 	});
-	const channelOpenCost = buyChannelData.clientBalanceSat + txFeeInSats;
+	const channelOpenCost = buyChannelData.feeSat;
 	const channelOpenFee = Math.abs(
 		buyChannelData.clientBalanceSat - buyChannelData.feeSat,
 	);
@@ -265,13 +270,21 @@ export const startChannelPurchase = async ({
 		},
 	});
 
-	await updateFee({
+	const feeRes = await updateFee({
 		satsPerByte: min0ConfTxFee.value.satPerVByte + 1,
 		selectedWallet,
 		selectedNetwork,
 	});
+	if (feeRes.isOk()) {
+		txFeeInSats = feeRes.value.fee;
+	}
 
-	return ok({ orderId: buyChannelData.id, channelOpenCost, channelOpenFee });
+	return ok({
+		order: buyChannelData,
+		channelOpenCost,
+		channelOpenFee,
+		transactionFeeEstimate: txFeeInSats,
+	});
 };
 
 /**
@@ -417,6 +430,42 @@ const handleOrderStateChange = (order: IBtOrder): void => {
 		// refresh LDK after channel open
 		refreshLdk({});
 	}
+};
+
+/**
+ * Wipes all stored blocktank orders.
+ * @returns {<Result<string>>}
+ */
+export const resetBlocktankOrders = (): Result<string> => {
+	dispatch({ type: actions.RESET_BLOCKTANK_ORDERS });
+	return ok('');
+};
+
+/**
+ * Wipes all stored blocktank order data and updates it to match returned data from the server.
+ * Used for migrating from v1 to v2 of the Blocktank API.
+ * @returns {Promise<Result<string>>}
+ */
+export const refreshAllBlocktankOrders = async (): Promise<Result<string>> => {
+	const orders = getBlocktankStore().orders;
+	await resetBlocktankOrders();
+	await Promise.all(
+		orders.map(async (order): Promise<void> => {
+			// @ts-ignore
+			const orderId = order?._id ? order._id : order.id;
+			const getUpdatedOrderResult = await blocktank.getOrder(orderId);
+			if (getUpdatedOrderResult.isErr()) {
+				return;
+			}
+			const payload = getUpdatedOrderResult.value;
+			// Update stored order
+			dispatch({
+				type: actions.UPDATE_BLOCKTANK_ORDER,
+				payload,
+			});
+		}),
+	);
+	return ok('All orders refreshed.');
 };
 
 export const updateBlocktank = (

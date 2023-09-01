@@ -10,7 +10,11 @@ import { err, ok, Result } from '@synonymdev/result';
 
 import { EAvailableNetworks, TAvailableNetworks } from '../networks';
 import { addPeers, getNodeId, refreshLdk } from '../lightning';
-import { refreshOrder, refreshOrdersList } from '../../store/actions/blocktank';
+import {
+	refreshAllBlocktankOrders,
+	refreshOrder,
+	refreshOrdersList,
+} from '../../store/actions/blocktank';
 import i18n from '../../utils/i18n';
 import { sleep } from '../helpers';
 import { getBlocktankStore, getUserStore } from '../../store/helpers';
@@ -36,17 +40,24 @@ export const unsettledStatuses = [0, 100, 200, 300, 350, 410, 500];
 export const setupBlocktank = async (
 	selectedNetwork: TAvailableNetworks,
 ): Promise<void> => {
+	let isGeoBlocked = false;
 	switch (selectedNetwork) {
 		case EAvailableNetworks.bitcoin:
-			await setGeoBlock();
+			isGeoBlocked = await setGeoBlock();
 			bt.baseUrl = 'https://blocktank.synonym.to/api/v2';
 			break;
 		case EAvailableNetworks.bitcoinRegtest:
 			updateUser({ isGeoBlocked: false });
 			bt.baseUrl = 'https://api.stag.blocktank.to/blocktank/api/v2';
 			break;
-		default:
-			return;
+	}
+	if (isGeoBlocked) {
+		return;
+	}
+	const blocktankOrders = getBlocktankStore().orders;
+	// @ts-ignore
+	if (blocktankOrders.length && blocktankOrders[0]?._id) {
+		await refreshAllBlocktankOrders();
 	}
 };
 

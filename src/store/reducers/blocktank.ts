@@ -56,6 +56,12 @@ const blocktank = (
 				...action.payload,
 			};
 
+		case actions.RESET_BLOCKTANK_ORDERS:
+			return {
+				...state,
+				orders: [],
+			};
+
 		case actions.RESET_BLOCKTANK_STORE:
 			return defaultBlocktankShape;
 

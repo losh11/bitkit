@@ -160,7 +160,7 @@ const Setup = ({ navigation }: TransferScreenProps<'Setup'>): ReactElement => {
 		if (purchaseResponse.isOk()) {
 			navigation.push('Confirm', {
 				spendingAmount,
-				orderId: purchaseResponse.value.orderId,
+				orderId: purchaseResponse.value.order.id,
 			});
 		}
 	}, [

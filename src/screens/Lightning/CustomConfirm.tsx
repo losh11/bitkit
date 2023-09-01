@@ -93,7 +93,7 @@ const CustomConfirm = ({
 			});
 			return;
 		}
-		setOrderId(purchaseResponse.value.orderId);
+		setOrderId(purchaseResponse.value.order.id);
 	};
 
 	return (
