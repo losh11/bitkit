@@ -191,7 +191,7 @@ const CustomSetup = ({
 			let packageFiatAmount = p.fiatAmount;
 
 			// Ensure the fiatAmount is within the range of minReceiving and maxChannelSizeFiat.fiatValue
-			if (packageFiatAmount >= maxChannelSizeFiat.fiatValue) {
+			if (packageFiatAmount > maxChannelSizeFiat.fiatValue) {
 				packageFiatAmount = maxChannelSizeFiat.fiatValue;
 			} else if (packageFiatAmount < minChannelSizeFiat.fiatValue) {
 				packageFiatAmount = minChannelSizeFiat.fiatValue;
