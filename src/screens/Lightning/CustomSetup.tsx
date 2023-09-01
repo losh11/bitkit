@@ -78,9 +78,9 @@ const PACKAGES_SPENDING: Omit<TPackage, 'satoshis'>[] = [
 
 const PACKAGES_RECEIVING: Omit<TPackage, 'satoshis'>[] = [
 	{
-		id: 'small',
-		img: require('../../assets/illustrations/coin-stack-1.png'),
-		fiatAmount: 250,
+		id: 'big',
+		img: require('../../assets/illustrations/coin-stack-3.png'),
+		fiatAmount: 999,
 	},
 	{
 		id: 'medium',
@@ -88,9 +88,9 @@ const PACKAGES_RECEIVING: Omit<TPackage, 'satoshis'>[] = [
 		fiatAmount: 500,
 	},
 	{
-		id: 'big',
-		img: require('../../assets/illustrations/coin-stack-3.png'),
-		fiatAmount: 999,
+		id: 'small',
+		img: require('../../assets/illustrations/coin-stack-1.png'),
+		fiatAmount: 250,
 	},
 ];
 
@@ -178,6 +178,9 @@ const CustomSetup = ({
 
 		let maxReceiving = maxChannelSizeSat;
 		let minReceiving = spendingAmount! ?? 0;
+		const minChannelSizeFiat = getFiatDisplayValues({
+			satoshis: minReceiving,
+		});
 		let availReceivingPackages: TPackage[] = [];
 		PACKAGES_RECEIVING.forEach((p) => {
 			const maxChannelSizeFiat = getFiatDisplayValues({
@@ -190,23 +193,17 @@ const CustomSetup = ({
 			// Ensure the fiatAmount is within the range of minReceiving and maxChannelSizeFiat.fiatValue
 			if (packageFiatAmount >= maxChannelSizeFiat.fiatValue) {
 				packageFiatAmount = maxChannelSizeFiat.fiatValue;
-			} else if (packageFiatAmount < minReceiving) {
-				packageFiatAmount = minReceiving;
+			} else if (packageFiatAmount < minChannelSizeFiat.fiatValue) {
+				packageFiatAmount = minChannelSizeFiat.fiatValue;
 			}
 
-			const convertedAmount = convertCurrency({
-				amount: packageFiatAmount,
-				from: 'USD',
-				to: selectedCurrency,
-			});
-
-			const satoshis = convertToSats(convertedAmount.fiatValue, EUnit.fiat);
+			const satoshis = convertToSats(packageFiatAmount, EUnit.fiat);
 			const satoshisCapped = Math.min(satoshis, maxReceiving);
 
 			maxReceiving = Number((maxReceiving - delta / 2).toFixed(0));
 			availReceivingPackages.push({
 				...p,
-				fiatAmount: convertedAmount.fiatValue,
+				fiatAmount: packageFiatAmount,
 				satoshis: satoshisCapped,
 			});
 		});
