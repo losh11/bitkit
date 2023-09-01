@@ -194,7 +194,9 @@ export const startChannelPurchase = async ({
 	lspNodeId?: string;
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
-}): Promise<Result<{ orderId: string; channelOpenCost: number }>> => {
+}): Promise<
+	Result<{ orderId: string; channelOpenCost: number; channelOpenFee: number }>
+> => {
 	if (!selectedNetwork) {
 		selectedNetwork = getSelectedNetwork();
 	}
@@ -236,7 +238,9 @@ export const startChannelPurchase = async ({
 		selectedNetwork,
 	});
 	const channelOpenCost = buyChannelData.clientBalanceSat + txFeeInSats;
-
+	const channelOpenFee = Math.abs(
+		buyChannelData.clientBalanceSat - buyChannelData.feeSat,
+	);
 	// Ensure we have enough funds to pay for both the channel and the fee to broadcast the transaction.
 	if (channelOpenCost > onchainBalance) {
 		// TODO: Attempt to re-calculate a lower fee channel-open that's not instant if unable to pay.
@@ -267,7 +271,7 @@ export const startChannelPurchase = async ({
 		selectedNetwork,
 	});
 
-	return ok({ orderId: buyChannelData.id, channelOpenCost });
+	return ok({ orderId: buyChannelData.id, channelOpenCost, channelOpenFee });
 };
 
 /**

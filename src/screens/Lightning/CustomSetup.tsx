@@ -110,7 +110,7 @@ const CustomSetup = ({
 	const blocktankInfo = useSelector(blocktankInfoSelector);
 
 	const [textFieldValue, setTextFieldValue] = useState('');
-	const [channelOpenCost, setChannelOpenCost] = useState('');
+	const [channelOpenFee, setChannelOpenFee] = useState('');
 	const [showNumberPad, setShowNumberPad] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [spendingPackages, setSpendingPackages] = useState<TPackage[]>([]); // Packages the user can afford.
@@ -275,9 +275,9 @@ const CustomSetup = ({
 				});
 				if (response.isOk()) {
 					const { fiatSymbol, fiatValue } = getFiatDisplayValues({
-						satoshis: response.value.channelOpenCost,
+						satoshis: response.value.channelOpenFee,
 					});
-					setChannelOpenCost(`${fiatSymbol} ${fiatValue.toFixed(2)}`);
+					setChannelOpenFee(`${fiatSymbol} ${fiatValue.toFixed(2)}`);
 				}
 			};
 
@@ -478,9 +478,9 @@ const CustomSetup = ({
 							<Caption13Up style={styles.amountCaption} color="purple">
 								{t(spending ? 'spending_label' : 'receiving_label')}
 							</Caption13Up>
-							{channelOpenCost && (
+							{channelOpenFee && (
 								<Caption13Up style={styles.amountCaptionCost} color="gray1">
-									(Cost: {channelOpenCost})
+									(Cost: {channelOpenFee})
 								</Caption13Up>
 							)}
 						</View>

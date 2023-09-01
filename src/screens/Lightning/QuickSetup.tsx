@@ -66,14 +66,6 @@ const QuickSetup = ({
 		}, [selectedNetwork, selectedWallet]),
 	);
 
-	// default spendingPercentage to 20%
-	useEffect(() => {
-		const defaultSpendingAmount = Math.round(onchainBalance * 0.2);
-		const result = getNumberPadText(defaultSpendingAmount, unit);
-		setTextFieldValue(result);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [onchainBalance]);
-
 	const spendingAmount = useMemo((): number => {
 		return convertToSats(textFieldValue, unit);
 	}, [textFieldValue, unit]);
@@ -105,6 +97,15 @@ const QuickSetup = ({
 		return fiatWhole;
 	}, [btSpendingLimitBalanced]);
 
+	const onMax = useCallback(() => {
+		const result = getNumberPadText(spendingLimit, unit);
+		setTextFieldValue(result);
+	}, [spendingLimit, unit]);
+
+	useEffect(() => {
+		onMax();
+	}, [onMax, onchainBalance, unit]);
+
 	const onChangeUnit = (): void => {
 		const result = getNumberPadText(spendingAmount, nextUnit);
 		setTextFieldValue(result);
@@ -118,11 +119,6 @@ const QuickSetup = ({
 		},
 		[unit],
 	);
-
-	const onMax = useCallback(() => {
-		const result = getNumberPadText(spendingLimit, unit);
-		setTextFieldValue(result);
-	}, [spendingLimit, unit]);
 
 	const onDone = useCallback(() => {
 		setShowNumberPad(false);
