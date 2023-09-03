@@ -269,6 +269,7 @@ const CustomSetup = ({
 					channelExpiry: DEFAULT_CHANNEL_DURATION,
 					selectedWallet,
 					selectedNetwork,
+					lspNodeId: blocktankInfo.nodes[0].pubkey,
 				});
 				if (response.isOk()) {
 					const { fiatSymbol, fiatValue } = getFiatDisplayValues({
@@ -288,6 +289,7 @@ const CustomSetup = ({
 		spendingAmount,
 		selectedWallet,
 		selectedNetwork,
+		blocktankInfo.nodes,
 	]);
 
 	const getBarrels = useCallback((): ReactElement[] => {

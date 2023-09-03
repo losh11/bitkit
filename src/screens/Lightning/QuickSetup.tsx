@@ -42,6 +42,7 @@ import { blocktankInfoSelector } from '../../store/reselect/blocktank';
 import { primaryUnitSelector } from '../../store/reselect/settings';
 import NumberPadTextField from '../../components/NumberPadTextField';
 import { getNumberPadText } from '../../utils/numberpad';
+import { DEFAULT_CHANNEL_DURATION } from './CustomConfirm';
 
 const QuickSetup = ({
 	navigation,
@@ -127,17 +128,20 @@ const QuickSetup = ({
 	const onContinue = useCallback(async (): Promise<void> => {
 		setLoading(true);
 
-		// Ensure local balance is bigger than remote balance
-		const localBalance = Math.max(
+		const maxUsableLspBalance = Math.round(
+			blocktankInfo.options.maxChannelSizeSat - spendingAmount!,
+		);
+		const minUsableLspBalance = Math.round(maxUsableLspBalance / 3);
+		let lspBalance = Math.max(
 			Math.round(spendingAmount + spendingAmount * diff),
-			blocktankInfo.options.minChannelSizeSat,
+			minUsableLspBalance,
 		);
 		const purchaseResponse = await startChannelPurchase({
 			selectedNetwork,
 			selectedWallet,
-			remoteBalance: spendingAmount,
-			localBalance,
-			channelExpiry: 12,
+			remoteBalance: spendingAmount!,
+			localBalance: lspBalance,
+			channelExpiry: DEFAULT_CHANNEL_DURATION,
 			lspNodeId: blocktankInfo.nodes[0].pubkey,
 		});
 
@@ -264,7 +268,7 @@ const QuickSetup = ({
 							loading={loading}
 							text={t('continue')}
 							size="large"
-							disabled={spendingAmount === 0}
+							disabled={spendingAmount > spendingLimit}
 							testID="QuickSetupContinue"
 							onPress={onContinue}
 						/>
