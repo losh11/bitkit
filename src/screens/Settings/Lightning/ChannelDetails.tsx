@@ -63,10 +63,6 @@ export const getOrderStatus = (
 	const paymentState: BtPaymentState = order.payment.state;
 	const channelState: BtOpenChannelState | undefined = order.channel?.state;
 
-	console.log({ orderState });
-	console.log({ paymentState });
-	console.log({ channelState });
-
 	switch (orderState) {
 		case 'expired':
 			return (): ReactElement => (

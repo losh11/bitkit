@@ -166,7 +166,6 @@ export const openChannel = async (
 			nodeId.value,
 			false,
 		);
-		console.log('finalizeChannelResponse', finalizeChannelResponse);
 		if (finalizeChannelResponse) {
 			// Once finalized, refresh on-chain & lightning.
 			await refreshWallet();
