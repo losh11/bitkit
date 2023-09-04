@@ -98,14 +98,23 @@ const QuickSetup = ({
 		return fiatWhole;
 	}, [btSpendingLimitBalanced]);
 
+	const setDefaultClientBalance = useCallback(() => {
+		const value = Math.min(
+			Math.round(onchainBalance * 0.2),
+			btSpendingLimitBalanced,
+		);
+		const result = getNumberPadText(value, unit);
+		setTextFieldValue(result);
+	}, [btSpendingLimitBalanced, onchainBalance, unit]);
+
 	const onMax = useCallback(() => {
 		const result = getNumberPadText(spendingLimit, unit);
 		setTextFieldValue(result);
 	}, [spendingLimit, unit]);
 
 	useEffect(() => {
-		onMax();
-	}, [onMax, onchainBalance, unit]);
+		setDefaultClientBalance();
+	}, [setDefaultClientBalance, onchainBalance, unit]);
 
 	const onChangeUnit = (): void => {
 		const result = getNumberPadText(spendingAmount, nextUnit);
