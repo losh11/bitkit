@@ -33,8 +33,9 @@ import {
 import {
 	resetSendTransaction,
 	setupOnChainTransaction,
-	updateSendTransaction,
 } from '../../../store/actions/wallet';
+import { fromAddressViewerSelector } from '../../../store/reselect/ui';
+import { updateUi } from '../../../store/actions/ui';
 
 const imageSrc = require('../../../assets/illustrations/coin-stack-logo.png');
 
@@ -47,6 +48,7 @@ const Recipient = ({
 	const { keyboardShown } = useKeyboard();
 	const [textFieldValue, setTextFieldValue] = useState('');
 	const [isValid, setIsValid] = useState(false);
+	const fromAddressViewer = useSelector(fromAddressViewerSelector);
 	const transaction = useSelector(transactionSelector);
 	const selectedWallet = useSelector(selectedWalletSelector);
 	const selectedNetwork = useSelector(selectedNetworkSelector);
@@ -118,15 +120,9 @@ const Recipient = ({
 	const onContinue = async (): Promise<void> => {
 		await Keyboard.dismiss();
 
-		if (transaction?.fromAddressViewer) {
+		if (fromAddressViewer) {
 			//Skip processInputData if from address viewer so-as to not lose inputs.
-			updateSendTransaction({
-				selectedWallet,
-				selectedNetwork,
-				transaction: {
-					fromAddressViewer: false,
-				},
-			});
+			updateUi({ fromAddressViewer: false });
 		} else {
 			// make sure transaction is up-to-date when navigating back and forth
 			await processInputData({

@@ -71,4 +71,5 @@ export interface IUi {
 	viewControllers: TUiViewController;
 	timeZone: string;
 	language: string;
+	fromAddressViewer: boolean;
 }

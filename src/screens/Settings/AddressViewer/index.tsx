@@ -67,7 +67,7 @@ import {
 	updateSendTransaction,
 	updateWallet,
 } from '../../../store/actions/wallet';
-import { showBottomSheet } from '../../../store/actions/ui';
+import { showBottomSheet, updateUi } from '../../../store/actions/ui';
 import Store from '../../../store/types';
 import SearchInput from '../../../components/SearchInput';
 import AddressViewerListItem from './AddressViewerListItem';
@@ -710,11 +710,11 @@ const AddressViewer = ({
 				transaction: {
 					...transactionRes.value,
 					outputs: [{ address: receiveAddress.value, value: 0, index: 0 }],
-					fromAddressViewer: true,
 				},
 				selectedWallet,
 				selectedNetwork,
 			});
+			updateUi({ fromAddressViewer: true });
 			sendMax({ selectedWallet, selectedNetwork });
 			showBottomSheet('sendNavigation');
 		},

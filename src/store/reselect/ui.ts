@@ -100,3 +100,8 @@ export const criticalUpdateSelector = createSelector(
 export const timeZoneSelector = createSelector([uiState], (ui) => ui.timeZone);
 
 export const languageSelector = createSelector([uiState], (ui) => ui.language);
+
+export const fromAddressViewerSelector = createSelector(
+	[uiState],
+	(ui) => ui?.fromAddressViewer ?? false,
+);
