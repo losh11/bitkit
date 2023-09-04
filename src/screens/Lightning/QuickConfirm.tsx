@@ -19,7 +19,6 @@ import type { LightningScreenProps } from '../../navigation/types';
 import { addTodo } from '../../store/actions/todos';
 import { confirmChannelPurchase } from '../../store/actions/blocktank';
 import { blocktankOrdersSelector } from '../../store/reselect/blocktank';
-import { setLightningSettingUpStep } from '../../store/actions/user';
 import {
 	selectedNetworkSelector,
 	transactionFeeSelector,
@@ -41,15 +40,21 @@ const QuickConfirm = ({
 	const [loading, setLoading] = useState(false);
 
 	const order = useMemo(() => {
-		return orders.find((o) => o._id === orderId);
+		return orders.find((o) => o.id === orderId);
 	}, [orderId, orders]);
-
+	const purchaseFee = useMemo(() => {
+		return !order ? 0 : order?.feeSat ?? 0;
+	}, [order]);
+	const blocktankPurchaseFee = useDisplayValues(purchaseFee);
 	const fiatTransactionFee = useDisplayValues(transactionFee);
-	const blocktankPurchaseFee = useDisplayValues(order?.price ?? 0);
+	const clientBalance = useDisplayValues(order?.clientBalanceSat ?? 0);
 
 	const channelOpenCost = useMemo(() => {
-		const fee = blocktankPurchaseFee.fiatValue + fiatTransactionFee.fiatValue;
-		return fee.toFixed(2);
+		return (
+			blocktankPurchaseFee.fiatValue -
+			clientBalance.fiatValue +
+			fiatTransactionFee.fiatValue
+		).toFixed(2);
 
 		// avoid flashing different price after confirmation
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,7 +74,6 @@ const QuickConfirm = ({
 			setLoading(false);
 			return;
 		}
-		setLightningSettingUpStep(0);
 		addTodo('lightningSettingUp');
 		navigation.navigate('SettingUp');
 	};

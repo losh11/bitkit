@@ -890,7 +890,8 @@ export const addPeers = async ({
 		// No need to add Blocktank peer if geo-blocked.
 		if (!geoBlocked) {
 			// Set Blocktank node uri array if able.
-			blocktankNodeUris = getBlocktankStore()?.info?.node_info?.uris ?? [];
+			blocktankNodeUris =
+				getBlocktankStore()?.info?.nodes[0]?.connectionStrings ?? [];
 			if (!blocktankNodeUris.length) {
 				// Fall back to hardcoded Blocktank peer if the blocktankNodeUris array is empty.
 				blocktankNodeUris = FALLBACK_BLOCKTANK_PEERS[selectedNetwork];
@@ -947,7 +948,8 @@ export const getLightningNodePeers = async ({
 		// No need to add Blocktank peer if geo-blocked.
 		if (!geoBlocked) {
 			// Set Blocktank node uri array if able.
-			blocktankNodeUris = getBlocktankStore()?.info?.node_info?.uris ?? [];
+			blocktankNodeUris =
+				getBlocktankStore()?.info?.nodes[0].connectionStrings ?? [];
 			if (!blocktankNodeUris.length) {
 				// Fall back to hardcoded Blocktank peer if the blocktankNodeUris array is empty.
 				blocktankNodeUris = FALLBACK_BLOCKTANK_PEERS[selectedNetwork];
@@ -1463,7 +1465,7 @@ export const removeUnusedPeers = async ({
 		(channel) => channel.counterparty_node_id,
 	);
 	const blocktankInfo = await getBlocktankInfo(true);
-	const blocktankPubKey = blocktankInfo.node_info.public_key;
+	const blocktankPubKey = blocktankInfo.nodes[0].pubkey;
 	const peers = await lm.getPeers();
 
 	await Promise.all(

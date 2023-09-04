@@ -47,17 +47,26 @@ const Confirm = ({
 	const selectedNetwork = useSelector(selectedNetworkSelector);
 	const orders = useSelector(blocktankOrdersSelector);
 	const order = useMemo(() => {
-		return orders.find((o) => o._id === orderId);
+		return orders.find((o) => o.id === orderId);
 	}, [orderId, orders]);
 
-	const blocktankPurchaseFee = useDisplayValues(order?.price ?? 0);
+	const feeSat = order?.feeSat ?? 0;
+	const blocktankPurchaseFee = useDisplayValues(feeSat);
 	const transactionFee = useSelector(transactionFeeSelector);
 	const fiatTransactionFee = useDisplayValues(transactionFee);
+	const clientBalance = useDisplayValues(order?.clientBalanceSat ?? 0);
+
 	const channelOpenCost = useMemo(() => {
 		return (
-			blocktankPurchaseFee.fiatValue + fiatTransactionFee.fiatValue
+			blocktankPurchaseFee.fiatValue -
+			clientBalance.fiatValue +
+			fiatTransactionFee.fiatValue
 		).toFixed(2);
-	}, [blocktankPurchaseFee, fiatTransactionFee.fiatValue]);
+	}, [
+		blocktankPurchaseFee.fiatValue,
+		clientBalance.fiatValue,
+		fiatTransactionFee.fiatValue,
+	]);
 
 	const handleConfirm = async (): Promise<void> => {
 		setLoading(true);
