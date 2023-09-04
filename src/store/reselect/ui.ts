@@ -103,5 +103,5 @@ export const languageSelector = createSelector([uiState], (ui) => ui.language);
 
 export const fromAddressViewerSelector = createSelector(
 	[uiState],
-	(ui) => ui?.fromAddressViewer ?? false,
+	(ui) => ui.fromAddressViewer,
 );

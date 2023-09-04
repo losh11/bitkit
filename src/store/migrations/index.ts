@@ -179,6 +179,15 @@ const migrations = {
 			widgets: defaultWidgetsShape,
 		};
 	},
+	18: (state): PersistedState => {
+		return {
+			...state,
+			ui: {
+				...state.ui,
+				fromAddressViewer: false,
+			},
+		};
+	},
 };
 
 export default migrations;
