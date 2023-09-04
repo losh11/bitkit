@@ -85,7 +85,6 @@ export const refreshOrder = async (
 			setLightningSettingUpStep(1);
 			const finalizeRes = await openChannel(orderId);
 			if (finalizeRes.isOk()) {
-				//setLightningSettingUpStep(2);
 				removeTodo('lightning');
 				setLightningSettingUpStep(3);
 				const getUpdatedOrderResult = await blocktank.getOrder(orderId);
@@ -258,7 +257,7 @@ export const startChannelPurchase = async ({
 		);
 	}
 
-	await updateSendTransaction({
+	updateSendTransaction({
 		transaction: {
 			outputs: [
 				{
@@ -270,7 +269,7 @@ export const startChannelPurchase = async ({
 		},
 	});
 
-	const feeRes = await updateFee({
+	const feeRes = updateFee({
 		satsPerByte: min0ConfTxFee.value.satPerVByte + 1,
 		selectedWallet,
 		selectedNetwork,
@@ -378,16 +377,6 @@ export const addPaidBlocktankOrder = ({
  * @param {IBtOrder} order
  */
 const handleOrderStateChange = (order: IBtOrder): void => {
-	// Order states: https://github.com/synonymdev/blocktank-client/blob/f8a20c35a4953435cecf8f718ee555e311e1db9b/src/services/client.ts#L15
-	//TODO: Not sure what to do with this
-	// const currentOrders = getBlocktankStore().orders;
-	// const otherOrders = currentOrders.filter((o) => o.id !== order.id);
-	// const otherOrderStates = otherOrders.map((o) => o.state);
-	//
-	// const oneOtherOrderHasState = (states: number[]): boolean => {.
-	// 	return otherOrderStates.some((state) => states.includes(state));
-	// };
-
 	// queued for opening
 	if (!order.channel?.state) {
 		setLightningSettingUpStep(2);
