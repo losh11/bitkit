@@ -184,6 +184,7 @@ export const startChannelPurchase = async ({
 	localBalance,
 	channelExpiry = 6,
 	lspNodeId,
+	couponCode,
 	selectedWallet,
 	selectedNetwork,
 }: {
@@ -191,6 +192,7 @@ export const startChannelPurchase = async ({
 	localBalance: number;
 	channelExpiry?: number;
 	lspNodeId?: string;
+	couponCode?: string;
 	selectedWallet?: TWalletName;
 	selectedNetwork?: TAvailableNetworks;
 }): Promise<
@@ -214,6 +216,7 @@ export const startChannelPurchase = async ({
 		options: {
 			clientBalanceSat: remoteBalance,
 			lspNodeId,
+			couponCode,
 		},
 	});
 	if (buyChannelResponse.isErr()) {
