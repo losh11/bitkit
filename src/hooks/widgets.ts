@@ -12,6 +12,9 @@ type Field = {
 	unit?: string;
 };
 
+// Cache config files to reduce widgets layout shifts.
+const cache: { [url: string]: { config: SlashFeedJSON } } = {};
+
 export const useSlashfeed = (options: {
 	url: string;
 	fields?: SlashFeedJSON['fields'];
@@ -23,7 +26,9 @@ export const useSlashfeed = (options: {
 	loading: boolean;
 	failed: boolean;
 } => {
-	const [config, setConfig] = useState<any>();
+	const [config, setConfig] = useState<SlashFeedJSON>(
+		cache[options.url]?.config,
+	);
 	const [icon, setIcon] = useState<string>();
 	const [fields, setFields] = useState<Field[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -40,36 +45,55 @@ export const useSlashfeed = (options: {
 
 		const getData = async (): Promise<void> => {
 			try {
-				const _config = await reader.getConfig();
+				await reader.ready();
 
-				if (!_config) {
+				if (!reader.config) {
 					setFailed(true);
 					setLoading(false);
 					return;
 				}
 
-				setConfig(_config);
+				cache[options.url] = cache[options.url] || {};
+				cache[options.url].config = reader.config as SlashFeedJSON;
 
-				const buffer = await reader.getIcon();
-				const _icon = b4a.toString(buffer);
-				setIcon(_icon);
+				setConfig(reader.config as SlashFeedJSON);
 
-				const _fields = options.fields ?? _config.fields ?? [];
+				if (reader.config.icons && reader.icon) {
+					const iconPath = Object.values(reader.config.icons)[0];
+
+					// console.log({ url: options.url, ic: b4a.toString(reader.icon) })
+					if (iconPath?.endsWith('.svg')) {
+						// Will be handled in SvgImage
+						setIcon(b4a.toString(reader.icon));
+					} else if (iconPath.endsWith('.png')) {
+						// Assuming it is png
+						// TODO: Handle other formats
+
+						const base64String = b4a.toString(reader.icon, 'base64');
+						const dataUri = `data:image/png;base64,${base64String}`;
+
+						setIcon(dataUri);
+					}
+				}
+
+				const _fields = options.fields ?? reader.config.fields ?? [];
 
 				// Don't continue for news & facts feeds
 				if (
-					_config.type === SUPPORTED_FEED_TYPES.FACTS_FEED ||
-					_config.type === SUPPORTED_FEED_TYPES.HEADLINES_FEED
+					reader.config.type === SUPPORTED_FEED_TYPES.FACTS_FEED ||
+					reader.config.type === SUPPORTED_FEED_TYPES.HEADLINES_FEED ||
+					reader.config.type === SUPPORTED_FEED_TYPES.LUGAON_FEED
 				) {
 					setLoading(false);
 					return;
 				}
 
 				const promises = _fields.map(async (field) => {
+					// TODO: Use reader.getField(field.name) after merging and publishing https://github.com/synonymdev/slashtags-feeds/pull/11
 					const fieldName = field.main.replace('/feed/', '');
 					const value = await reader.getField(fieldName);
 					const formattedValue = decodeWidgetFieldValue(
-						_config.type ?? '',
+						reader.config.type ?? '',
 						field,
 						value,
 					);

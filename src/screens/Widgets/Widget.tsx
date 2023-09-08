@@ -26,6 +26,7 @@ import FeedWidget from '../../components/FeedWidget';
 import FactsWidget from '../../components/FactsWidget';
 import Spinner from '../../components/Spinner';
 import type { RootStackScreenProps } from '../../navigation/types';
+import LuganoFeedWidget from '../../components/LuganoFeedWidget';
 
 const Widget = ({
 	navigation,
@@ -131,13 +132,7 @@ const Widget = ({
 							{t('widget_preview')}
 						</Caption13Up>
 
-						{loading && (
-							<ThemedView style={styles.previewLoading} color="white08">
-								<Spinner />
-							</ThemedView>
-						)}
-
-						{!loading && (
+						{
 							<>
 								{((): ReactElement => {
 									const previewWidget = {
@@ -169,18 +164,26 @@ const Widget = ({
 											);
 										case SUPPORTED_FEED_TYPES.FACTS_FEED:
 											return <FactsWidget key={url} url={url} />;
+										case SUPPORTED_FEED_TYPES.LUGAON_FEED:
+											return <LuganoFeedWidget key={url} url={url} />;
 										default:
-											return (
+											return !loading ? (
 												<FeedWidget
 													key={url}
 													url={url}
 													widget={previewWidget}
 												/>
+											) : (
+												<ThemedView
+													style={styles.previewLoading}
+													color="white08">
+													<Spinner />
+												</ThemedView>
 											);
 									}
 								})()}
 							</>
-						)}
+						}
 
 						<View style={styles.buttonsContainer}>
 							{savedWidget && (

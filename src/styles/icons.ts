@@ -69,6 +69,8 @@ import {
 	shareAndroidIcon,
 	hourglassSimpleIcon,
 	questionMarkIcon,
+	mapTrifoldIcon,
+	mapPinLineIcon,
 } from '../assets/icons/wallet';
 import {
 	chevronRightIcon,
@@ -875,6 +877,26 @@ export const LightningHollow = styled(SvgXml).attrs((props) => ({
 	),
 	height: props.height ?? '24px',
 	width: props.width ?? '24px',
+}))<IconProps>((props) => ({
+	color: props.color ? props.theme.colors[props.color] : 'white',
+}));
+
+export const MapTrifoldIcon = styled(SvgXml).attrs((props) => ({
+	xml: mapTrifoldIcon(
+		props.color ? props.theme.colors[props.color] : props.theme.colors.white,
+	),
+	height: props.height ?? '16px',
+	width: props.width ?? '16px',
+}))<IconProps>((props) => ({
+	color: props.color ? props.theme.colors[props.color] : 'white',
+}));
+
+export const MapPinLineIcon = styled(SvgXml).attrs((props) => ({
+	xml: mapPinLineIcon(
+		props.color ? props.theme.colors[props.color] : props.theme.colors.white,
+	),
+	height: props.height ?? '16px',
+	width: props.width ?? '16px',
 }))<IconProps>((props) => ({
 	color: props.color ? props.theme.colors[props.color] : 'white',
 }));

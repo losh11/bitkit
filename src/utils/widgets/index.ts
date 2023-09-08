@@ -6,6 +6,7 @@ export enum SUPPORTED_FEED_TYPES {
 	HEADLINES_FEED = 'news.headlines',
 	BLOCKS_FEED = 'bitcoin.stats',
 	FACTS_FEED = 'quotes',
+	LUGAON_FEED = 'to.synonym.lugano-feed',
 }
 
 /**

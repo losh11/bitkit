@@ -33,6 +33,7 @@ import {
 	widgetsOrderSelector,
 	widgetsSelector,
 } from '../store/reselect/widgets';
+import LuganoFeedWidget from './LuganoFeedWidget';
 
 const Widgets = (): ReactElement => {
 	const { t } = useTranslation('slashtags');
@@ -86,7 +87,7 @@ const Widgets = (): ReactElement => {
 				);
 			}
 
-			let testID;
+			let testID: string;
 			let Component:
 				| typeof PriceWidget
 				| typeof HeadlinesWidget
@@ -110,6 +111,10 @@ const Widgets = (): ReactElement => {
 				case SUPPORTED_FEED_TYPES.FACTS_FEED:
 					Component = FactsWidget;
 					testID = 'FactsWidget';
+					break;
+				case SUPPORTED_FEED_TYPES.LUGAON_FEED:
+					Component = LuganoFeedWidget;
+					testID = 'LuganoWidget';
 					break;
 				default:
 					Component = FeedWidget;

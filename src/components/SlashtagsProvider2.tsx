@@ -3,7 +3,7 @@ import { createContext } from 'react';
 import { useSelector } from 'react-redux';
 import b4a from 'b4a';
 import KeyChain from '@synonymdev/slashtags-keychain';
-import { Client } from '@synonymdev/web-relay/lib/client';
+import { Client } from '@synonymdev/web-relay';
 import SlashtagsProfile from '@synonymdev/slashtags-profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
