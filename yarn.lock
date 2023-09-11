@@ -2977,23 +2977,9 @@
     "@synonymdev/feeds" "^2.0.0"
     node-fetch "^2.6.12"
 
-"@synonymdev/web-relay@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@synonymdev/web-relay/-/web-relay-1.0.0.tgz#ddf715d21078822f717db8b74d6f8fba00ca1564"
-  integrity sha512-S/WVRWJEHFFNOrdZsn/2a4VK97Lj/taoKRmOq8USLCadCaljOwcesxiI92R3+tBvCFvydqahZw/Mb0kDY6O2CQ==
-  dependencies:
-    "@synonymdev/slashtags-url" "1.0.0-alpha.3"
-    b4a "1.6.4"
-    git-repo-info "^2.1.1"
-    level "8.0.0"
-    lmdb "2.8.4"
-    node-fetch "2.6.12"
-    sodium-universal "4.0.0"
-    xmlhttprequest "1.8.0"
-
 "@synonymdev/web-relay@https://github.com/slashtags/web-relay.git#react-native-fetch-hack":
   version "1.0.0"
-  resolved "https://github.com/slashtags/web-relay.git#677b402b1fe8fecac11c6fec1ba86c7ec663f371"
+  resolved "https://github.com/slashtags/web-relay.git#a8bca8e60aca9fb339bc60cf95725f3c890b960f"
   dependencies:
     "@synonymdev/slashtags-url" "1.0.0-alpha.3"
     b4a "1.6.4"
