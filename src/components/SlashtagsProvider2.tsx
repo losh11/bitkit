@@ -3,7 +3,9 @@ import { createContext } from 'react';
 import { useSelector } from 'react-redux';
 import b4a from 'b4a';
 import KeyChain from '@synonymdev/slashtags-keychain';
-import { Client } from '@synonymdev/web-relay';
+import type { Client as IWebRelayClient } from '@synonymdev/web-relay';
+// @ts-ignore
+import Client from '@synonymdev/web-relay/lib/client';
 import SlashtagsProfile from '@synonymdev/slashtags-profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -87,7 +89,7 @@ export const webRelayUrl = 'https://dht-relay.synonym.to/staging/web-relay';
 // export const webRelayUrl = 'http://localhost:3000';
 const store = new Store('example1.db') as unknown as Client.Store;
 
-export let webRelayClient: Client;
+export let webRelayClient: IWebRelayClient;
 export let profile: SlashtagsProfile;
 
 export interface ISlashtagsContext2 {
