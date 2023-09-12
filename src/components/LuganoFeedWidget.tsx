@@ -1,14 +1,12 @@
 import React, { memo, ReactElement, useEffect, useState } from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, Image } from 'react-native';
-import * as SlashURL from '@synonymdev/slashtags-url';
+import b4a from 'b4a';
 
 import { Caption13M, Text01M, Text02M } from '../styles/text';
 import BaseFeedWidget from './BaseFeedWidget';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { openURL } from '../utils/helpers';
 
-import { webRelayUrl } from './SlashtagsProvider2';
-import { LuganoFeedURL } from '../screens/Widgets/WidgetsSuggestions';
 import { useSlashfeed } from '../hooks/widgets';
 import Button from './Button';
 import { CalendarIcon, MapPinLineIcon, MapTrifoldIcon } from '../styles/icons';
@@ -49,22 +47,15 @@ const LuganoWidget = ({
 	>([]);
 
 	useEffect(() => {
-		const bannerPath = config?.fields?.find((f) => f.name === 'banner')?.main;
-
-		if (bannerPath) {
-			const parsed = SlashURL.parse(LuganoFeedURL);
-
-			const bannerURL =
-				bannerPath &&
-				webRelayUrl.replace(/\/*$/, '/') + // remove possible duplicate trailing forward slash
-					parsed.id + // <id> part of the url https://<relay path>/<id>/<path>
-					'/' +
-					encodeURIComponent(parsed.path.slice(1)) + // Encode feed name to avoid special character issues
-					bannerPath;
-
-			cache.banner = bannerURL;
-			setBanner(bannerURL);
-		}
+		reader
+			.getField('banner.png')
+			.then((buffer) => {
+				const base64 = b4a.toString(buffer as Uint8Array, 'base64');
+				setBanner(`data:image/png;base64,${base64}`);
+			})
+			.catch((error) => {
+				console.log('Error while reading banner png', error);
+			});
 
 		reader
 			.getField('links.json')

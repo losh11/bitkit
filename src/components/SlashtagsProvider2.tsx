@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import b4a from 'b4a';
 import KeyChain from '@synonymdev/slashtags-keychain';
 import type { Client as IWebRelayClient } from '@synonymdev/web-relay';
-// @ts-ignore
 import Client from '@synonymdev/web-relay/lib/client';
 import SlashtagsProfile from '@synonymdev/slashtags-profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';

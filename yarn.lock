@@ -2922,18 +2922,18 @@
     turbo-hash-map "^1.0.3"
     ws "^8.8.1"
 
-"@synonymdev/slashtags-url@1.0.0-alpha.3":
-  version "1.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@synonymdev/slashtags-url/-/slashtags-url-1.0.0-alpha.3.tgz#2e29a48c73ba622c9aa4cdf6e0b835e53e4e9e15"
-  integrity sha512-AVwBdTZI9KMNXjU8SRv6Un4T9aOugLhuiaOJXcaIv8BJfuCnTSkaxe5Uc/62pZstsFfOjdWOjdji4AAWu3Lu5w==
-  dependencies:
-    b4a "^1.6.0"
-    z32 "^1.0.0"
-
 "@synonymdev/slashtags-url@1.0.0-alpha.4", "@synonymdev/slashtags-url@^1.0.0-alpha.3":
   version "1.0.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@synonymdev/slashtags-url/-/slashtags-url-1.0.0-alpha.4.tgz#f9f47a59dc57aa5efbb2e9ad0cb2a33399fdca67"
   integrity sha512-6+ac8h2MqF0H+h4km4dqmyhomvDvyXB7ny1QsvwwwPNPmyVbSyatjsnGLmEkzpNTVO7PHVCkEbDWGrZmdUVksQ==
+  dependencies:
+    b4a "^1.6.0"
+    z32 "^1.0.0"
+
+"@synonymdev/slashtags-url@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@synonymdev/slashtags-url/-/slashtags-url-1.0.0.tgz#71eede3b95c81fa737bbd0e2b3ea69c60841c1aa"
+  integrity sha512-mXPqOodXeLUr/257FBbLB8HSdYk+4bPIQqmpq7NsKzrCZscngaE6mtPtUdB0IZG4LlPXtfyJ93NZMfdVTRQrew==
   dependencies:
     b4a "^1.6.0"
     z32 "^1.0.0"
@@ -2977,11 +2977,12 @@
     "@synonymdev/feeds" "^2.0.0"
     node-fetch "^2.6.12"
 
-"@synonymdev/web-relay@https://github.com/slashtags/web-relay.git#react-native-fetch-hack":
-  version "1.0.0"
-  resolved "https://github.com/slashtags/web-relay.git#a8bca8e60aca9fb339bc60cf95725f3c890b960f"
+"@synonymdev/web-relay@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@synonymdev/web-relay/-/web-relay-1.0.2.tgz#1e66b519e5545034513b91d59e6b63ff226357de"
+  integrity sha512-bc/NYmwnWCYfHgUeeAacS3Wkr+0AGB3AJM7HllGhqCUGjFYNsDPOpx35f5PBeAilE55ZECWCohu3w0KcIY+cBQ==
   dependencies:
-    "@synonymdev/slashtags-url" "1.0.0-alpha.3"
+    "@synonymdev/slashtags-url" "^1.0.0"
     b4a "1.6.4"
     git-repo-info "^2.1.1"
     level "8.0.0"
