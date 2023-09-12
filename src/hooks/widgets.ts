@@ -59,21 +59,8 @@ export const useSlashfeed = (options: {
 				setConfig(reader.config as SlashFeedJSON);
 
 				if (reader.config.icons && reader.icon) {
-					const iconPath = Object.values(reader.config.icons)[0];
-
-					// console.log({ url: options.url, ic: b4a.toString(reader.icon) })
-					if (iconPath?.endsWith('.svg')) {
-						// Will be handled in SvgImage
-						setIcon(b4a.toString(reader.icon));
-					} else if (iconPath.endsWith('.png')) {
-						// Assuming it is png
-						// TODO: Handle other formats
-
-						const base64String = b4a.toString(reader.icon, 'base64');
-						const dataUri = `data:image/png;base64,${base64String}`;
-
-						setIcon(dataUri);
-					}
+					// Always assume it is an svg icon
+					setIcon(b4a.toString(reader.icon));
 				}
 
 				const _fields = options.fields ?? reader.config.fields ?? [];

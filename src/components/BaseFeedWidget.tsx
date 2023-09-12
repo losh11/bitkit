@@ -28,6 +28,7 @@ const BaseFeedWidget = ({
 	onPressIn,
 	onLongPress,
 	testID,
+	iconComponent,
 }: {
 	url: string;
 	name?: string;
@@ -39,6 +40,7 @@ const BaseFeedWidget = ({
 	onPressIn?: () => void;
 	onLongPress?: () => void;
 	testID?: string;
+	iconComponent?: ReactElement;
 }): ReactElement => {
 	const { t } = useTranslation('slashtags');
 	const { config, icon } = useSlashfeed({ url });
@@ -67,7 +69,9 @@ const BaseFeedWidget = ({
 				<View style={styles.header}>
 					<View style={styles.title}>
 						<View style={styles.icon}>
-							{icon ? (
+							{iconComponent ? (
+								iconComponent
+							) : icon ? (
 								<SvgImage image={icon} size={32} />
 							) : (
 								<QuestionMarkIcon width={32} height={32} />
