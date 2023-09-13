@@ -88,8 +88,8 @@ const LuganoWidget = ({
 			.then((_schedule: { time: number; location: string; name: string }[]) => {
 				const mapped = _schedule.map((event) => {
 					const time = new Date(event.time);
-					const hours = time.getHours().toString();
-					const minutes = time.getMinutes();
+					const hours = time.getHours().toString().padStart(2, '0');
+					const minutes = time.getMinutes().toString().padStart(2, '0');
 
 					return {
 						timeLocation: hours + ':' + minutes + ' @ ' + event.location,

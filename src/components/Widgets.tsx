@@ -112,7 +112,7 @@ const Widgets = (): ReactElement => {
 					Component = FactsWidget;
 					testID = 'FactsWidget';
 					break;
-				case SUPPORTED_FEED_TYPES.LUGAON_FEED:
+				case SUPPORTED_FEED_TYPES.LUGANO_FEED:
 					Component = LuganoFeedWidget;
 					testID = 'LuganoWidget';
 					break;

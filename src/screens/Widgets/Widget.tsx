@@ -164,7 +164,7 @@ const Widget = ({
 											);
 										case SUPPORTED_FEED_TYPES.FACTS_FEED:
 											return <FactsWidget key={url} url={url} />;
-										case SUPPORTED_FEED_TYPES.LUGAON_FEED:
+										case SUPPORTED_FEED_TYPES.LUGANO_FEED:
 											return <LuganoFeedWidget key={url} url={url} />;
 										default:
 											return !loading ? (

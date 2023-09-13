@@ -69,7 +69,7 @@ export const useSlashfeed = (options: {
 				if (
 					reader.config.type === SUPPORTED_FEED_TYPES.FACTS_FEED ||
 					reader.config.type === SUPPORTED_FEED_TYPES.HEADLINES_FEED ||
-					reader.config.type === SUPPORTED_FEED_TYPES.LUGAON_FEED
+					reader.config.type === SUPPORTED_FEED_TYPES.LUGANO_FEED
 				) {
 					setLoading(false);
 					return;
