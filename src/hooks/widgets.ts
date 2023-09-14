@@ -75,10 +75,8 @@ export const useSlashfeed = (options: {
 					return;
 				}
 
-				const promises = _fields.map(async (field) => {
-					// TODO: Use reader.getField(field.name) after merging and publishing https://github.com/synonymdev/slashtags-feeds/pull/11
-					const fieldName = field.main.replace('/feed/', '');
-					const value = await reader.getField(fieldName);
+				const promises = _fields.map(async (field: { name: string }) => {
+					const value = await reader.getField(field.name);
 					const formattedValue = decodeWidgetFieldValue(
 						reader.config.type ?? '',
 						field,

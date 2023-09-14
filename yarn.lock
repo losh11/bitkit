@@ -2790,10 +2790,17 @@
   dependencies:
     axios "^1.4.0"
 
-"@synonymdev/feeds@2.1.0", "@synonymdev/feeds@^2.0.0", "@synonymdev/feeds@^2.1.0":
+"@synonymdev/feeds@^2.0.0", "@synonymdev/feeds@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@synonymdev/feeds/-/feeds-2.1.0.tgz#ec983a8707d91251b2bd326965351f8c8ca2f234"
   integrity sha512-fnlXmv+r/9601s/x+Vhkg5pvVFhDdXX781670eN1VSJzNXokL0zRCkhsohu/YsFF9xcTGcK8yRVv5hvckcmcPQ==
+  dependencies:
+    b4a "^1.5.3"
+
+"@synonymdev/feeds@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@synonymdev/feeds/-/feeds-2.1.1.tgz#f91bbd171e09458e2f73938c6afc13aad57e07a8"
+  integrity sha512-C10eOlL55gPy1Te2/s9oIjEMK+Ho+d89TrS6CtE7LUscBoQNXZG+pLxoTZdceDdAvmgdtY82xTdLH3n5X7avDQ==
   dependencies:
     b4a "^1.5.3"
 
@@ -2977,7 +2984,7 @@
     "@synonymdev/feeds" "^2.0.0"
     node-fetch "^2.6.12"
 
-"@synonymdev/web-relay@^1.0.2":
+"@synonymdev/web-relay@1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@synonymdev/web-relay/-/web-relay-1.0.2.tgz#1e66b519e5545034513b91d59e6b63ff226357de"
   integrity sha512-bc/NYmwnWCYfHgUeeAacS3Wkr+0AGB3AJM7HllGhqCUGjFYNsDPOpx35f5PBeAilE55ZECWCohu3w0KcIY+cBQ==
