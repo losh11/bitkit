@@ -2790,10 +2790,17 @@
   dependencies:
     axios "^1.4.0"
 
-"@synonymdev/feeds@2.1.0", "@synonymdev/feeds@^2.0.0", "@synonymdev/feeds@^2.1.0":
+"@synonymdev/feeds@^2.0.0", "@synonymdev/feeds@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@synonymdev/feeds/-/feeds-2.1.0.tgz#ec983a8707d91251b2bd326965351f8c8ca2f234"
   integrity sha512-fnlXmv+r/9601s/x+Vhkg5pvVFhDdXX781670eN1VSJzNXokL0zRCkhsohu/YsFF9xcTGcK8yRVv5hvckcmcPQ==
+  dependencies:
+    b4a "^1.5.3"
+
+"@synonymdev/feeds@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@synonymdev/feeds/-/feeds-2.1.1.tgz#f91bbd171e09458e2f73938c6afc13aad57e07a8"
+  integrity sha512-C10eOlL55gPy1Te2/s9oIjEMK+Ho+d89TrS6CtE7LUscBoQNXZG+pLxoTZdceDdAvmgdtY82xTdLH3n5X7avDQ==
   dependencies:
     b4a "^1.5.3"
 
@@ -2922,18 +2929,18 @@
     turbo-hash-map "^1.0.3"
     ws "^8.8.1"
 
-"@synonymdev/slashtags-url@1.0.0-alpha.3":
-  version "1.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@synonymdev/slashtags-url/-/slashtags-url-1.0.0-alpha.3.tgz#2e29a48c73ba622c9aa4cdf6e0b835e53e4e9e15"
-  integrity sha512-AVwBdTZI9KMNXjU8SRv6Un4T9aOugLhuiaOJXcaIv8BJfuCnTSkaxe5Uc/62pZstsFfOjdWOjdji4AAWu3Lu5w==
-  dependencies:
-    b4a "^1.6.0"
-    z32 "^1.0.0"
-
 "@synonymdev/slashtags-url@1.0.0-alpha.4", "@synonymdev/slashtags-url@^1.0.0-alpha.3":
   version "1.0.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@synonymdev/slashtags-url/-/slashtags-url-1.0.0-alpha.4.tgz#f9f47a59dc57aa5efbb2e9ad0cb2a33399fdca67"
   integrity sha512-6+ac8h2MqF0H+h4km4dqmyhomvDvyXB7ny1QsvwwwPNPmyVbSyatjsnGLmEkzpNTVO7PHVCkEbDWGrZmdUVksQ==
+  dependencies:
+    b4a "^1.6.0"
+    z32 "^1.0.0"
+
+"@synonymdev/slashtags-url@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@synonymdev/slashtags-url/-/slashtags-url-1.0.0.tgz#71eede3b95c81fa737bbd0e2b3ea69c60841c1aa"
+  integrity sha512-mXPqOodXeLUr/257FBbLB8HSdYk+4bPIQqmpq7NsKzrCZscngaE6mtPtUdB0IZG4LlPXtfyJ93NZMfdVTRQrew==
   dependencies:
     b4a "^1.6.0"
     z32 "^1.0.0"
@@ -2977,12 +2984,12 @@
     "@synonymdev/feeds" "^2.0.0"
     node-fetch "^2.6.12"
 
-"@synonymdev/web-relay@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@synonymdev/web-relay/-/web-relay-1.0.0.tgz#ddf715d21078822f717db8b74d6f8fba00ca1564"
-  integrity sha512-S/WVRWJEHFFNOrdZsn/2a4VK97Lj/taoKRmOq8USLCadCaljOwcesxiI92R3+tBvCFvydqahZw/Mb0kDY6O2CQ==
+"@synonymdev/web-relay@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@synonymdev/web-relay/-/web-relay-1.0.2.tgz#1e66b519e5545034513b91d59e6b63ff226357de"
+  integrity sha512-bc/NYmwnWCYfHgUeeAacS3Wkr+0AGB3AJM7HllGhqCUGjFYNsDPOpx35f5PBeAilE55ZECWCohu3w0KcIY+cBQ==
   dependencies:
-    "@synonymdev/slashtags-url" "1.0.0-alpha.3"
+    "@synonymdev/slashtags-url" "^1.0.0"
     b4a "1.6.4"
     git-repo-info "^2.1.1"
     level "8.0.0"

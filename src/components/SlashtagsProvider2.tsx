@@ -3,13 +3,16 @@ import { createContext } from 'react';
 import { useSelector } from 'react-redux';
 import b4a from 'b4a';
 import KeyChain from '@synonymdev/slashtags-keychain';
-import { Client } from '@synonymdev/web-relay/lib/client';
+import type { Client as IWebRelayClient } from '@synonymdev/web-relay';
+import Client from '@synonymdev/web-relay/lib/client';
 import SlashtagsProfile from '@synonymdev/slashtags-profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { format, parse } from '@synonymdev/slashtags-url';
 
 import { getSlashtagsPrimaryKey } from '../utils/wallet';
 import { seedHashSelector } from '../store/reselect/wallet';
 import { showToast } from '../utils/notifications';
+import { __WEB_RELAY__ } from '../constants/env';
 
 class Store {
 	location: string;
@@ -83,11 +86,10 @@ class Store {
 	async close(): Promise<void> {}
 }
 
-export const webRelayUrl = 'https://dht-relay.synonym.to/staging/web-relay';
-// export const webRelayUrl = 'http://localhost:3000';
+export const webRelayUrl = __WEB_RELAY__;
 const store = new Store('example1.db') as unknown as Client.Store;
 
-export let webRelayClient: Client;
+export let webRelayClient: IWebRelayClient;
 export let profile: SlashtagsProfile;
 
 export interface ISlashtagsContext2 {
@@ -141,8 +143,12 @@ export const SlashtagsProvider2 = ({
 			});
 
 			profile = new SlashtagsProfile(webRelayClient);
-			const url2 = await profile.createURL();
-			setUrl(url2);
+			const profileUrl = await profile.createURL();
+			const parsed = parse(profileUrl);
+			const long = format(parsed.key, {
+				query: { relay: __WEB_RELAY__ },
+			});
+			setUrl(long);
 		})();
 	}, [seedHash]);
 

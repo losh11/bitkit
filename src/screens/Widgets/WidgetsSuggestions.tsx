@@ -22,6 +22,8 @@ const BlocksFeedURL =
 	'slashfeed:ourqbz3s3e1yqs5wqkzqo74zoydqqssgskueo6gsgp46e5i5ecdo/Bitcoin Blocks';
 const BitcoinFactsURL =
 	'slashfeed:6zwka9fw7orrfb7kbeojhre1yyrgd9foss8a3z9x5rtss1k9ujao/Bitcoin Facts';
+export const LuganoFeedURL =
+	'slashfeed:zjue99s4r7ooo91cq4f1eu9iz836rc81he6jfqiremx1cuc96h9o/PlanB forum';
 
 const WidgetsSuggestions = ({
 	navigation,
@@ -41,6 +43,7 @@ const WidgetsSuggestions = ({
 					<Feed url={NewsFeedURL} testID="HeadlinesWidget" />
 					<Feed url={BlocksFeedURL} testID="BlocksWidget" />
 					<Feed url={BitcoinFactsURL} testID="FactsWidget" />
+					<Feed url={LuganoFeedURL} testID="LuganoFeedWidget" />
 				</ScrollView>
 
 				<View style={styles.buttonContainer}>
