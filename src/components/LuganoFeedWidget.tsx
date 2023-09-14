@@ -128,7 +128,7 @@ const LuganoWidget = ({
 							</Text02M>
 						</View>
 						<View style={styles.columnRight}>
-							<Text01M numberOfLines={1} ellipsizeMode="middle">
+							<Text01M numberOfLines={1} ellipsizeMode="tail">
 								{event.name}
 							</Text01M>
 						</View>
