@@ -132,58 +132,40 @@ const Widget = ({
 							{t('widget_preview')}
 						</Caption13Up>
 
-						{
-							<>
-								{((): ReactElement => {
-									const previewWidget = {
-										type: config.type,
-										extras: settings.extras,
-										fields: config.fields.filter((f) => {
-											return settings.fields.includes(f.name);
-										}),
-									};
+						{((): ReactElement => {
+							const previewWidget = {
+								type: config.type,
+								extras: settings.extras,
+								fields: config.fields.filter((f) => {
+									return settings.fields.includes(f.name);
+								}),
+							};
 
-									switch (config.type) {
-										case SUPPORTED_FEED_TYPES.PRICE_FEED:
-											return (
-												<PriceWidget
-													key={url}
-													url={url}
-													widget={previewWidget}
-												/>
-											);
-										case SUPPORTED_FEED_TYPES.HEADLINES_FEED:
-											return <HeadlinesWidget key={url} url={url} />;
-										case SUPPORTED_FEED_TYPES.BLOCKS_FEED:
-											return (
-												<BlocksWidget
-													key={url}
-													url={url}
-													widget={previewWidget}
-												/>
-											);
-										case SUPPORTED_FEED_TYPES.FACTS_FEED:
-											return <FactsWidget key={url} url={url} />;
-										case SUPPORTED_FEED_TYPES.LUGANO_FEED:
-											return <LuganoFeedWidget key={url} url={url} />;
-										default:
-											return !loading ? (
-												<FeedWidget
-													key={url}
-													url={url}
-													widget={previewWidget}
-												/>
-											) : (
-												<ThemedView
-													style={styles.previewLoading}
-													color="white08">
-													<Spinner />
-												</ThemedView>
-											);
-									}
-								})()}
-							</>
-						}
+							switch (config.type) {
+								case SUPPORTED_FEED_TYPES.PRICE_FEED:
+									return (
+										<PriceWidget key={url} url={url} widget={previewWidget} />
+									);
+								case SUPPORTED_FEED_TYPES.HEADLINES_FEED:
+									return <HeadlinesWidget key={url} url={url} />;
+								case SUPPORTED_FEED_TYPES.BLOCKS_FEED:
+									return (
+										<BlocksWidget key={url} url={url} widget={previewWidget} />
+									);
+								case SUPPORTED_FEED_TYPES.FACTS_FEED:
+									return <FactsWidget key={url} url={url} />;
+								case SUPPORTED_FEED_TYPES.LUGANO_FEED:
+									return <LuganoFeedWidget key={url} url={url} />;
+								default:
+									return !loading ? (
+										<FeedWidget key={url} url={url} widget={previewWidget} />
+									) : (
+										<ThemedView style={styles.previewLoading} color="white08">
+											<Spinner />
+										</ThemedView>
+									);
+							}
+						})()}
 
 						<View style={styles.buttonsContainer}>
 							{savedWidget && (

@@ -1,9 +1,15 @@
 import React, { memo, ReactElement, useEffect, useState } from 'react';
-import { View, StyleSheet, StyleProp, ViewStyle, Image } from 'react-native';
+import {
+	View,
+	StyleSheet,
+	StyleProp,
+	ViewStyle,
+	Image,
+	TouchableOpacity,
+} from 'react-native';
 
 import { Caption13M, Text01M, Text02M } from '../styles/text';
 import BaseFeedWidget from './BaseFeedWidget';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { openURL } from '../utils/helpers';
 
 import { useSlashfeed } from '../hooks/widgets';
