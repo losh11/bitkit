@@ -26,6 +26,7 @@ import FeedWidget from '../../components/FeedWidget';
 import FactsWidget from '../../components/FactsWidget';
 import Spinner from '../../components/Spinner';
 import type { RootStackScreenProps } from '../../navigation/types';
+import LuganoFeedWidget from '../../components/LuganoFeedWidget';
 
 const Widget = ({
 	navigation,
@@ -131,56 +132,40 @@ const Widget = ({
 							{t('widget_preview')}
 						</Caption13Up>
 
-						{loading && (
-							<ThemedView style={styles.previewLoading} color="white08">
-								<Spinner />
-							</ThemedView>
-						)}
+						{((): ReactElement => {
+							const previewWidget = {
+								type: config.type,
+								extras: settings.extras,
+								fields: config.fields.filter((f) => {
+									return settings.fields.includes(f.name);
+								}),
+							};
 
-						{!loading && (
-							<>
-								{((): ReactElement => {
-									const previewWidget = {
-										type: config.type,
-										extras: settings.extras,
-										fields: config.fields.filter((f) => {
-											return settings.fields.includes(f.name);
-										}),
-									};
-
-									switch (config.type) {
-										case SUPPORTED_FEED_TYPES.PRICE_FEED:
-											return (
-												<PriceWidget
-													key={url}
-													url={url}
-													widget={previewWidget}
-												/>
-											);
-										case SUPPORTED_FEED_TYPES.HEADLINES_FEED:
-											return <HeadlinesWidget key={url} url={url} />;
-										case SUPPORTED_FEED_TYPES.BLOCKS_FEED:
-											return (
-												<BlocksWidget
-													key={url}
-													url={url}
-													widget={previewWidget}
-												/>
-											);
-										case SUPPORTED_FEED_TYPES.FACTS_FEED:
-											return <FactsWidget key={url} url={url} />;
-										default:
-											return (
-												<FeedWidget
-													key={url}
-													url={url}
-													widget={previewWidget}
-												/>
-											);
-									}
-								})()}
-							</>
-						)}
+							switch (config.type) {
+								case SUPPORTED_FEED_TYPES.PRICE_FEED:
+									return (
+										<PriceWidget key={url} url={url} widget={previewWidget} />
+									);
+								case SUPPORTED_FEED_TYPES.HEADLINES_FEED:
+									return <HeadlinesWidget key={url} url={url} />;
+								case SUPPORTED_FEED_TYPES.BLOCKS_FEED:
+									return (
+										<BlocksWidget key={url} url={url} widget={previewWidget} />
+									);
+								case SUPPORTED_FEED_TYPES.FACTS_FEED:
+									return <FactsWidget key={url} url={url} />;
+								case SUPPORTED_FEED_TYPES.LUGANO_FEED:
+									return <LuganoFeedWidget key={url} url={url} />;
+								default:
+									return !loading ? (
+										<FeedWidget key={url} url={url} widget={previewWidget} />
+									) : (
+										<ThemedView style={styles.previewLoading} color="white08">
+											<Spinner />
+										</ThemedView>
+									);
+							}
+						})()}
 
 						<View style={styles.buttonsContainer}>
 							{savedWidget && (

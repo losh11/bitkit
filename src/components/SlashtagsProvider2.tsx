@@ -3,7 +3,8 @@ import { createContext } from 'react';
 import { useSelector } from 'react-redux';
 import b4a from 'b4a';
 import KeyChain from '@synonymdev/slashtags-keychain';
-import { Client } from '@synonymdev/web-relay/lib/client';
+import type { Client as IWebRelayClient } from '@synonymdev/web-relay';
+import Client from '@synonymdev/web-relay/lib/client';
 import SlashtagsProfile from '@synonymdev/slashtags-profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format, parse } from '@synonymdev/slashtags-url';
@@ -88,7 +89,7 @@ class Store {
 export const webRelayUrl = __WEB_RELAY__;
 const store = new Store('example1.db') as unknown as Client.Store;
 
-export let webRelayClient: Client;
+export let webRelayClient: IWebRelayClient;
 export let profile: SlashtagsProfile;
 
 export interface ISlashtagsContext2 {
