@@ -30,10 +30,13 @@ import {
 	BitcoinCircleIcon,
 	BitcoinSlantedIcon,
 	CopyIcon,
+	LightningCircleIcon,
 	LightningIcon,
+	PencileIcon,
 	ShareIcon,
+	UnifiedIcon,
 } from '../../../styles/icons';
-import { Caption13Up, Text02S } from '../../../styles/text';
+import { Caption13Up, Text01S, Text02S } from '../../../styles/text';
 import { updatePendingInvoice } from '../../../store/actions/metadata';
 import { createLightningInvoice } from '../../../store/actions/lightning';
 import { generateNewReceiveAddress } from '../../../store/actions/wallet';
@@ -49,6 +52,7 @@ import SafeAreaInset from '../../../components/SafeAreaInset';
 import Button from '../../../components/Button';
 import Tooltip from '../../../components/Tooltip';
 import Dot from '../../../components/SliderDots';
+import SwitchRow from '../../../components/SwitchRow';
 import {
 	addressTypeSelector,
 	selectedNetworkSelector,
@@ -65,19 +69,6 @@ const defaultTooltips = {
 	lightning: false,
 };
 
-const QrIcon = memo(
-	(): ReactElement => {
-		return (
-			<View style={styles.qrIconContainer}>
-				<View style={styles.qrIcon}>
-					<BitcoinCircleIcon color="bitcoin" width={50} height={50} />
-				</View>
-			</View>
-		);
-	},
-	() => true,
-);
-
 const ReceiveQR = ({
 	navigation,
 }: ReceiveScreenProps<'ReceiveQR'>): ReactElement => {
@@ -87,22 +78,31 @@ const ReceiveQR = ({
 	const carouselRef = useRef<ICarouselInstance>(null);
 	const qrRef = useRef<any>('');
 
-	const [loading, setLoading] = useState(true);
-	const [receiveAddress, setReceiveAddress] = useState('');
-	const [lightningInvoice, setLightningInvoice] = useState('');
-	const [showTooltip, setShowTooltip] = useState(defaultTooltips);
-	const [isSharing, setIsSharing] = useState(false);
-
 	const selectedWallet = useSelector(selectedWalletSelector);
 	const selectedNetwork = useSelector(selectedNetworkSelector);
 	const addressType = useSelector(addressTypeSelector);
-	const { id, amount, message, tags } = useSelector(receiveSelector);
+	const { id, amount, message, tags, jitOrder } = useSelector(receiveSelector);
 	const lightningBalance = useLightningBalance(false);
 	const receiveNavigationIsOpen = useSelector((state) =>
 		viewControllerIsOpenSelector(state, 'receiveNavigation'),
 	);
 
+	const jitInvoice = jitOrder?.invoice.request;
+
+	const [loading, setLoading] = useState(true);
+	const [receiveAddress, setReceiveAddress] = useState('');
+	const [lightningInvoice, setLightningInvoice] = useState('');
+	const [showTooltip, setShowTooltip] = useState(defaultTooltips);
+	const [isSharing, setIsSharing] = useState(false);
+	const [enableInstant, setEnableInstant] = useState(
+		!!jitInvoice || lightningBalance.localBalance > 0,
+	);
+
 	useBottomSheetBackPress('receiveNavigation');
+
+	useEffect(() => {
+		setEnableInstant(!!jitInvoice);
+	}, [jitInvoice]);
 
 	const getLightningInvoice = useCallback(async (): Promise<void> => {
 		if (
@@ -229,6 +229,15 @@ const ReceiveQR = ({
 		if (!receiveNavigationIsOpen) {
 			return '';
 		}
+
+		if (enableInstant && jitInvoice) {
+			return jitInvoice;
+		}
+
+		if (!enableInstant) {
+			return receiveAddress;
+		}
+
 		return getUnifiedUri({
 			address: receiveAddress,
 			amount,
@@ -237,6 +246,8 @@ const ReceiveQR = ({
 			lightning: lightningInvoice,
 		});
 	}, [
+		jitInvoice,
+		enableInstant,
 		amount,
 		lightningInvoice,
 		message,
@@ -244,20 +255,39 @@ const ReceiveQR = ({
 		receiveNavigationIsOpen,
 	]);
 
-	const handleCopy = (text: string, tooltipId: string): void => {
+	const onToggleInstant = (): void => {
+		if (!jitInvoice && lightningBalance.localBalance === 0) {
+			navigation.navigate('ReceiveAmount');
+		} else {
+			setEnableInstant(!enableInstant);
+		}
+	};
+
+	const onEdit = useCallback((): void => {
+		if (jitInvoice) {
+			navigation.navigate('ReceiveAmount');
+		} else {
+			navigation.navigate('ReceiveDetails', {
+				receiveAddress,
+				lightningInvoice,
+			});
+		}
+	}, [jitInvoice, lightningInvoice, receiveAddress, navigation]);
+
+	const onCopy = (text: string, tooltipId: string): void => {
 		Clipboard.setString(text);
 		setShowTooltip((prevState) => ({ ...prevState, [tooltipId]: true }));
 		setTimeout(() => setShowTooltip(defaultTooltips), 1500);
 	};
 
-	const handleCopyQrCode = useCallback((): void => {
+	const onCopyQrCode = useCallback((): void => {
 		console.log('TODO: copy QR code as image');
 		// not implemented in upstream yet
 		// https://github.com/react-native-clipboard/clipboard/issues/6
 		// Clipboard.setString(qrRef.current);
 	}, []);
 
-	const handleShare = useCallback(
+	const onShare = useCallback(
 		async (text: string, imageData?: string): Promise<void> => {
 			setIsSharing(true);
 
@@ -285,9 +315,29 @@ const ReceiveQR = ({
 		[t],
 	);
 
-	const qrMaxHeight = dimensions.height / 2.5;
-	const qrMaxWidth = dimensions.width - 16 * 4;
+	const qrMaxHeight = dimensions.height / 2.2;
+	const qrMaxWidth = dimensions.width - 16 * 2;
 	const qrSize = Math.min(qrMaxWidth, qrMaxHeight);
+
+	const QrIcon = useCallback((): ReactElement => {
+		return (
+			<View style={styles.qrIconContainer}>
+				<View style={styles.qrIcon}>
+					{enableInstant && jitInvoice ? (
+						<LightningCircleIcon width={50} height={50} />
+					) : (
+						<>
+							{enableInstant ? (
+								<UnifiedIcon width={50} height={50} />
+							) : (
+								<BitcoinCircleIcon color="bitcoin" width={50} height={50} />
+							)}
+						</>
+					)}
+				</View>
+			</View>
+		);
+	}, [jitInvoice, enableInstant]);
 
 	const Slide1 = useCallback((): ReactElement => {
 		return (
@@ -296,10 +346,10 @@ const ReceiveQR = ({
 					style={styles.qrCode}
 					color="white"
 					activeOpacity={1}
-					onPress={(): void => handleCopy(uri, 'unified')}
-					onLongPress={handleCopyQrCode}
+					accessibilityLabel={uri}
 					testID="QRCode"
-					accessibilityLabel={uri}>
+					onPress={(): void => onCopy(uri, 'unified')}
+					onLongPress={onCopyQrCode}>
 					<QRCode
 						value={uri}
 						size={qrSize}
@@ -320,10 +370,18 @@ const ReceiveQR = ({
 				<View style={styles.actions}>
 					<Button
 						style={styles.actionButton}
+						icon={<PencileIcon width={18} color="brand" />}
+						text={t('edit')}
+						testID="SpecifyInvoiceButton"
+						onPress={onEdit}
+					/>
+					<View style={styles.buttonSpacer} />
+					<Button
+						style={styles.actionButton}
 						icon={<CopyIcon width={18} color="brand" />}
 						text={t('copy')}
 						testID="ReceiveCopyQR"
-						onPress={(): void => handleCopy(uri, 'unified')}
+						onPress={(): void => onCopy(uri, 'unified')}
 					/>
 					<View style={styles.buttonSpacer} />
 					<Button
@@ -334,7 +392,7 @@ const ReceiveQR = ({
 						onPress={(): void => {
 							qrRef.current?.toDataURL((data: string) => {
 								const imageData = data.replace(/(\r\n|\n|\r)/gm, '');
-								handleShare(uri, imageData);
+								onShare(uri, imageData);
 							});
 						}}
 					/>
@@ -342,10 +400,12 @@ const ReceiveQR = ({
 			</View>
 		);
 	}, [
-		uri,
-		handleCopyQrCode,
-		handleShare,
+		QrIcon,
+		onEdit,
+		onCopyQrCode,
+		onShare,
 		isSharing,
+		uri,
 		qrSize,
 		showTooltip.unified,
 		t,
@@ -384,7 +444,7 @@ const ReceiveQR = ({
 								icon={<CopyIcon width={18} color="brand" />}
 								text={t('copy')}
 								onPress={(): void => {
-									handleCopy(receiveAddress, 'onchain');
+									onCopy(receiveAddress, 'onchain');
 								}}
 							/>
 							<View style={styles.buttonSpacer} />
@@ -394,13 +454,13 @@ const ReceiveQR = ({
 								icon={<ShareIcon width={18} color="brand" />}
 								disabled={isSharing}
 								onPress={(): void => {
-									handleShare(receiveAddress);
+									onShare(receiveAddress);
 								}}
 							/>
 						</View>
 					</View>
 
-					{lightningInvoice !== '' && (
+					{enableInstant && lightningInvoice !== '' && (
 						<>
 							<View style={styles.divider} />
 							<View style={styles.invoice}>
@@ -433,20 +493,20 @@ const ReceiveQR = ({
 								<View style={styles.actions}>
 									<Button
 										style={styles.actionButton}
-										icon={<CopyIcon width={18} color="brand" />}
+										icon={<CopyIcon width={18} color="purple" />}
 										text={t('copy')}
 										onPress={(): void => {
-											handleCopy(lightningInvoice, 'lightning');
+											onCopy(lightningInvoice, 'lightning');
 										}}
 									/>
 									<View style={styles.buttonSpacer} />
 									<Button
 										style={styles.actionButton}
 										text={t('share')}
-										icon={<ShareIcon width={18} color="brand" />}
+										icon={<ShareIcon width={18} color="purple" />}
 										disabled={isSharing}
 										onPress={(): void => {
-											handleShare(lightningInvoice);
+											onShare(lightningInvoice);
 										}}
 									/>
 								</View>
@@ -459,8 +519,9 @@ const ReceiveQR = ({
 	}, [
 		lightningInvoice,
 		receiveAddress,
+		enableInstant,
 		showTooltip,
-		handleShare,
+		onShare,
 		isSharing,
 		t,
 	]);
@@ -487,7 +548,7 @@ const ReceiveQR = ({
 						style={styles.carousel}
 						data={slides}
 						width={dimensions.width}
-						height={qrMaxHeight + 110}
+						height={qrMaxHeight + 80}
 						loop={false}
 						panGestureHandlerProps={{ activeOffsetX: [-10, 10] }}
 						testID="ReceiveSlider"
@@ -513,17 +574,13 @@ const ReceiveQR = ({
 			)}
 
 			<View style={styles.buttonContainer}>
-				<Button
-					size="large"
-					text={t('receive_specify')}
-					testID="SpecifyInvoiceButton"
-					onPress={(): void => {
-						navigation.navigate('ReceiveDetails', {
-							receiveAddress,
-							lightningInvoice,
-						});
-					}}
-				/>
+				<SwitchRow
+					color="purple"
+					isEnabled={enableInstant}
+					showDivider={false}
+					onPress={onToggleInstant}>
+					<Text01S>{t('receive_instantly')}</Text01S>
+				</SwitchRow>
 			</View>
 			<SafeAreaInset type="bottom" minPadding={16} />
 		</View>

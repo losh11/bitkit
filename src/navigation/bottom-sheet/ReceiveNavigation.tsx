@@ -10,6 +10,8 @@ import BottomSheetWrapper from '../../components/BottomSheetWrapper';
 import ReceiveQR from '../../screens/Wallets/Receive/ReceiveQR';
 import ReceiveDetails from '../../screens/Wallets/Receive/ReceiveDetails';
 import Tags from '../../screens/Wallets/Receive/Tags';
+import ReceiveAmount from '../../screens/Wallets/Receive/ReceiveAmount';
+import ReceiveConnect from '../../screens/Wallets/Receive/ReceiveConnect';
 import { useSnapPoints } from '../../hooks/bottomSheet';
 import { NavigationContainer } from '../../styles/components';
 import { viewControllerIsOpenSelector } from '../../store/reselect/ui';
@@ -23,6 +25,8 @@ export type ReceiveStackParamList = {
 	ReceiveQR: undefined;
 	ReceiveDetails: { receiveAddress: string; lightningInvoice?: string };
 	Tags: undefined;
+	ReceiveAmount: undefined;
+	ReceiveConnect: undefined;
 };
 
 const Stack = createNativeStackNavigator<ReceiveStackParamList>();
@@ -50,6 +54,8 @@ const ReceiveNavigation = (): ReactElement => {
 					<Stack.Screen name="ReceiveQR" component={ReceiveQR} />
 					<Stack.Screen name="ReceiveDetails" component={ReceiveDetails} />
 					<Stack.Screen name="Tags" component={Tags} />
+					<Stack.Screen name="ReceiveAmount" component={ReceiveAmount} />
+					<Stack.Screen name="ReceiveConnect" component={ReceiveConnect} />
 				</Stack.Navigator>
 			</NavigationContainer>
 		</BottomSheetWrapper>

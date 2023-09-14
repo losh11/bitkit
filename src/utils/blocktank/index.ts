@@ -4,6 +4,7 @@ import {
 	BtPaymentState,
 	IBtInfo,
 	IBtOrder,
+	ICJitEntry,
 } from '@synonymdev/blocktank-lsp-http-client';
 
 import { err, ok, Result } from '@synonymdev/result';
@@ -100,6 +101,44 @@ export const createOrder = async (
 		if (buyRes?.id) {
 			await refreshOrder(buyRes.id);
 		}
+		return ok(buyRes);
+	} catch (e) {
+		console.log(e);
+		return err(e);
+	}
+};
+
+/**
+ * @param {ICreateOrderRequest} data
+ * @returns {Promise<Result<ICJitEntry>>}
+ */
+export const createCjitOrder = async (data: {
+	invoiceSat: number;
+	invoiceDescription: string;
+	channelExpiryWeeks: number;
+	couponCode?: string;
+}): Promise<Result<ICJitEntry>> => {
+	try {
+		const nodeIdResult = await getNodeId();
+		if (nodeIdResult.isErr()) {
+			return err(nodeIdResult.error.message);
+		}
+
+		// Ensure we're properly connected to the Blocktank node prior to buying a channel.
+		const addPeersRes = await addPeers();
+		if (addPeersRes.isErr()) {
+			return err('Unable to add Blocktank node as a peer at this time.');
+		}
+
+		const buyRes = await bt.createCJitEntry(
+			data.invoiceSat * 2,
+			data.invoiceSat,
+			data.invoiceDescription,
+			nodeIdResult.value,
+			data.channelExpiryWeeks,
+			data.couponCode,
+		);
+
 		return ok(buyRes);
 	} catch (e) {
 		console.log(e);

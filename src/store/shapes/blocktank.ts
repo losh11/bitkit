@@ -21,7 +21,7 @@ export const defaultBlocktankInfoShape: IBtInfo = {
 		minExpiryWeeks: 1,
 		maxExpiryWeeks: 12,
 		minPaymentConfirmations: 0,
-		minPaymentConfirmationsClientBalance: 1,
+		minHighRiskPaymentConfirmations: 1,
 		max0ConfClientBalanceSat: 856487,
 		maxClientBalanceLspBalanceRatio: 1,
 	},
@@ -66,6 +66,7 @@ export const defaultOrderResponse: IBtOrder = {
 		onchain: {
 			address: '',
 			confirmedSat: 0,
+			requiredConfirmations: 1,
 			transactions: [],
 		},
 	},
