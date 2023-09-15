@@ -46,6 +46,8 @@ import {
 	addMetaSlashTagsUrlTag,
 } from '../../../store/actions/metadata';
 import useColors from '../../../hooks/colors';
+import useDisplayValues from '../../../hooks/displayValues';
+import { useLightningBalance } from '../../../hooks/lightning';
 import { FeeText } from '../../../store/shapes/fees';
 import { EFeeId } from '../../../store/types/fees';
 import {
@@ -58,7 +60,6 @@ import { refreshWallet } from '../../../utils/wallet';
 import type { SendScreenProps } from '../../../navigation/types';
 import SafeAreaInset from '../../../components/SafeAreaInset';
 import Dialog from '../../../components/Dialog';
-import { useLightningBalance } from '../../../hooks/lightning';
 import Biometrics from '../../../components/Biometrics';
 import Button from '../../../components/Button';
 import Store from '../../../store/types';
@@ -77,7 +78,6 @@ import {
 import { onChainFeesSelector } from '../../../store/reselect/fees';
 import { updateOnChainActivityList } from '../../../store/actions/activity';
 import { truncate } from '../../../utils/helpers';
-import Money from '../../../components/Money';
 import { EUnit } from '../../../store/types/wallet';
 import AmountToggle from '../../../components/AmountToggle';
 import LightningSyncing from '../../../components/LightningSyncing';
@@ -348,6 +348,8 @@ const ReviewAndSend = ({
 		selectedWallet,
 		selectedNetwork,
 	]);
+
+	const fiatTransactionFee = useDisplayValues(feeSats);
 
 	const runCreateTxMethods = useCallback((): void => {
 		if (transaction.lightningInvoice) {
@@ -627,8 +629,11 @@ const ReviewAndSend = ({
 								value={
 									<View style={styles.fee}>
 										{feeIcon}
-										<Text02M>{t(`fee:${selectedFeeId}.title`)} </Text02M>
-										<Money sats={feeSats} size="text02m" />
+										<Text02M>
+											{t(`fee:${selectedFeeId}.title`)} (
+											{fiatTransactionFee.fiatSymbol}
+											{fiatTransactionFee.fiatFormatted})
+										</Text02M>
 										<PencileIcon height={12} width={22} />
 									</View>
 								}
