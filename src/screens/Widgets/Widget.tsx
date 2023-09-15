@@ -4,7 +4,11 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import isEqual from 'lodash.isequal';
 
-import { View as ThemedView, TouchableOpacity } from '../../styles/components';
+import {
+	ScrollView,
+	View as ThemedView,
+	TouchableOpacity,
+} from '../../styles/components';
 import { Caption13Up, Headline, Text01S } from '../../styles/text';
 import { ChevronRight, QuestionMarkIcon } from '../../styles/icons';
 import Store from '../../store/types';
@@ -24,9 +28,9 @@ import HeadlinesWidget from '../../components/HeadlinesWidget';
 import BlocksWidget from '../../components/BlocksWidget';
 import FeedWidget from '../../components/FeedWidget';
 import FactsWidget from '../../components/FactsWidget';
+import LuganoFeedWidget from '../../components/LuganoFeedWidget';
 import Spinner from '../../components/Spinner';
 import type { RootStackScreenProps } from '../../navigation/types';
-import LuganoFeedWidget from '../../components/LuganoFeedWidget';
 
 const Widget = ({
 	navigation,
@@ -86,7 +90,7 @@ const Widget = ({
 			{!config ? (
 				<HourglassSpinner />
 			) : (
-				<View style={styles.content}>
+				<ScrollView contentContainerStyle={styles.content}>
 					<View style={styles.header}>
 						<View style={styles.headerText}>
 							<Headline numberOfLines={2}>{config.name}</Headline>
@@ -107,7 +111,8 @@ const Widget = ({
 						</Text01S>
 					)}
 
-					{config.fields.length > 1 && (
+					{(config.type === SUPPORTED_FEED_TYPES.PRICE_FEED ||
+						config.type === SUPPORTED_FEED_TYPES.BLOCKS_FEED) && (
 						<TouchableOpacity
 							style={styles.item}
 							activeOpacity={0.6}
@@ -190,7 +195,7 @@ const Widget = ({
 							/>
 						</View>
 					</View>
-				</View>
+				</ScrollView>
 			)}
 			<SafeAreaInset type="bottom" minPadding={16} />
 		</ThemedView>
@@ -202,7 +207,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	content: {
-		flex: 1,
+		flexGrow: 1,
 		paddingHorizontal: 16,
 	},
 	header: {
