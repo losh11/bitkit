@@ -62,7 +62,7 @@ export type SendStackParamList = {
 const Stack = createNativeStackNavigator<SendStackParamList>();
 const screenOptions: NativeStackNavigationOptions = {
 	headerShown: false,
-	...(__E2E__ ? { animation: 'none', animationDuration: 0 } : {}),
+	animation: __E2E__ ? 'none' : 'default',
 };
 
 /**
