@@ -32,7 +32,7 @@ export const getDefaultSettings = (config?: SlashFeedJSON): TWidgetSettings => {
 		}
 		if (config.type === SUPPORTED_FEED_TYPES.BLOCKS_FEED) {
 			return {
-				fields: ['Block', 'Date', 'Time'],
+				fields: ['Block', 'Time', 'Date'],
 				extras: { showSource: false },
 			};
 		}
