@@ -26,6 +26,7 @@ import {
 import { setGeoBlock, updateUser } from '../../store/actions/user';
 import { refreshWallet } from '../wallet';
 import { BtOpenChannelState } from '@synonymdev/blocktank-lsp-http-client/dist/shared/BtOpenChannelState';
+import { DEFAULT_CHANNEL_DURATION } from '../../screens/Lightning/CustomConfirm';
 
 const bt = new BlocktankClient();
 
@@ -112,7 +113,14 @@ export const createOrder = async (
  * @param {ICreateOrderRequest} data
  * @returns {Promise<Result<ICJitEntry>>}
  */
-export const createCjitOrder = async (data: {
+export const createCJitEntry = async ({
+	channelSizeSat,
+	invoiceSat,
+	invoiceDescription,
+	channelExpiryWeeks = DEFAULT_CHANNEL_DURATION,
+	couponCode = 'bitkit',
+}: {
+	channelSizeSat: number;
 	invoiceSat: number;
 	invoiceDescription: string;
 	channelExpiryWeeks: number;
@@ -123,6 +131,7 @@ export const createCjitOrder = async (data: {
 		if (nodeIdResult.isErr()) {
 			return err(nodeIdResult.error.message);
 		}
+		const nodeId = nodeIdResult.value;
 
 		// Ensure we're properly connected to the Blocktank node prior to buying a channel.
 		const addPeersRes = await addPeers();
@@ -130,21 +139,31 @@ export const createCjitOrder = async (data: {
 			return err('Unable to add Blocktank node as a peer at this time.');
 		}
 
-		const buyRes = await bt.createCJitEntry(
-			data.invoiceSat * 2,
-			data.invoiceSat,
-			data.invoiceDescription,
-			nodeIdResult.value,
-			data.channelExpiryWeeks,
-			data.couponCode,
+		const createRes = await bt.createCJitEntry(
+			channelSizeSat,
+			invoiceSat,
+			invoiceDescription,
+			nodeId,
+			channelExpiryWeeks,
+			couponCode,
 		);
 
-		return ok(buyRes);
+		return ok(createRes);
 	} catch (e) {
 		console.log(e);
 		return err(e);
 	}
 };
+
+/**
+ * NOT CURRENTLY USED
+ * Retrieves a CJIT Entry using the provided entryId.
+ * @param {string} entryId
+ * @returns {Promise<ICJitEntry>}
+ */
+// export const getCjitEntry = async (entryId: string): Promise<ICJitEntry> => {
+// 	return await bt.getCJitEntry(entryId);
+// };
 
 /**
  * @param {string} orderId

@@ -1,4 +1,4 @@
-import React, { ReactElement, memo, useState } from 'react';
+import React, { ReactElement, memo, useState, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -17,9 +17,17 @@ import { useCurrency } from '../../../hooks/displayValues';
 import { updateInvoice } from '../../../store/actions/receive';
 import { receiveSelector } from '../../../store/reselect/receive';
 import { getNumberPadText } from '../../../utils/numberpad';
-import { createCjitOrder } from '../../../utils/blocktank';
+import { createCJitEntry } from '../../../utils/blocktank';
 import { showToast } from '../../../utils/notifications';
 import type { ReceiveScreenProps } from '../../../navigation/types';
+import { DEFAULT_CHANNEL_DURATION } from '../../Lightning/CustomConfirm';
+import { EUnit } from '../../../store/types/wallet';
+import { convertToSats } from '../../../utils/conversion';
+import {
+	MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD,
+	MINIMUM_CLIENT_CHANNEL_SIZE,
+} from '../../../store/shapes/blocktank';
+import { primaryUnitSelector } from '../../../store/reselect/settings';
 
 const ReceiveAmount = ({
 	navigation,
@@ -29,6 +37,7 @@ const ReceiveAmount = ({
 	const [nextUnit, switchUnit] = useSwitchUnit();
 	const [isLoading, setIsLoading] = useState(false);
 	const invoice = useSelector(receiveSelector);
+	const unit = useSelector(primaryUnitSelector);
 
 	const onChangeUnit = (): void => {
 		const result = getNumberPadText(invoice.amount, nextUnit);
@@ -36,37 +45,65 @@ const ReceiveAmount = ({
 		switchUnit();
 	};
 
+	const maxChannelSats = useMemo(() => {
+		return convertToSats(MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD, EUnit.fiat);
+	}, []);
+	const maxInvoiceSats = useMemo(() => {
+		return Math.round(maxChannelSats / 2);
+	}, [maxChannelSats]);
+
 	const onContinue = async (): Promise<void> => {
 		setIsLoading(true);
-
-		const orderResponse = await createCjitOrder({
-			invoiceSat: invoice.amount,
-			invoiceDescription: 'test',
-			channelExpiryWeeks: 10,
-		});
-
-		if (orderResponse.isErr()) {
+		// Ensure the invoice is greater than MINIMUM_CLIENT_CHANNEL_SIZE
+		if (invoice.amount < MINIMUM_CLIENT_CHANNEL_SIZE) {
+			const txt = getNumberPadText(MINIMUM_CLIENT_CHANNEL_SIZE, unit);
 			setIsLoading(false);
-
-			// TODO: parse error
-			console.log({ error: orderResponse.error.message });
-
 			showToast({
 				type: 'error',
-				title: 'Error',
-				description: 'orderResponse.error',
+				title: `Below Minimum Amount of ${txt}`,
+				description: `Invoice must be at least ${txt}`,
+				autoHide: true,
 			});
 			return;
 		}
-
-		const order = orderResponse.value;
-		console.log({ order });
-
+		// Ensure the invoice is less than maxInvoiceSats
+		if (invoice.amount > maxInvoiceSats) {
+			const txt = getNumberPadText(maxInvoiceSats, unit);
+			setIsLoading(false);
+			showToast({
+				type: 'error',
+				title: `Above Maximum Amount of ${txt}`,
+				description: `Invoice must be less than ${txt}`,
+				autoHide: true,
+			});
+			return;
+		}
+		const cJitEntryResponse = await createCJitEntry({
+			channelSizeSat: maxChannelSats,
+			invoiceSat: invoice.amount,
+			invoiceDescription: invoice.message,
+			channelExpiryWeeks: DEFAULT_CHANNEL_DURATION,
+			couponCode: 'bitkit',
+		});
+		if (cJitEntryResponse.isErr()) {
+			setIsLoading(false);
+			console.log({ error: cJitEntryResponse.error.message });
+			showToast({
+				type: 'error',
+				title: 'CJIT Error',
+				description: cJitEntryResponse.error.message,
+			});
+			return;
+		}
+		const order = cJitEntryResponse.value;
 		updateInvoice({ jitOrder: order });
 		navigation.navigate('ReceiveConnect');
-
 		setIsLoading(false);
 	};
+
+	const continueDisabled =
+		invoice.amount < MINIMUM_CLIENT_CHANNEL_SIZE ||
+		invoice.amount > maxInvoiceSats;
 
 	return (
 		<GradientView style={styles.container}>
@@ -112,6 +149,7 @@ const ReceiveAmount = ({
 							loading={isLoading}
 							testID="ReceiveAmountContinue"
 							onPress={onContinue}
+							disabled={continueDisabled}
 						/>
 					</View>
 				</View>

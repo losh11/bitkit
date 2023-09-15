@@ -16,6 +16,7 @@ import useDisplayValues from '../../../hooks/displayValues';
 import { useLightningBalance } from '../../../hooks/lightning';
 import { receiveSelector } from '../../../store/reselect/receive';
 import type { ReceiveScreenProps } from '../../../navigation/types';
+import { addCJitEntry } from '../../../store/actions/blocktank';
 
 const imageSrc = require('../../../assets/illustrations/lightning.png');
 
@@ -32,6 +33,7 @@ const ReceiveConnect = ({
 	const displayFee = useDisplayValues(order.feeSat);
 
 	const onContinue = (): void => {
+		addCJitEntry(order).then();
 		navigation.navigate('ReceiveQR');
 	};
 

@@ -6,6 +6,9 @@ import {
 	IBtInfo,
 } from '@synonymdev/blocktank-lsp-http-client';
 
+export const MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD = 995;
+export const MINIMUM_CLIENT_CHANNEL_SIZE = 20000;
+
 export const defaultBlocktankInfoShape: IBtInfo = {
 	version: 2,
 	nodes: [
@@ -23,7 +26,6 @@ export const defaultBlocktankInfoShape: IBtInfo = {
 		minPaymentConfirmations: 0,
 		minHighRiskPaymentConfirmations: 1,
 		max0ConfClientBalanceSat: 856487,
-		maxClientBalanceLspBalanceRatio: 1,
 	},
 };
 
@@ -31,6 +33,7 @@ export const defaultBlocktankShape: IBlocktank = {
 	orders: [],
 	paidOrders: {},
 	info: defaultBlocktankInfoShape,
+	cJitEntries: [],
 };
 
 export const defaultOrderResponse: IBtOrder = {

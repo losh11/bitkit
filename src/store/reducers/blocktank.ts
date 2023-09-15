@@ -50,6 +50,12 @@ const blocktank = (
 				},
 			};
 
+		case actions.ADD_CJIT_ENTRY:
+			return {
+				...state,
+				cJitEntries: [...state.cJitEntries, action.payload],
+			};
+
 		case actions.UPDATE_BLOCKTANK:
 			return {
 				...state,

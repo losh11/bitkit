@@ -38,6 +38,7 @@ import {
 	BtOrderState,
 	BtPaymentState,
 	IBtOrder,
+	ICJitEntry,
 } from '@synonymdev/blocktank-lsp-http-client';
 
 const dispatch = getDispatch();
@@ -147,6 +148,24 @@ export const updateOrder = async (
 		payload: order,
 	});
 	return ok(order);
+};
+
+/**
+ * Retrieves and updates a given blocktank order by id.
+ * @param {ICJitEntry} cJitEntry
+ * @returns {Promise<Result<IBtOrder>>}
+ */
+export const addCJitEntry = async (
+	cJitEntry: ICJitEntry,
+): Promise<Result<ICJitEntry>> => {
+	if (!cJitEntry) {
+		return err('No cJitEntry provided.');
+	}
+	dispatch({
+		type: actions.ADD_CJIT_ENTRY,
+		payload: cJitEntry,
+	});
+	return ok(cJitEntry);
 };
 
 /**

@@ -188,6 +188,15 @@ const migrations = {
 			},
 		};
 	},
+	19: (state): PersistedState => {
+		return {
+			...state,
+			blocktank: {
+				...state.blocktank,
+				cJitEntries: [],
+			},
+		};
+	},
 };
 
 export default migrations;

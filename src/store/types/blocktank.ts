@@ -1,6 +1,7 @@
 import {
 	IBtInfo,
 	IBtOrder,
+	ICJitEntry,
 	ICreateOrderOptions,
 } from '@synonymdev/blocktank-lsp-http-client';
 
@@ -8,6 +9,7 @@ export interface IBlocktank {
 	orders: IBtOrder[];
 	paidOrders: TPaidBlocktankOrders;
 	info: IBtInfo;
+	cJitEntries: ICJitEntry[];
 }
 
 export type TPaidBlocktankOrders = {

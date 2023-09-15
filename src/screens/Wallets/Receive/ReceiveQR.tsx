@@ -60,6 +60,7 @@ import {
 } from '../../../store/reselect/wallet';
 import { receiveSelector } from '../../../store/reselect/receive';
 import { ReceiveScreenProps } from '../../../navigation/types';
+import { isGeoBlockedSelector } from '../../../store/reselect/user';
 
 type Slide = () => ReactElement;
 
@@ -81,6 +82,7 @@ const ReceiveQR = ({
 	const selectedWallet = useSelector(selectedWalletSelector);
 	const selectedNetwork = useSelector(selectedNetworkSelector);
 	const addressType = useSelector(addressTypeSelector);
+	const isGeoBlocked = useSelector(isGeoBlockedSelector);
 	const { id, amount, message, tags, jitOrder } = useSelector(receiveSelector);
 	const lightningBalance = useLightningBalance(false);
 	const receiveNavigationIsOpen = useSelector((state) =>
@@ -101,8 +103,8 @@ const ReceiveQR = ({
 	useBottomSheetBackPress('receiveNavigation');
 
 	useEffect(() => {
-		setEnableInstant(!!jitInvoice);
-	}, [jitInvoice]);
+		setEnableInstant(!!jitInvoice || lightningBalance.localBalance > 0);
+	}, [jitInvoice, lightningBalance.localBalance]);
 
 	const getLightningInvoice = useCallback(async (): Promise<void> => {
 		if (
@@ -256,7 +258,7 @@ const ReceiveQR = ({
 	]);
 
 	const onToggleInstant = (): void => {
-		if (!jitInvoice && lightningBalance.localBalance === 0) {
+		if (!isGeoBlocked && !jitInvoice && lightningBalance.localBalance === 0) {
 			navigation.navigate('ReceiveAmount');
 		} else {
 			setEnableInstant(!enableInstant);
@@ -318,6 +320,10 @@ const ReceiveQR = ({
 	const qrMaxHeight = dimensions.height / 2.2;
 	const qrMaxWidth = dimensions.width - 16 * 2;
 	const qrSize = Math.min(qrMaxWidth, qrMaxHeight);
+
+	const displayReceiveInstantlySwitch = useMemo((): boolean => {
+		return !(isGeoBlocked && !lightningBalance.remoteBalance);
+	}, [isGeoBlocked, lightningBalance.remoteBalance]);
 
 	const QrIcon = useCallback((): ReactElement => {
 		return (
@@ -573,15 +579,17 @@ const ReceiveQR = ({
 				</View>
 			)}
 
-			<View style={styles.buttonContainer}>
-				<SwitchRow
-					color="purple"
-					isEnabled={enableInstant}
-					showDivider={false}
-					onPress={onToggleInstant}>
-					<Text01S>{t('receive_instantly')}</Text01S>
-				</SwitchRow>
-			</View>
+			{displayReceiveInstantlySwitch && (
+				<View style={styles.buttonContainer}>
+					<SwitchRow
+						color="purple"
+						isEnabled={enableInstant}
+						showDivider={false}
+						onPress={onToggleInstant}>
+						<Text01S>{t('receive_instantly')}</Text01S>
+					</SwitchRow>
+				</View>
+			)}
 			<SafeAreaInset type="bottom" minPadding={16} />
 		</View>
 	);
