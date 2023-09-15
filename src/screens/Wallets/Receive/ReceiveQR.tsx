@@ -258,7 +258,7 @@ const ReceiveQR = ({
 	]);
 
 	const onToggleInstant = (): void => {
-		if (!isGeoBlocked && !jitInvoice && lightningBalance.localBalance === 0) {
+		if (!isGeoBlocked && !jitInvoice && lightningBalance.remoteBalance === 0) {
 			navigation.navigate('ReceiveAmount');
 		} else {
 			setEnableInstant(!enableInstant);
