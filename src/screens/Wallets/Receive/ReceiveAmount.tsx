@@ -28,6 +28,7 @@ import {
 	MINIMUM_CLIENT_CHANNEL_SIZE,
 } from '../../../store/shapes/blocktank';
 import { primaryUnitSelector } from '../../../store/reselect/settings';
+import { blocktankInfoSelector } from '../../../store/reselect/blocktank';
 
 const ReceiveAmount = ({
 	navigation,
@@ -38,6 +39,7 @@ const ReceiveAmount = ({
 	const [isLoading, setIsLoading] = useState(false);
 	const invoice = useSelector(receiveSelector);
 	const unit = useSelector(primaryUnitSelector);
+	const blocktank = useSelector(blocktankInfoSelector);
 
 	const onChangeUnit = (): void => {
 		const result = getNumberPadText(invoice.amount, nextUnit);
@@ -46,10 +48,14 @@ const ReceiveAmount = ({
 	};
 
 	const maxChannelSats = useMemo(() => {
-		return convertToSats(MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD, EUnit.fiat);
-	}, []);
+		return (
+			blocktank.options?.maxChannelSizeSat ??
+			convertToSats(MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD, EUnit.fiat)
+		);
+	}, [blocktank.options?.maxChannelSizeSat]);
 	const maxInvoiceSats = useMemo(() => {
-		return Math.round(maxChannelSats / 2);
+		// Subtract from max to keep a buffer for dust
+		return maxChannelSats - MINIMUM_CLIENT_CHANNEL_SIZE;
 	}, [maxChannelSats]);
 
 	const onContinue = async (): Promise<void> => {

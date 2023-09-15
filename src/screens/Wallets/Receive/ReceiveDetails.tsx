@@ -40,6 +40,17 @@ import {
 	removePendingInvoice,
 	updatePendingInvoice,
 } from '../../../store/actions/metadata';
+import {
+	MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD,
+	MINIMUM_CLIENT_CHANNEL_SIZE,
+} from '../../../store/shapes/blocktank';
+import { createCJitEntry } from '../../../utils/blocktank';
+import { DEFAULT_CHANNEL_DURATION } from '../../Lightning/CustomConfirm';
+import { convertToSats } from '../../../utils/conversion';
+import { EUnit } from '../../../store/types/wallet';
+import { blocktankInfoSelector } from '../../../store/reselect/blocktank';
+import { isGeoBlockedSelector } from '../../../store/reselect/user';
+import { useLightningBalance } from '../../../hooks/lightning';
 
 const imageSrc = require('../../../assets/illustrations/coin-stack-4.png');
 
@@ -55,6 +66,9 @@ const ReceiveDetails = ({
 	const invoice = useSelector(receiveSelector);
 	const { fiatTicker } = useCurrency();
 	const { receiveAddress, lightningInvoice } = route.params;
+	const blocktank = useSelector(blocktankInfoSelector);
+	const lightningBalance = useLightningBalance(false);
+	const isGeoBlocked = useSelector(isGeoBlockedSelector);
 
 	const onChangeUnit = (): void => {
 		const result = getNumberPadText(invoice.amount, nextUnit);
@@ -62,14 +76,55 @@ const ReceiveDetails = ({
 		switchUnit();
 	};
 
+	// Determines if a CJIT entry can and should be created for the given invoice.
+	const createCJitIfNeeded = useCallback(async () => {
+		// Return if geo-blocked or if we have a large enough remote balance to satisfy the invoice.
+		if (isGeoBlocked || lightningBalance.remoteBalance >= invoice.amount) {
+			return;
+		}
+		const maxChannelSats =
+			blocktank.options?.maxChannelSizeSat ??
+			convertToSats(MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD, EUnit.fiat);
+		// Subtract from max to keep a buffer for dust
+		const maxInvoiceSats = maxChannelSats - MINIMUM_CLIENT_CHANNEL_SIZE;
+		// Ensure the CJIT entry is within an acceptable range.
+		if (
+			invoice.amount >= MINIMUM_CLIENT_CHANNEL_SIZE &&
+			invoice.amount <= maxInvoiceSats
+		) {
+			const cJitEntryResponse = await createCJitEntry({
+				channelSizeSat: maxChannelSats,
+				invoiceSat: invoice.amount,
+				invoiceDescription: invoice.message,
+				channelExpiryWeeks: DEFAULT_CHANNEL_DURATION,
+				couponCode: 'bitkit',
+			});
+			if (cJitEntryResponse.isErr()) {
+				console.log({ error: cJitEntryResponse.error.message });
+				return;
+			}
+			const order = cJitEntryResponse.value;
+			updateInvoice({ jitOrder: order });
+			navigation.navigate('ReceiveConnect');
+		}
+	}, [
+		blocktank.options?.maxChannelSizeSat,
+		invoice.amount,
+		invoice.message,
+		isGeoBlocked,
+		lightningBalance.remoteBalance,
+		navigation,
+	]);
+
 	const onNavigateBack = useCallback(async () => {
 		await Keyboard.dismiss();
 		navigation.navigate('ReceiveQR');
 	}, [navigation]);
 
-	const onContinue = useCallback(() => {
+	const onContinue = useCallback(async () => {
+		await createCJitIfNeeded();
 		setShowNumberPad(false);
-	}, []);
+	}, [createCJitIfNeeded]);
 
 	const onNumberPadPress = (): void => {
 		if (showNumberPad) {

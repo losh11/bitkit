@@ -97,14 +97,14 @@ const ReceiveQR = ({
 	const [showTooltip, setShowTooltip] = useState(defaultTooltips);
 	const [isSharing, setIsSharing] = useState(false);
 	const [enableInstant, setEnableInstant] = useState(
-		!!jitInvoice || lightningBalance.localBalance > 0,
+		!!jitInvoice || lightningBalance.remoteBalance > 0,
 	);
 
 	useBottomSheetBackPress('receiveNavigation');
 
 	useEffect(() => {
-		setEnableInstant(!!jitInvoice || lightningBalance.localBalance > 0);
-	}, [jitInvoice, lightningBalance.localBalance]);
+		setEnableInstant(!!jitInvoice || lightningBalance.remoteBalance > 0);
+	}, [jitInvoice, lightningBalance.remoteBalance]);
 
 	const getLightningInvoice = useCallback(async (): Promise<void> => {
 		if (
