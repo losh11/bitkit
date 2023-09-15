@@ -165,7 +165,7 @@ const ScannerComponent = ({
 							}}
 						/>
 
-						{(__DEV__ || __E2E__) && (
+						{__E2E__ && (
 							<Button
 								style={styles.pasteButton}
 								text="Enter QRCode string"

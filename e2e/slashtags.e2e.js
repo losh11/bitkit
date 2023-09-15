@@ -7,6 +7,8 @@ import {
 	launchAndWait,
 	markComplete,
 	sleep,
+	electrumHost,
+	electrumPort,
 } from './helpers';
 import initWaitForElectrumToSync from '../__tests__/utils/wait-for-electrum';
 
@@ -44,7 +46,7 @@ d('Profile and Contacts', () => {
 		}
 
 		waitForElectrum = await initWaitForElectrumToSync(
-			{ port: 60001, host: '127.0.0.1' },
+			{ host: electrumHost, port: electrumPort },
 			bitcoinURL,
 		);
 	});

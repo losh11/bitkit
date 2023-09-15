@@ -4,6 +4,8 @@ import path from 'path';
 const LOCK_PATH = '/tmp/';
 
 export const bitcoinURL = 'http://polaruser:polarpass@127.0.0.1:43782';
+export const electrumHost = '127.0.0.1';
+export const electrumPort = 60001;
 
 export const checkComplete = (name) => {
 	if (!process.env.CI) {
