@@ -40,6 +40,15 @@ export const sleep = (ms) => {
 	});
 };
 
+export const isVisible = async (id) => {
+	try {
+		await expect(element(by.id(id))).toBeVisible();
+		return true;
+	} catch (e) {
+		return false;
+	}
+};
+
 export const isButtonEnabled = async (element) => {
 	try {
 		await expect(element).tap();

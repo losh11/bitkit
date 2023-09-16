@@ -19,7 +19,7 @@ const __DEV__ = process.env.DEV === 'true';
 const tls = `${__dirname}/../docker/lnd/tls.cert`;
 const macaroon = `${__dirname}/../docker/lnd/data/chain/bitcoin/regtest/admin.macaroon`;
 
-d = checkComplete('lnurl-1') ? describe.skip : describe;
+const d = checkComplete('lnurl-1') ? describe.skip : describe;
 
 const waitForEvent = (lnurl, name) => {
 	let timer;

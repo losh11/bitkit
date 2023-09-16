@@ -12,7 +12,7 @@ import {
 } from './helpers';
 import initWaitForElectrumToSync from '../__tests__/utils/wait-for-electrum';
 
-d = checkComplete('slash-1') ? describe.skip : describe;
+const d = checkComplete('slash-1') ? describe.skip : describe;
 
 // private key: rhuoi5upr3he3d5p9ef685bnxq8adbariwphg7i8gxdnnazok87xtc3e15pkouxizbzm6m4kjaoi9bndwp88iefycf6i6qhqu1ifzfa
 const satoshi = {
@@ -130,7 +130,6 @@ d('Profile and Contacts', () => {
 			// self
 			await element(by.id('AddContact')).tap();
 			await element(by.id('ContactURLInput')).typeText(slashtagsUrl + '\n');
-			// await element(by.id('ContactURLInput')).tapReturnKey();
 			await expect(element(by.id('ContactError'))).toBeVisible();
 
 			// Satoshi
