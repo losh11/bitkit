@@ -11,7 +11,8 @@ import BaseFeedWidget from './BaseFeedWidget';
 import { webRelayClient, webRelayUrl } from './SlashtagsProvider2';
 import { Change, Chart, getChange } from './PriceChart';
 import { decodeWidgetFieldValue, SUPPORTED_FEED_TYPES } from '../utils/widgets';
-import { __E2E__ } from '../constants/env';
+
+const INTERVAL = 1000 * 60;
 
 type TField = {
 	name: string;
@@ -52,7 +53,7 @@ const PriceWidget = ({
 		const feedUrl = `${url}?relay=${webRelayUrl}`;
 		const reader = new Reader(webRelayClient, feedUrl);
 
-		const getPastValues = async (): Promise<void> => {
+		const getCandles = async (): Promise<void> => {
 			const promises = widget.fields.map(async (field) => {
 				const pair = `${field.base}${field.quote}` as Pair;
 				const candles = await reader.getPastCandles(pair, period);
@@ -82,42 +83,42 @@ const PriceWidget = ({
 			}
 		};
 
-		getPastValues();
+		const getLatestPrices = (): void => {
+			widget.fields.map(async (field) => {
+				const pair = `${field.base}${field.quote}` as Pair;
+				const updatedPrice = await reader.getLatestPrice(pair);
 
-		const subscriptions = widget.fields.map((field) => {
-			const pair = `${field.base}${field.quote}` as Pair;
+				setData((prev) => {
+					const pairData = prev.find((f) => f.name === field.name);
 
-			// subscriptions are breaking e2e tests
-			if (!__E2E__) {
-				const unsubscribe = reader.subscribeLatestPrice(pair, (updatePrice) => {
-					setData((prev) => {
-						const pairData = prev.find((f) => f.name === field.name);
+					if (pairData && updatedPrice) {
+						const change = getChange([...pairData.pastValues, updatedPrice]);
+						// replace last candle with updated price
+						const pastValues = [...pairData.pastValues].fill(updatedPrice, -1);
 
-						if (pairData) {
-							const change = getChange([...pairData.pastValues, updatePrice]);
-							const price = decodeWidgetFieldValue(
-								SUPPORTED_FEED_TYPES.PRICE_FEED,
-								field,
-								updatePrice,
-							);
-							const updated = { ...pairData, change, price };
+						const price = decodeWidgetFieldValue(
+							SUPPORTED_FEED_TYPES.PRICE_FEED,
+							field,
+							updatedPrice,
+						);
+						const updated = { ...pairData, pastValues, change, price };
 
-							// replace old data while keeping the order
-							return prev.map((d) => (d !== pairData ? d : updated));
-						} else {
-							return prev;
-						}
-					});
+						// replace old data while keeping the order
+						return prev.map((d) => (d !== pairData ? d : updated));
+					} else {
+						return prev;
+					}
 				});
+			});
+		};
 
-				return unsubscribe;
-			}
-		});
+		// get data once then start polling
+		getCandles();
+		getLatestPrices();
+		const interval = setInterval(getLatestPrices, INTERVAL);
 
 		return () => {
-			if (!__E2E__) {
-				subscriptions.forEach((unsubscribe) => unsubscribe!());
-			}
+			clearInterval(interval);
 		};
 	}, [url, widget.fields, period]);
 

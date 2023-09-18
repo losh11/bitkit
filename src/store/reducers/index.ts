@@ -45,8 +45,9 @@ const rootReducer = (
 		console.log('Wiping app data...');
 		// Clear mmkv persisted storage
 		storage.clearAll();
-		// Clear async storage
-		AsyncStorage.clear();
+		// Clear web relay client storage
+		AsyncStorage.clear().catch(() => {});
+
 		// Reset all stores
 		return appReducer(undefined, action);
 	}

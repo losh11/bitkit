@@ -12,8 +12,15 @@ type Field = {
 	unit?: string;
 };
 
-// Cache config files to reduce widgets layout shifts.
-const cache: { [url: string]: { config: SlashFeedJSON } } = {};
+type Cache = {
+	[url: string]: {
+		config: SlashFeedJSON;
+		icon: string;
+	};
+};
+
+// Cache widget data to reduce layout shifts while loading.
+const cache: Cache = {};
 
 export const useSlashfeed = (options: {
 	url: string;
@@ -29,7 +36,7 @@ export const useSlashfeed = (options: {
 	const [config, setConfig] = useState<SlashFeedJSON>(
 		cache[options.url]?.config,
 	);
-	const [icon, setIcon] = useState<string>();
+	const [icon, setIcon] = useState<string>(cache[options.url]?.icon);
 	const [fields, setFields] = useState<Field[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [failed, setFailed] = useState(false);
@@ -58,9 +65,19 @@ export const useSlashfeed = (options: {
 
 				setConfig(reader.config as SlashFeedJSON);
 
-				if (reader.config.icons && reader.icon) {
-					// Always assume it is an svg icon
+				if (reader.icon) {
+					// Assume it is an svg icon
 					setIcon(b4a.toString(reader.icon));
+				} else if (reader.config.icons?.base64) {
+					const iconField = reader.config.icons?.base64;
+					const fieldName = iconField.replace('/feed/', '');
+					const base64 = await reader.getField(fieldName);
+					// TODO: remove after PR is merged
+					// https://github.com/synonymdev/slashtags-widget-event-feed/pull/2
+					const dataUrl = `data:image/png;base64,${base64}`;
+					cache[options.url].icon = dataUrl;
+					// Assume it is a png icon
+					setIcon(dataUrl);
 				}
 
 				const _fields = options.fields ?? reader.config.fields ?? [];

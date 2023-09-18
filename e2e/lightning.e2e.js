@@ -8,6 +8,8 @@ import {
 	launchAndWait,
 	completeOnboarding,
 	bitcoinURL,
+	electrumHost,
+	electrumPort,
 } from './helpers';
 import initWaitForElectrumToSync from '../__tests__/utils/wait-for-electrum';
 
@@ -29,7 +31,7 @@ d('Lightning', () => {
 		}
 
 		waitForElectrum = await initWaitForElectrumToSync(
-			{ port: 60001, host: '127.0.0.1' },
+			{ host: electrumHost, port: electrumPort },
 			bitcoinURL,
 		);
 

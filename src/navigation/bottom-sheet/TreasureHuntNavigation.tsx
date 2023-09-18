@@ -27,7 +27,7 @@ const Stack = createStackNavigator<TreasureHuntStackParamList>();
 const screenOptions: StackNavigationOptions = {
 	presentation: 'transparentModal',
 	headerShown: false,
-	...(__E2E__ ? { animation: 'none', animationDuration: 0 } : {}),
+	animationEnabled: __E2E__ ? false : true,
 };
 
 const TreasureHuntNavigation = (): ReactElement => {
