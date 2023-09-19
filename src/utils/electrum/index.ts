@@ -35,7 +35,7 @@ export const getDefaultPort = (
 export const getProtocolForPort = (
 	port: string,
 	selectedNetwork?: TAvailableNetworks,
-): TProtocol | undefined => {
+): TProtocol => {
 	if (port === '443') {
 		return 'ssl';
 	}

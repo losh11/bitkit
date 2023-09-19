@@ -1,9 +1,12 @@
+import jestExpect from 'expect';
 import {
 	sleep,
 	checkComplete,
 	markComplete,
 	launchAndWait,
 	completeOnboarding,
+	electrumHost,
+	electrumPort,
 } from './helpers';
 
 const __DEV__ = process.env.DEV === 'true';
@@ -384,11 +387,72 @@ d('Settings', () => {
 			await waitFor(element(by.id('Disconnected'))).toBeVisible();
 			await sleep(1000);
 
+			// scanner - check all possible connection formats
+			// Umbrel format
+			const umbrel1 = {
+				url: `${electrumHost}:${electrumPort}:t`,
+				expectedHost: electrumHost,
+				expectedPort: electrumPort.toString(),
+				expectedProtocol: 'tcp',
+			};
+			const umbrel2 = {
+				url: `${electrumHost}:${electrumPort}:s`,
+				expectedHost: electrumHost,
+				expectedPort: electrumPort.toString(),
+				expectedProtocol: 'ssl',
+			};
+
+			// should detect protocol for common ports
+			const noProto1 = {
+				url: `${electrumHost}:50001`,
+				expectedHost: electrumHost,
+				expectedPort: '50001',
+				expectedProtocol: 'tcp',
+			};
+			const noProto2 = {
+				url: `${electrumHost}:50002`,
+				expectedHost: electrumHost,
+				expectedPort: '50002',
+				expectedProtocol: 'ssl',
+			};
+
+			// HTTP URL
+			const http1 = {
+				url: `http://${electrumHost}:${electrumPort}`,
+				expectedHost: electrumHost,
+				expectedPort: electrumPort.toString(),
+				expectedProtocol: 'tcp',
+			};
+			const http2 = {
+				url: `https://${electrumHost}:${electrumPort}`,
+				expectedHost: electrumHost,
+				expectedPort: electrumPort.toString(),
+				expectedProtocol: 'ssl',
+			};
+
+			const conns = [umbrel1, umbrel2, noProto1, noProto2, http1, http2];
+
+			for (const conn of conns) {
+				await element(by.id('NavigationAction')).tap();
+				await element(by.id('ScanPrompt')).tap();
+				await element(by.type('_UIAlertControllerTextField')).replaceText(
+					conn.url,
+				);
+				await element(
+					by.label('OK').and(by.type('_UIAlertControllerActionView')),
+				).tap();
+				await expect(element(by.id('HostInput'))).toHaveText(conn.expectedHost);
+				await expect(element(by.id('PortInput'))).toHaveText(conn.expectedPort);
+				const attrs = await element(by.id('ElectrumProtocol')).getAttributes();
+				jestExpect(attrs.label).toBe(conn.expectedProtocol);
+			}
+
 			// switch back to default
 			await element(by.id('ResetToDefault')).tap();
 			await element(by.id('ConnectToHost')).tap();
 			await waitFor(element(by.id('Connected'))).toBeVisible();
 			await sleep(1000);
+
 			markComplete('settings-9');
 		});
 	});

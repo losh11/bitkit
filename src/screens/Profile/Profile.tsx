@@ -100,13 +100,13 @@ const ProfileScreen = ({
 			<NavigationHeader
 				style={styles.header}
 				title={t('profile')}
+				actionIcon={<UsersIcon height={24} width={24} />}
 				onClosePress={(): void => {
 					navigation.navigate('Wallet');
 				}}
 				onActionPress={(): void => {
 					navigation.navigate('Contacts');
 				}}
-				actionIcon={<UsersIcon height={24} width={24} />}
 			/>
 
 			<ScrollView contentContainerStyle={styles.content}>
@@ -142,14 +142,19 @@ const ProfileScreen = ({
 						<PencileIcon height={20} width={20} color="brand" />
 					</IconButton>
 				</View>
-				<QRView url={url} profile={profile} qrRef={qrRef} />
+				<QRView
+					url={url}
+					profile={profile}
+					qrRef={qrRef}
+					onPress={handleCopy}
+				/>
 				{showCopy && (
 					<AnimatedView
-						entering={FadeIn.duration(500)}
-						exiting={FadeOut.duration(500)}
+						style={styles.tooltip}
 						color="transparent"
-						style={styles.tooltip}>
-						<Tooltip text={t('contact_copied')} />
+						entering={FadeIn.duration(500)}
+						exiting={FadeOut.duration(500)}>
+						<Tooltip testID="ContactCopiedTooltip" text={t('contact_copied')} />
 					</AnimatedView>
 				)}
 				<SafeAreaInset type="bottom" minPadding={16} />
@@ -162,14 +167,15 @@ const QRView = ({
 	url,
 	profile,
 	qrRef,
+	onPress,
 }: {
 	url: string;
 	profile?: BasicProfile;
 	qrRef: MutableRefObject<string | undefined>;
+	onPress?: () => void;
 }): ReactElement => {
 	const { t } = useTranslation('slashtags');
 	const dimensions = useWindowDimensions();
-	const [showCopy, setShowCopy] = useState(false);
 
 	const qrMaxHeight = useMemo(
 		() => dimensions.height / 2.3,
@@ -183,12 +189,6 @@ const QRView = ({
 		() => Math.min(qrMaxWidth, qrMaxHeight),
 		[qrMaxHeight, qrMaxWidth],
 	);
-
-	const handleCopy = useCallback((): void => {
-		setShowCopy(() => true);
-		setTimeout(() => setShowCopy(() => false), 1200);
-		Clipboard.setString(url);
-	}, [url]);
 
 	const handleCopyQrCode = useCallback((): void => {
 		console.log('TODO: copy QR code as image');
@@ -209,7 +209,7 @@ const QRView = ({
 				style={styles.qrCode}
 				color="white"
 				activeOpacity={1}
-				onPress={handleCopy}
+				onPress={onPress}
 				onLongPress={handleCopyQrCode}>
 				<QRCode
 					value={url}
@@ -228,16 +228,6 @@ const QRView = ({
 						<ProfileImage url={url} image={profile?.image} size={68} />
 					</ThemedView>
 				</View>
-
-				{showCopy && (
-					<AnimatedView
-						style={styles.tooltip}
-						color="transparent"
-						entering={FadeIn.duration(500)}
-						exiting={FadeOut.duration(500)}>
-						<Tooltip testID="ContactCopiedTooltip" text={t('contact_copied')} />
-					</AnimatedView>
-				)}
 			</TouchableOpacity>
 
 			<Text02S style={styles.qrViewNote}>
@@ -293,7 +283,7 @@ const styles = StyleSheet.create({
 	tooltip: {
 		position: 'absolute',
 		alignSelf: 'center',
-		top: '66%',
+		top: '70%',
 	},
 });
 

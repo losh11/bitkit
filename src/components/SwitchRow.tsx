@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
 	container: {
 		flexDirection: 'row',
 		justifyContent: 'flex-start',
-		alignItems: 'flex-start',
+		alignItems: 'center',
 		paddingVertical: 8,
 	},
 	divider: {
