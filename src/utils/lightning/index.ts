@@ -231,6 +231,7 @@ export const setupLdk = async ({
 					highPriority: fees.fast,
 					normal: fees.normal,
 					background: fees.slow,
+					mempoolMinimum: fees.minimum,
 				};
 			},
 			network,
