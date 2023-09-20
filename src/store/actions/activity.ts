@@ -16,6 +16,7 @@ import { closeBottomSheet, showBottomSheet } from './ui';
 import { checkPendingCJitEntries } from './blocktank';
 import { getLightningChannels } from '../../utils/lightning';
 import { updateSettings } from './settings';
+import { removeTodo } from './todos';
 
 const dispatch = getDispatch();
 
@@ -86,6 +87,7 @@ export const addCJitActivityItem = async (channelId: string): Promise<void> => {
 	});
 	closeBottomSheet('receiveNavigation');
 	showBottomSheet('newTxPrompt', { activityItem });
+	removeTodo('lightning');
 };
 
 export const addActivityItems = (
