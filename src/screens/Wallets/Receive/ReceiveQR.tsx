@@ -237,7 +237,12 @@ const ReceiveQR = ({
 		}
 
 		if (!enableInstant) {
-			return receiveAddress;
+			return getUnifiedUri({
+				address: receiveAddress,
+				amount,
+				label: message,
+				message,
+			});
 		}
 
 		return getUnifiedUri({
