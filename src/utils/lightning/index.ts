@@ -62,7 +62,10 @@ import {
 	EActivityType,
 	TLightningActivityItem,
 } from '../../store/types/activity';
-import { addActivityItem } from '../../store/actions/activity';
+import {
+	addActivityItem,
+	addCJitActivityItem,
+} from '../../store/actions/activity';
 import {
 	EPaymentType,
 	IWalletItem,
@@ -400,7 +403,7 @@ export const subscribeToLightningPayments = ({
 		// @ts-ignore
 		onChannelSubscription = ldk.onEvent(
 			EEventTypes.new_channel,
-			(_res: TChannelUpdate) => {
+			async (_res: TChannelUpdate) => {
 				// New Channel will open in 1 block confirmation
 
 				if (!selectedWallet) {
@@ -420,6 +423,9 @@ export const subscribeToLightningPayments = ({
 
 				removeTodo('lightningSettingUp');
 				refreshLdk({ selectedWallet, selectedNetwork }).then();
+
+				// Check if this is a CJIT Entry that needs to be added to the activity list.
+				addCJitActivityItem(_res.channel_id).then();
 			},
 		);
 	}

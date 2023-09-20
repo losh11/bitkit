@@ -1,7 +1,7 @@
 import actions from '../actions/actions';
 import { defaultBlocktankShape } from '../shapes/blocktank';
 import { IBlocktank } from '../types/blocktank';
-import { IBtOrder } from '@synonymdev/blocktank-lsp-http-client';
+import { IBtOrder, ICJitEntry } from '@synonymdev/blocktank-lsp-http-client';
 
 const blocktank = (
 	state: IBlocktank = defaultBlocktankShape,
@@ -37,6 +37,32 @@ const blocktank = (
 				return {
 					...state,
 					orders: [...state.orders, action.payload],
+				};
+			}
+		}
+
+		case actions.UPDATE_CJIT_ENTRY: {
+			// Find existing order and update it if it exists, else append to list
+			const existingEntry = state.cJitEntries.find(
+				(order) => order.id === action.payload.id,
+			);
+
+			if (existingEntry) {
+				const updatedEntries: ICJitEntry[] = state.cJitEntries.map((entry) => {
+					if (entry.id === action.payload.id) {
+						return action.payload;
+					}
+					return entry;
+				});
+
+				return {
+					...state,
+					cJitEntries: updatedEntries,
+				};
+			} else {
+				return {
+					...state,
+					cJitEntries: [...state.cJitEntries, action.payload],
 				};
 			}
 		}
