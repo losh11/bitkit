@@ -75,7 +75,7 @@ export const addCJitActivityItem = async (channelId: string): Promise<void> => {
 		id: lightningChannel?.funding_txid ?? '',
 		activityType: EActivityType.lightning,
 		txType: EPaymentType.received,
-		message: 'CJIT',
+		message: 'Blocktank CJIT Payment',
 		address: cJitEntry.invoice.request,
 		value: lightningChannel.balance_sat,
 		confirmed: true,
