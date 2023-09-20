@@ -417,6 +417,16 @@ const ReceiveQR = ({
 		t,
 	]);
 
+	const lInvoice = useMemo((): string => {
+		if (jitInvoice && jitInvoice !== '') {
+			return jitInvoice;
+		}
+		if (lightningInvoice && lightningInvoice !== '') {
+			return lightningInvoice;
+		}
+		return '';
+	}, [jitInvoice, lightningInvoice]);
+
 	const Slide2 = useCallback((): ReactElement => {
 		return (
 			<View style={styles.slide}>
@@ -466,7 +476,7 @@ const ReceiveQR = ({
 						</View>
 					</View>
 
-					{enableInstant && lightningInvoice !== '' && (
+					{enableInstant && lInvoice !== '' && (
 						<>
 							<View style={styles.divider} />
 							<View style={styles.invoice}>
@@ -484,8 +494,8 @@ const ReceiveQR = ({
 								<View style={styles.invoiceText}>
 									<Text02S
 										testID="ReceiveLightningInvoice"
-										accessibilityLabel={lightningInvoice}>
-										{ellipsis(lightningInvoice, 33)}
+										accessibilityLabel={lInvoice}>
+										{ellipsis(lInvoice, 33)}
 									</Text02S>
 									{showTooltip.lightning && (
 										<AnimatedView
@@ -502,7 +512,7 @@ const ReceiveQR = ({
 										icon={<CopyIcon width={18} color="purple" />}
 										text={t('copy')}
 										onPress={(): void => {
-											onCopy(lightningInvoice, 'lightning');
+											onCopy(lInvoice, 'lightning');
 										}}
 									/>
 									<View style={styles.buttonSpacer} />
@@ -512,7 +522,7 @@ const ReceiveQR = ({
 										icon={<ShareIcon width={18} color="purple" />}
 										disabled={isSharing}
 										onPress={(): void => {
-											onShare(lightningInvoice);
+											onShare(lInvoice);
 										}}
 									/>
 								</View>
@@ -523,13 +533,14 @@ const ReceiveQR = ({
 			</View>
 		);
 	}, [
-		lightningInvoice,
-		receiveAddress,
-		enableInstant,
-		showTooltip,
-		onShare,
-		isSharing,
 		t,
+		receiveAddress,
+		showTooltip.onchain,
+		showTooltip.lightning,
+		isSharing,
+		enableInstant,
+		lInvoice,
+		onShare,
 	]);
 
 	const slides = useMemo((): Slide[] => [Slide1, Slide2], [Slide1, Slide2]);
