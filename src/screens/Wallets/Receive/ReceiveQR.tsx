@@ -351,17 +351,6 @@ const ReceiveQR = ({
 		);
 	}, [jitInvoice, enableInstant]);
 
-	const getRef = useCallback(
-		(c) => {
-			if (c?.toDataURL && qrRef?.current) {
-				c.toDataURL((data: string) => {
-					qrRef.current = data.replace(/(\r\n|\n|\r)/gm, '');
-				});
-			}
-		},
-		[qrRef],
-	);
-
 	const Slide1 = useCallback((): ReactElement => {
 		return (
 			<View style={styles.slide}>
@@ -373,7 +362,12 @@ const ReceiveQR = ({
 					testID="QRCode"
 					onPress={(): void => onCopy(uri, 'unified')}
 					onLongPress={onCopyQrCode}>
-					<QRCode value={uri} size={qrSize} quietZone={16} getRef={getRef} />
+					<QRCode
+						value={uri}
+						size={qrSize}
+						quietZone={16}
+						getRef={(c): void => (qrRef.current = c)}
+					/>
 					<QrIcon />
 
 					{showTooltip.unified && (
@@ -425,7 +419,6 @@ const ReceiveQR = ({
 		isSharing,
 		uri,
 		qrSize,
-		getRef,
 		showTooltip.unified,
 		t,
 	]);
