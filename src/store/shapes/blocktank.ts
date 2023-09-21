@@ -71,6 +71,7 @@ export const defaultOrderResponse: IBtOrder = {
 			confirmedSat: 0,
 			requiredConfirmations: 1,
 			transactions: [],
+			requiredConfirmations: 0,
 		},
 	},
 	couponCode: '',
