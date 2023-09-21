@@ -437,54 +437,56 @@ const ReceiveQR = ({
 		return (
 			<View style={styles.slide}>
 				<ThemedView style={styles.invoices} color="white04">
-					<View style={styles.invoice} testID="ReceiveOnchainInvoice">
-						<View style={styles.invoiceLabel}>
-							<Caption13Up color="gray1">
-								{t('receive_bitcoin_invoice')}
-							</Caption13Up>
-							<BitcoinSlantedIcon
-								style={styles.invoiceLabelIcon}
-								color="gray1"
-								height={14}
-								width={20}
-							/>
+					{!enableInstant && jitInvoice !== '' && (
+						<View style={styles.invoice} testID="ReceiveOnchainInvoice">
+							<View style={styles.invoiceLabel}>
+								<Caption13Up color="gray1">
+									{t('receive_bitcoin_invoice')}
+								</Caption13Up>
+								<BitcoinSlantedIcon
+									style={styles.invoiceLabelIcon}
+									color="gray1"
+									height={14}
+									width={20}
+								/>
+							</View>
+							<View style={styles.invoiceText}>
+								<Text02S>{ellipsis(receiveAddress, 25)}</Text02S>
+								{showTooltip.onchain && (
+									<AnimatedView
+										style={styles.tooltip}
+										color="transparent"
+										entering={FadeIn}>
+										<Tooltip text={t('receive_copied')} />
+									</AnimatedView>
+								)}
+							</View>
+							<View style={styles.actions}>
+								<Button
+									style={styles.actionButton}
+									icon={<CopyIcon width={18} color="brand" />}
+									text={t('copy')}
+									onPress={(): void => {
+										onCopy(receiveAddress, 'onchain');
+									}}
+								/>
+								<View style={styles.buttonSpacer} />
+								<Button
+									style={styles.actionButton}
+									text={t('share')}
+									icon={<ShareIcon width={18} color="brand" />}
+									disabled={isSharing}
+									onPress={(): void => {
+										onShare(receiveAddress);
+									}}
+								/>
+							</View>
 						</View>
-						<View style={styles.invoiceText}>
-							<Text02S>{ellipsis(receiveAddress, 25)}</Text02S>
-							{showTooltip.onchain && (
-								<AnimatedView
-									style={styles.tooltip}
-									color="transparent"
-									entering={FadeIn}>
-									<Tooltip text={t('receive_copied')} />
-								</AnimatedView>
-							)}
-						</View>
-						<View style={styles.actions}>
-							<Button
-								style={styles.actionButton}
-								icon={<CopyIcon width={18} color="brand" />}
-								text={t('copy')}
-								onPress={(): void => {
-									onCopy(receiveAddress, 'onchain');
-								}}
-							/>
-							<View style={styles.buttonSpacer} />
-							<Button
-								style={styles.actionButton}
-								text={t('share')}
-								icon={<ShareIcon width={18} color="brand" />}
-								disabled={isSharing}
-								onPress={(): void => {
-									onShare(receiveAddress);
-								}}
-							/>
-						</View>
-					</View>
+					)}
 
 					{enableInstant && lInvoice !== '' && (
 						<>
-							<View style={styles.divider} />
+							{jitInvoice === '' && <View style={styles.divider} />}
 							<View style={styles.invoice}>
 								<View style={styles.invoiceLabel}>
 									<Caption13Up color="gray1">
@@ -539,12 +541,13 @@ const ReceiveQR = ({
 			</View>
 		);
 	}, [
+		enableInstant,
+		jitInvoice,
 		t,
 		receiveAddress,
 		showTooltip.onchain,
 		showTooltip.lightning,
 		isSharing,
-		enableInstant,
 		lInvoice,
 		onShare,
 	]);
