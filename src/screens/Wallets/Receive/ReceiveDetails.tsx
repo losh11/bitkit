@@ -40,14 +40,8 @@ import {
 	removePendingInvoice,
 	updatePendingInvoice,
 } from '../../../store/actions/metadata';
-import {
-	MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD,
-	MINIMUM_CLIENT_CHANNEL_SIZE,
-} from '../../../store/shapes/blocktank';
 import { createCJitEntry } from '../../../utils/blocktank';
 import { DEFAULT_CHANNEL_DURATION } from '../../Lightning/CustomConfirm';
-import { convertToSats } from '../../../utils/conversion';
-import { EUnit } from '../../../store/types/wallet';
 import { blocktankInfoSelector } from '../../../store/reselect/blocktank';
 import { isGeoBlockedSelector } from '../../../store/reselect/user';
 import { useLightningBalance } from '../../../hooks/lightning';
@@ -86,14 +80,12 @@ const ReceiveDetails = ({
 		) {
 			return;
 		}
-		const maxChannelSats =
-			blocktank.options?.maxChannelSizeSat ??
-			convertToSats(MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD, EUnit.fiat);
+		const maxChannelSats = blocktank.options.maxChannelSizeSat;
 		// Subtract from max to keep a buffer for dust
-		const maxInvoiceSats = maxChannelSats - MINIMUM_CLIENT_CHANNEL_SIZE;
+		const maxInvoiceSats = maxChannelSats - blocktank.options.minChannelSizeSat;
 		// Ensure the CJIT entry is within an acceptable range.
 		if (
-			invoice.amount >= MINIMUM_CLIENT_CHANNEL_SIZE &&
+			invoice.amount >= blocktank.options.minChannelSizeSat &&
 			invoice.amount <= maxInvoiceSats
 		) {
 			const cJitEntryResponse = await createCJitEntry({
@@ -112,7 +104,8 @@ const ReceiveDetails = ({
 			navigation.navigate('ReceiveConnect');
 		}
 	}, [
-		blocktank.options?.maxChannelSizeSat,
+		blocktank.options.maxChannelSizeSat,
+		blocktank.options.minChannelSizeSat,
 		enableInstant,
 		invoice.amount,
 		invoice.message,
