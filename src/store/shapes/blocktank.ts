@@ -69,7 +69,6 @@ export const defaultOrderResponse: IBtOrder = {
 		onchain: {
 			address: '',
 			confirmedSat: 0,
-			requiredConfirmations: 1,
 			transactions: [],
 			requiredConfirmations: 0,
 		},
