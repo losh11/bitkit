@@ -437,7 +437,7 @@ const ReceiveQR = ({
 		return (
 			<View style={styles.slide}>
 				<ThemedView style={styles.invoices} color="white04">
-					{!enableInstant && jitInvoice !== '' && (
+					{!jitInvoice && (
 						<View style={styles.invoice} testID="ReceiveOnchainInvoice">
 							<View style={styles.invoiceLabel}>
 								<Caption13Up color="gray1">
@@ -486,7 +486,7 @@ const ReceiveQR = ({
 
 					{enableInstant && lInvoice !== '' && (
 						<>
-							{jitInvoice === '' && <View style={styles.divider} />}
+							{!jitInvoice && <View style={styles.divider} />}
 							<View style={styles.invoice}>
 								<View style={styles.invoiceLabel}>
 									<Caption13Up color="gray1">

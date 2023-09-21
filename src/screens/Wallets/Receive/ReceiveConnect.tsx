@@ -42,49 +42,49 @@ const ReceiveConnect = ({
 
 	return (
 		<GradientView style={styles.container}>
-			<BottomSheetNavigationHeader
-				title={t('receive_instantly')}
-				displayBackButton={false}
-			/>
+			<BottomSheetNavigationHeader title={t('receive_instantly')} />
+			<View style={styles.content}>
+				<AmountToggle sats={amount} reverse={true} space={12} />
 
-			<AmountToggle sats={amount} reverse={true} space={12} />
+				<Text01S style={styles.text} color="gray1">
+					<Trans
+						t={t}
+						i18nKey={
+							isInitial
+								? 'receive_connect_initial'
+								: 'receive_connect_additional'
+						}
+						components={{
+							white: <Text01S color="white" />,
+						}}
+						values={{
+							fee: `${displayFee.fiatSymbol}${displayFee.fiatFormatted}`,
+						}}
+					/>
+				</Text01S>
 
-			<Text01S style={styles.text} color="gray1">
-				<Trans
-					t={t}
-					i18nKey={
-						isInitial ? 'receive_connect_initial' : 'receive_connect_additional'
-					}
-					components={{
-						white: <Text01S color="white" />,
-					}}
-					values={{
-						fee: `${displayFee.fiatSymbol}${displayFee.fiatFormatted}`,
-					}}
-				/>
-			</Text01S>
+				<View style={styles.payAmount}>
+					<Caption13Up style={styles.payAmountText} color="gray1">
+						You will receive
+					</Caption13Up>
+					<Money
+						sats={payAmount}
+						size="title"
+						symbol={true}
+						testID="AvailableAmount"
+					/>
+				</View>
 
-			<View style={styles.payAmount}>
-				<Caption13Up style={styles.payAmountText} color="gray1">
-					You will receive
-				</Caption13Up>
-				<Money
-					sats={payAmount}
-					size="title"
-					symbol={true}
-					testID="AvailableAmount"
-				/>
-			</View>
+				<GlowImage image={imageSrc} glowColor="purple" imageSize={imageSize} />
 
-			<GlowImage image={imageSrc} glowColor="purple" imageSize={imageSize} />
-
-			<View style={styles.buttonContainer}>
-				<Button
-					size="large"
-					text={t('continue')}
-					testID="ReceiveConnectContinue"
-					onPress={onContinue}
-				/>
+				<View style={styles.buttonContainer}>
+					<Button
+						size="large"
+						text={t('continue')}
+						testID="ReceiveConnectContinue"
+						onPress={onContinue}
+					/>
+				</View>
 			</View>
 			<SafeAreaInset type="bottom" minPadding={16} />
 		</GradientView>
@@ -93,6 +93,9 @@ const ReceiveConnect = ({
 
 const styles = StyleSheet.create({
 	container: {
+		flex: 1,
+	},
+	content: {
 		flex: 1,
 		paddingHorizontal: 16,
 	},

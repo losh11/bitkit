@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import { TouchableOpacity } from '../../../styles/components';
-import { Text02B, Text02M } from '../../../styles/text';
+import { Caption13Up, Text02B } from '../../../styles/text';
 import { SwitchIcon } from '../../../styles/icons';
 import BottomSheetNavigationHeader from '../../../components/BottomSheetNavigationHeader';
 import NumberPadTextField from '../../../components/NumberPadTextField';
@@ -118,8 +118,10 @@ const ReceiveAmount = ({
 				<View style={styles.numberPad} testID="ReceiveNumberPad">
 					<View style={styles.actions}>
 						<View>
-							<Text02M color={'white5'}>{t('minimum')}</Text02M>
-							<Money sats={25000} size="text01m" symbol={true} />
+							<Caption13Up style={styles.minimumText} color="gray1">
+								{t('minimum')}
+							</Caption13Up>
+							<Money sats={25000} size="text02m" symbol={true} />
 						</View>
 						<View style={styles.actionButtons}>
 							<View style={styles.actionButtonContainer}>
@@ -182,6 +184,9 @@ const styles = StyleSheet.create({
 		flex: 1,
 		marginTop: 'auto',
 		maxHeight: 450,
+	},
+	minimumText: {
+		marginBottom: 5,
 	},
 	actionButtons: {
 		flexDirection: 'row',
