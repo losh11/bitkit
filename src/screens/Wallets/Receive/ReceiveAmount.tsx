@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import { TouchableOpacity } from '../../../styles/components';
-import { Text02B } from '../../../styles/text';
+import { Text02B, Text02M } from '../../../styles/text';
 import { SwitchIcon } from '../../../styles/icons';
 import BottomSheetNavigationHeader from '../../../components/BottomSheetNavigationHeader';
 import NumberPadTextField from '../../../components/NumberPadTextField';
@@ -21,14 +21,9 @@ import { createCJitEntry } from '../../../utils/blocktank';
 import { showToast } from '../../../utils/notifications';
 import type { ReceiveScreenProps } from '../../../navigation/types';
 import { DEFAULT_CHANNEL_DURATION } from '../../Lightning/CustomConfirm';
-import { EUnit } from '../../../store/types/wallet';
-import { convertToSats } from '../../../utils/conversion';
-import {
-	MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD,
-	MINIMUM_CLIENT_CHANNEL_SIZE,
-} from '../../../store/shapes/blocktank';
 import { primaryUnitSelector } from '../../../store/reselect/settings';
 import { blocktankInfoSelector } from '../../../store/reselect/blocktank';
+import Money from '../../../components/Money';
 
 const ReceiveAmount = ({
 	navigation,
@@ -48,21 +43,18 @@ const ReceiveAmount = ({
 	};
 
 	const maxChannelSats = useMemo(() => {
-		return (
-			blocktank.options?.maxChannelSizeSat ??
-			convertToSats(MAXIMUM_BLOCKTANK_CHANNEL_SIZE_USD, EUnit.fiat)
-		);
-	}, [blocktank.options?.maxChannelSizeSat]);
+		return blocktank.options.maxChannelSizeSat;
+	}, [blocktank.options.maxChannelSizeSat]);
 	const maxInvoiceSats = useMemo(() => {
 		// Subtract from max to keep a buffer for dust
-		return maxChannelSats - MINIMUM_CLIENT_CHANNEL_SIZE;
-	}, [maxChannelSats]);
+		return maxChannelSats - blocktank.options.minChannelSizeSat;
+	}, [blocktank.options.minChannelSizeSat, maxChannelSats]);
 
 	const onContinue = async (): Promise<void> => {
 		setIsLoading(true);
-		// Ensure the invoice is greater than MINIMUM_CLIENT_CHANNEL_SIZE
-		if (invoice.amount < MINIMUM_CLIENT_CHANNEL_SIZE) {
-			const txt = getNumberPadText(MINIMUM_CLIENT_CHANNEL_SIZE, unit);
+		// Ensure the invoice is greater than blocktank.options.minChannelSizeSat
+		if (invoice.amount < blocktank.options.minChannelSizeSat) {
+			const txt = getNumberPadText(blocktank.options.minChannelSizeSat, unit);
 			setIsLoading(false);
 			showToast({
 				type: 'error',
@@ -108,14 +100,14 @@ const ReceiveAmount = ({
 	};
 
 	const continueDisabled =
-		invoice.amount < MINIMUM_CLIENT_CHANNEL_SIZE ||
+		invoice.amount < blocktank.options.minChannelSizeSat ||
 		invoice.amount > maxInvoiceSats;
 
 	return (
 		<GradientView style={styles.container}>
 			<BottomSheetNavigationHeader
 				title={t('receive_instantly')}
-				displayBackButton={false}
+				displayBackButton={true}
 			/>
 			<View style={styles.content}>
 				<NumberPadTextField
@@ -125,6 +117,10 @@ const ReceiveAmount = ({
 
 				<View style={styles.numberPad} testID="ReceiveNumberPad">
 					<View style={styles.actions}>
+						<View>
+							<Text02M color={'white5'}>{t('minimum')}</Text02M>
+							<Money sats={25000} size="text01m" symbol={true} />
+						</View>
 						<View style={styles.actionButtons}>
 							<View style={styles.actionButtonContainer}>
 								<TouchableOpacity

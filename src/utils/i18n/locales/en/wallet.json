@@ -77,6 +77,7 @@
 	"receive_instantly": "Receive Instantly",
 	"receive_connect_initial": "To receive instant Bitcoin, Bitkit first has to connect you to Lightning. A <white>{fee}</white> fee will be deducted from the amount you specified.",
 	"receive_connect_additional": "To receive more instant Bitcoin, Bitkit has to increase your liquidity. A <white>{fee}</white> fee will be deducted from the amount you specified.",
+	"minimum": "MINIMUM",
 	"activity": "Activity",
 	"activity_show_all": "Show All Activity",
 	"activity_no": "No activity yet",
