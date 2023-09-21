@@ -89,16 +89,20 @@ const LuganoWidget = ({
 			.getField('schedule.json')
 			// @ts-ignore
 			.then((_schedule: { time: number; location: string; name: string }[]) => {
-				const mapped = _schedule.map((event) => {
-					const time = new Date(event.time);
-					const hours = time.getHours().toString().padStart(2, '0');
-					const minutes = time.getMinutes().toString().padStart(2, '0');
+				const mapped = _schedule
+					.filter((event) => (event.time || 0) > Date.now())
+					.sort((a, b) => a.time - b.time)
+					.slice(0, 3)
+					.map((event) => {
+						const time = new Date(event.time);
+						const hours = time.getHours().toString().padStart(2, '0');
+						const minutes = time.getMinutes().toString().padStart(2, '0');
 
-					return {
-						timeLocation: hours + ':' + minutes + ' @ ' + event.location,
-						name: event.name,
-					};
-				});
+						return {
+							timeLocation: hours + ':' + minutes + ' @ ' + event.location,
+							name: event.name,
+						};
+					});
 
 				// @ts-ignore
 				cache.schedule = mapped;
