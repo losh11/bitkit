@@ -95,7 +95,11 @@ export const createOrder = async (
 		const buyRes = await bt.createOrder(
 			data.lspBalanceSat,
 			data.channelExpiryWeeks,
-			{ ...data.options, couponCode: data.options?.couponCode ?? 'bitkit' },
+			{
+				...data.options,
+				couponCode: data.options?.couponCode ?? 'bitkit',
+				turboChannel: true,
+			},
 		);
 		if (buyRes?.id) {
 			await refreshOrder(buyRes.id);
