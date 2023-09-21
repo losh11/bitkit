@@ -277,9 +277,10 @@ const ReceiveQR = ({
 			navigation.navigate('ReceiveDetails', {
 				receiveAddress,
 				lightningInvoice,
+				enableInstant,
 			});
 		}
-	}, [jitInvoice, lightningInvoice, receiveAddress, navigation]);
+	}, [jitInvoice, navigation, receiveAddress, lightningInvoice, enableInstant]);
 
 	const onCopy = (text: string, tooltipId: string): void => {
 		Clipboard.setString(text);

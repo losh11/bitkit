@@ -65,7 +65,7 @@ const ReceiveDetails = ({
 	const [showNumberPad, setShowNumberPad] = useState(false);
 	const invoice = useSelector(receiveSelector);
 	const { fiatTicker } = useCurrency();
-	const { receiveAddress, lightningInvoice } = route.params;
+	const { receiveAddress, lightningInvoice, enableInstant } = route.params;
 	const blocktank = useSelector(blocktankInfoSelector);
 	const lightningBalance = useLightningBalance(false);
 	const isGeoBlocked = useSelector(isGeoBlockedSelector);
@@ -79,7 +79,11 @@ const ReceiveDetails = ({
 	// Determines if a CJIT entry can and should be created for the given invoice.
 	const createCJitIfNeeded = useCallback(async () => {
 		// Return if geo-blocked or if we have a large enough remote balance to satisfy the invoice.
-		if (isGeoBlocked || lightningBalance.remoteBalance >= invoice.amount) {
+		if (
+			!enableInstant ||
+			isGeoBlocked ||
+			lightningBalance.remoteBalance >= invoice.amount
+		) {
 			return;
 		}
 		const maxChannelSats =
@@ -109,6 +113,7 @@ const ReceiveDetails = ({
 		}
 	}, [
 		blocktank.options?.maxChannelSizeSat,
+		enableInstant,
 		invoice.amount,
 		invoice.message,
 		isGeoBlocked,
