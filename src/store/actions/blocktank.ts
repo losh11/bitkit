@@ -9,6 +9,7 @@ import * as blocktank from '../../utils/blocktank';
 import {
 	createOrder,
 	getBlocktankInfo,
+	getCJitEntry,
 	getMin0ConfTxFee,
 	getOrder,
 	isGeoBlocked,
@@ -38,7 +39,9 @@ import {
 	BtOrderState,
 	BtPaymentState,
 	IBtOrder,
+	ICJitEntry,
 } from '@synonymdev/blocktank-lsp-http-client';
+import { CJitStateEnum } from '@synonymdev/blocktank-lsp-http-client/dist/shared/CJitStateEnum';
 
 const dispatch = getDispatch();
 
@@ -54,6 +57,49 @@ export const refreshOrdersList = async (): Promise<Result<string>> => {
 		return ok('Orders list updated');
 	} catch (e) {
 		return err(e);
+	}
+};
+
+/**
+ * Updates the status of pending CJIT entries that may have changed.
+ * @returns {Promise<Result<string>>}
+ */
+export const checkPendingCJitEntries = async (): Promise<Result<string>> => {
+	const pendingCJitEntries = blocktank.getPendingCJitEntries();
+	try {
+		const promises = pendingCJitEntries.map((order) =>
+			refreshCJitEntry(order.id),
+		);
+		await Promise.all(promises);
+		return ok('Orders list updated');
+	} catch (e) {
+		return err(e);
+	}
+};
+
+/**
+ * Retrieves and updates a given CJIT entry by orderId.
+ * @param orderId
+ */
+export const refreshCJitEntry = async (
+	orderId: string,
+): Promise<Result<ICJitEntry>> => {
+	try {
+		const cJitEntry = await getCJitEntry(orderId);
+		if (cJitEntry.state === CJitStateEnum.CREATED) {
+			// Order state has not changed, no update needed.
+			return ok(cJitEntry);
+		}
+
+		// Update stored CJIT entry
+		dispatch({
+			type: actions.UPDATE_CJIT_ENTRY,
+			payload: cJitEntry,
+		});
+
+		return ok(cJitEntry);
+	} catch (error) {
+		return err(error);
 	}
 };
 
@@ -147,6 +193,24 @@ export const updateOrder = async (
 		payload: order,
 	});
 	return ok(order);
+};
+
+/**
+ * Retrieves and updates a given blocktank order by id.
+ * @param {ICJitEntry} cJitEntry
+ * @returns {Promise<Result<IBtOrder>>}
+ */
+export const addCJitEntry = async (
+	cJitEntry: ICJitEntry,
+): Promise<Result<ICJitEntry>> => {
+	if (!cJitEntry) {
+		return err('No cJitEntry provided.');
+	}
+	dispatch({
+		type: actions.ADD_CJIT_ENTRY,
+		payload: cJitEntry,
+	});
+	return ok(cJitEntry);
 };
 
 /**

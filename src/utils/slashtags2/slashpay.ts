@@ -160,12 +160,13 @@ function validate(config: SlashPayConfig): void {
 		if (_validate.errors) {
 			message = _validate.errors
 				.map((error) => {
-					const name =
-						// @ts-ignore
-						error.instancePath === ''
-							? 'config'
-							: // @ts-ignore eslint-disable-next-line no-mixed-spaces-and-tabs
-							  `Field '${error.instancePath.slice(1)}'`;
+					let name = 'config';
+					// @ts-ignore
+					if (error.instancePath !== '') {
+						// @ts-ignore eslint-disable-next-line no-mixed-spaces-and-tabs
+						name = `Field '${error.instancePath.slice(1)}'`;
+					}
+
 					return ` - ${name} ${error.message}`;
 				})
 				.join('\n');

@@ -9,13 +9,13 @@ export const getUnifiedUri = ({
 	amount,
 	label,
 	message,
-	lightning,
+	lightning = '',
 }: {
 	address: string;
 	amount: number | string;
 	label: string;
 	message: string;
-	lightning: string;
+	lightning?: string;
 }): string => {
 	const amountBTC = bitcoinUnits(amount, 'satoshi').to('btc').value();
 

@@ -69,6 +69,8 @@ import {
 	shareAndroidIcon,
 	hourglassSimpleIcon,
 	questionMarkIcon,
+	unifiedCircleIcon,
+	lightningCircleIcon,
 	mapTrifoldIcon,
 	mapPinLineIcon,
 } from '../assets/icons/wallet';
@@ -413,6 +415,20 @@ export const BitcoinCircleIcon = styled(SvgXml).attrs((props) => ({
 }))<IconProps>((props) => ({
 	color: props.color ? props.theme.colors[props.color] : 'white',
 }));
+
+export const LightningCircleIcon = styled(SvgXml).attrs((props) => ({
+	xml: lightningCircleIcon(),
+	height: props.height ?? '32px',
+	width: props.width ?? '32px',
+}))<IconProps>((props) => ({
+	color: props.color ? props.theme.colors[props.color] : 'white',
+}));
+
+export const UnifiedIcon = styled(SvgXml).attrs((props) => ({
+	xml: unifiedCircleIcon(),
+	height: props.height ?? '32px',
+	width: props.width ?? '32px',
+}))<IconProps>(() => ({}));
 
 export const UnitBitcoinIcon = styled(SvgXml).attrs((props) => ({
 	xml: unitBitcoinIcon(

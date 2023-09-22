@@ -4,6 +4,7 @@ import {
 	BtPaymentState,
 	IBtInfo,
 	IBtOrder,
+	ICJitEntry,
 } from '@synonymdev/blocktank-lsp-http-client';
 
 import { err, ok, Result } from '@synonymdev/result';
@@ -25,6 +26,8 @@ import {
 import { setGeoBlock, updateUser } from '../../store/actions/user';
 import { refreshWallet } from '../wallet';
 import { BtOpenChannelState } from '@synonymdev/blocktank-lsp-http-client/dist/shared/BtOpenChannelState';
+import { DEFAULT_CHANNEL_DURATION } from '../../screens/Lightning/CustomConfirm';
+import { CJitStateEnum } from '@synonymdev/blocktank-lsp-http-client/dist/shared/CJitStateEnum';
 
 const bt = new BlocktankClient();
 
@@ -109,6 +112,61 @@ export const createOrder = async (
 		console.log(e);
 		return err(e);
 	}
+};
+
+/**
+ * @param {ICreateOrderRequest} data
+ * @returns {Promise<Result<ICJitEntry>>}
+ */
+export const createCJitEntry = async ({
+	channelSizeSat,
+	invoiceSat,
+	invoiceDescription,
+	channelExpiryWeeks = DEFAULT_CHANNEL_DURATION,
+	couponCode = 'bitkit',
+}: {
+	channelSizeSat: number;
+	invoiceSat: number;
+	invoiceDescription: string;
+	channelExpiryWeeks: number;
+	couponCode?: string;
+}): Promise<Result<ICJitEntry>> => {
+	try {
+		const nodeIdResult = await getNodeId();
+		if (nodeIdResult.isErr()) {
+			return err(nodeIdResult.error.message);
+		}
+		const nodeId = nodeIdResult.value;
+
+		// Ensure we're properly connected to the Blocktank node prior to buying a channel.
+		const addPeersRes = await addPeers();
+		if (addPeersRes.isErr()) {
+			return err('Unable to add Blocktank node as a peer at this time.');
+		}
+
+		const createRes = await bt.createCJitEntry(
+			channelSizeSat,
+			invoiceSat,
+			invoiceDescription,
+			nodeId,
+			channelExpiryWeeks,
+			couponCode,
+		);
+
+		return ok(createRes);
+	} catch (e) {
+		console.log(e);
+		return err(e);
+	}
+};
+
+/**
+ * Retrieves a CJIT Entry using the provided entryId.
+ * @param {string} entryId
+ * @returns {Promise<ICJitEntry>}
+ */
+export const getCJitEntry = async (entryId: string): Promise<ICJitEntry> => {
+	return await bt.getCJitEntry(entryId);
 };
 
 /**
@@ -199,6 +257,17 @@ export const getPendingOrders = (): IBtOrder[] => {
 	const orders = getBlocktankStore().orders;
 	return orders.filter((order) => {
 		return order.state === BtOrderState.CREATED;
+	});
+};
+
+/**
+ * Returns CJIT orders that have been created and are currently pending.
+ * @returns {ICJitEntry[]}
+ */
+export const getPendingCJitEntries = (): ICJitEntry[] => {
+	const entries = getBlocktankStore().cJitEntries;
+	return entries.filter((entry) => {
+		return entry.state === CJitStateEnum.CREATED;
 	});
 };
 

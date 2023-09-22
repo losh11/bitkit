@@ -30,6 +30,7 @@ export const defaultBlocktankShape: IBlocktank = {
 	orders: [],
 	paidOrders: {},
 	info: defaultBlocktankInfoShape,
+	cJitEntries: [],
 };
 
 export const defaultOrderResponse: IBtOrder = {

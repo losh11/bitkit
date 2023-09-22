@@ -8,4 +8,5 @@ export const defaultReceiveShape: IReceive = {
 	numberPadText: '',
 	message: '',
 	tags: [],
+	jitOrder: null,
 };
