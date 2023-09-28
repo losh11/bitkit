@@ -36,6 +36,15 @@ export type TReceiveOption = {
 
 export type TCustomElectrumPeers = IWalletItem<ICustomElectrumPeer[]>;
 
+export type TChest = {
+	chestId: string;
+	state: 'found' | 'opened' | 'claimed' | 'success' | 'failed';
+	isAirdrop?: boolean;
+	shortId?: string;
+	attemptId?: string;
+	winType?: 'winning' | 'consolation' | 'empty';
+};
+
 export interface ISettings {
 	enableAutoReadClipboard: boolean;
 	enableSendAmountWarning: boolean;
@@ -62,4 +71,5 @@ export interface ISettings {
 	hideOnboardingMessage: boolean;
 	hideBeta: boolean;
 	enableDevOptions: boolean;
+	treasureChests: TChest[];
 }
