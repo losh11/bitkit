@@ -43,7 +43,7 @@ import { generateNewReceiveAddress } from '../../../store/actions/wallet';
 import { viewControllerIsOpenSelector } from '../../../store/reselect/ui';
 import { useLightningBalance } from '../../../hooks/lightning';
 import { useBottomSheetBackPress } from '../../../hooks/bottomSheet';
-import { refreshLdk, waitForLdk } from '../../../utils/lightning';
+import { waitForLdk } from '../../../utils/lightning';
 import { getUnifiedUri } from '../../../utils/receive';
 import { ellipsis, sleep } from '../../../utils/helpers';
 import { getReceiveAddress } from '../../../utils/wallet';
@@ -180,24 +180,6 @@ const ReceiveQR = ({
 		await sleep(200);
 		setLoading(false);
 	}, [getAddress, getLightningInvoice, loading, receiveNavigationIsOpen]);
-
-	useEffect(() => {
-		if (!receiveNavigationIsOpen) {
-			return;
-		}
-		// Gives the modal animation time to start.
-		sleep(50).then(() => {
-			// Only refresh LDK if we have a remote balance.
-			if (lightningBalance.remoteBalance > 0) {
-				refreshLdk({ selectedWallet, selectedNetwork }).then();
-			}
-		});
-	}, [
-		selectedNetwork,
-		selectedWallet,
-		receiveNavigationIsOpen,
-		lightningBalance.remoteBalance,
-	]);
 
 	useEffect(() => {
 		if (!receiveNavigationIsOpen) {

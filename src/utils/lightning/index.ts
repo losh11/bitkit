@@ -485,10 +485,10 @@ export const refreshLdk = async ({
 		}
 
 		const syncRes = await lm.syncLdk();
-		await lm.setFees();
 		if (syncRes.isErr()) {
 			return err(syncRes.error.message);
 		}
+		await lm.setFees();
 
 		await Promise.all([
 			addPeers({ selectedNetwork, selectedWallet }),
