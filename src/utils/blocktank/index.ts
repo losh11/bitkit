@@ -31,13 +31,8 @@ import { CJitStateEnum } from '@synonymdev/blocktank-lsp-http-client/dist/shared
 
 const bt = new BlocktankClient();
 
-// https://github.com/synonymdev/blocktank-server/blob/master/src/Orders/Order.js#L27
-// 410 is "expired" status, but we refresh it anyway. This helps with the case where blocktank order was marked as "paid" by hand.
-export const unsettledStatuses = [0, 100, 200, 300, 350, 410, 500];
-
 /**
  * Sets the selectedNetwork for Blocktank.
- * @param {TAvailableNetworks} selectedNetwork
  * @returns {void}
  */
 export const setupBlocktank = async (
@@ -250,13 +245,17 @@ export const watchPendingOrders = (): void => {
 };
 
 /**
- * Return orders that are less than or equal to the specified order state.
+ * Return orders that have a status that may change.
  * @returns {IBtOrder[]} pending Blocktank orders
  */
 export const getPendingOrders = (): IBtOrder[] => {
 	const orders = getBlocktankStore().orders;
 	return orders.filter((order) => {
-		return order.state === BtOrderState.CREATED;
+		return [
+			BtOrderState.CREATED,
+			BtOrderState.OPEN,
+			BtOrderState.EXPIRED,
+		].includes(order.state);
 	});
 };
 

@@ -125,8 +125,8 @@ export const refreshOrder = async (
 
 		// Attempt to finalize the channel open.
 		if (
-			order.payment.state === BtPaymentState.PAID &&
-			order.state !== BtOrderState.OPEN
+			order.state === BtOrderState.CREATED &&
+			order.payment.state === BtPaymentState.PAID
 		) {
 			setLightningSettingUpStep(1);
 			const finalizeRes = await openChannel(orderId);
