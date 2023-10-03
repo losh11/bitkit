@@ -173,14 +173,14 @@ const LuganoWidget = ({
 				<View style={styles.source}>
 					<View style={styles.sourceColumnLeft}>
 						<Caption13M color="gray1" numberOfLines={1}>
-							Treasure Chests Found: {numberOfChests} of 7
+							Treasure Chests Found: {numberOfChests} of 6
 						</Caption13M>
 					</View>
 					<View style={styles.columnRight}>
 						<TouchableOpacity
 							activeOpacity={0.9}
 							onPress={(): void => {
-								openURL('https://www.bitkit.to/treasure-hunt');
+								openURL('https://bitkit.to/treasure-hunt');
 							}}>
 							<Caption13M color="gray1" numberOfLines={1}>
 								bitkit.to
