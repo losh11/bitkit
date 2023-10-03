@@ -4,6 +4,13 @@ import { ClockIcon } from '../styles/icons';
 import { Text01M, Caption13M } from '../styles/text';
 import { TouchableOpacity } from '../styles/components';
 import Money from '../components/Money';
+import { useSelector } from 'react-redux';
+import Store from '../store/types';
+import {
+	selectedNetworkSelector,
+	selectedWalletSelector,
+} from '../store/reselect/wallet';
+import { openChannelIdsSelector } from '../store/reselect/lightning';
 
 const AssetCard = ({
 	name,
@@ -22,6 +29,14 @@ const AssetCard = ({
 	testID?: string;
 	onPress: (event: GestureResponderEvent) => void;
 }): ReactElement => {
+	const selectedWallet = useSelector(selectedWalletSelector);
+	const selectedNetwork = useSelector(selectedNetworkSelector);
+	const openChannelIds = useSelector((state: Store) => {
+		return openChannelIdsSelector(state, selectedWallet, selectedNetwork);
+	});
+
+	const isTransferToSavings = openChannelIds.length === 0;
+
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity
@@ -36,8 +51,9 @@ const AssetCard = ({
 
 				<View style={styles.amount}>
 					<View style={styles.primary}>
-						{/* TODO: change color depending on pending savings/spending */}
-						{pending && <ClockIcon color="purple" />}
+						{pending && (
+							<ClockIcon color={isTransferToSavings ? 'orange' : 'purple'} />
+						)}
 						<Money
 							style={styles.primaryAmount}
 							sats={satoshis}

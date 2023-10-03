@@ -10,11 +10,22 @@ import NetworkRow from './NetworkRow';
 import { useBalance } from '../../../hooks/wallet';
 import { RootNavigationProp } from '../../../navigation/types';
 import { isGeoBlockedSelector } from '../../../store/reselect/user';
+import {
+	selectedNetworkSelector,
+	selectedWalletSelector,
+} from '../../../store/reselect/wallet';
+import Store from '../../../store/types';
+import { openChannelIdsSelector } from '../../../store/reselect/lightning';
 
 const BitcoinBreakdown = (): ReactElement => {
 	const { t } = useTranslation('wallet');
 	const navigation = useNavigation<RootNavigationProp>();
 	const isGeoBlocked = useSelector(isGeoBlockedSelector);
+	const selectedWallet = useSelector(selectedWalletSelector);
+	const selectedNetwork = useSelector(selectedNetworkSelector);
+	const openChannelIds = useSelector((state: Store) => {
+		return openChannelIdsSelector(state, selectedWallet, selectedNetwork);
+	});
 	const {
 		onchainBalance,
 		lightningBalance,
@@ -22,6 +33,8 @@ const BitcoinBreakdown = (): ReactElement => {
 		reserveBalance,
 		claimableBalance,
 	} = useBalance();
+
+	const isTransferToSavings = openChannelIds.length === 0;
 
 	const onRebalancePress = (): void => {
 		if (lightningBalance && !isGeoBlocked) {
@@ -37,6 +50,7 @@ const BitcoinBreakdown = (): ReactElement => {
 				title={t('details_savings_title')}
 				subtitle={t('details_savings_subtitle')}
 				balance={onchainBalance}
+				pendingBalance={isTransferToSavings ? claimableBalance : 0}
 				color="brand"
 				icon={
 					<ThemedView style={styles.icon} color="brand16">
@@ -57,7 +71,7 @@ const BitcoinBreakdown = (): ReactElement => {
 				title={t('details_spending_title')}
 				subtitle={t('details_spending_subtitle')}
 				balance={spendingBalance}
-				pendingBalance={claimableBalance}
+				pendingBalance={isTransferToSavings ? 0 : claimableBalance}
 				reserveBalance={reserveBalance}
 				color="purple"
 				icon={
